@@ -10,7 +10,7 @@ A release is a deliberate act: merging a commit to `main` does not deploy it.
 2. On every push to `main`, release-please updates a standing pull request,
    `chore(main): release X.Y.Z`. It bumps the version in `pyproject.toml` and
    `uv.lock` and writes `CHANGELOG.md` from the commits since the last release.
-3. Merging that pull request tags `vX.Y.Z` and creates a GitHub release. The
+3. Merging that pull request tags `reelbarrow-vX.Y.Z` and creates a GitHub release. The
    `publish` job then builds the image **from the tag** and pushes
    `ghcr.io/dartagan/reelbarrow:X.Y.Z`.
 
@@ -40,7 +40,7 @@ share mount writable, together, in vulcanus-proxmox.
 The tag, the image and the source should all name the same commit:
 
 ```bash
-git rev-parse vX.Y.Z^{commit}
+git rev-parse 'reelbarrow-vX.Y.Z^{commit}'
 skopeo inspect docker://ghcr.io/dartagan/reelbarrow:X.Y.Z \
   | jq -r '.Labels["org.opencontainers.image.revision"]'
 ```
