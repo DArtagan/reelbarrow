@@ -10,12 +10,13 @@ trust-envrc = "direnv allow"
 # the activating checkout's config baked in, so moving between checkouts leaves
 # one running another's hooks. A per-worktree hooks directory gives each its own.
 # Installed immediately: a hooksPath with no hooks in it runs nothing at all,
-# and commits would skip every check.
+# and commits would skip every check. Both types, or convco never runs and
+# release-please meets messages it cannot read.
 own-hooks = """
 set -e
 git config extensions.worktreeConfig true
 git config --worktree core.hooksPath "$(git rev-parse --absolute-git-dir)/hooks"
-command -v prek >/dev/null 2>&1 && prek install || true
+command -v prek >/dev/null 2>&1 && prek install -t pre-commit -t commit-msg || true
 """
 
 # The gitignored files a session relies on: CLAUDE.local.md, and the design
