@@ -55,8 +55,10 @@ a new file first.
 
 Work is specified in [`todos/`](todos/README.md), one self-contained spec per
 step, ordered in that README. A spec's filename without `.md` is its **slug**,
-which names the branch it is worked on. Work happens on that branch and lands on
-`main` through a pull request.
+which names the branch it is worked on. Work happens on that branch, in a
+worktree made with `wt switch --create <slug>`, and lands on `main` through a
+pull request. [`.config/wt.toml`](.config/wt.toml) sets the worktree up; a plain
+`git worktree add` skips that and shares git hooks with every other checkout.
 
 When a spec is done, whatever it leaves permanently true goes into `docs/`, and
 the spec is deleted in the same pull request, with a line added to
