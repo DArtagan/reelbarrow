@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/DArtagan/reelbarrow/compare/v0.1.0...v0.1.1) (2026-10-19)
+
+
+### Documentation
+
+* name release tags as release-please writes them ([eb4c5e0](https://github.com/DArtagan/reelbarrow/commit/eb4c5e05654997e5b99e203e3ab77acc5b65c6ba))
+
 ## 0.1.0 (2026-10-19)
 
 
