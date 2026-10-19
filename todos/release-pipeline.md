@@ -20,8 +20,8 @@ Done and verified:
 - The deployment repository deploys it.
   Flux's `ImagePolicy` resolves `0.1.0`, and the pod is Ready. In-cluster,
   `/healthz` reports `dry_run: true`, and `touch /video/…` fails with
-  `Read-only file system`. `https://reelbarrow.immortalkeep.com/` serves the
-  version from the LAN.
+  `Read-only file system`. The internal ingress serves the version from the
+  LAN.
 
 **The tag format changed after 0.1.0.** Will wants no package prefix, since the
 repository will only ever hold one package, so `include-component-in-tag` is
@@ -41,8 +41,8 @@ are releasable, so spec updates here use `chore(todos):`.
 ## Done when
 
 - The pod is Ready, and `/healthz` reports `dry_run: true` from inside the
-  cluster. `https://reelbarrow.immortalkeep.com/` answers from the LAN, the
-  vantage point the internal ingress serves, and shows the version.
+  cluster. Its ingress hostname answers from the LAN, the vantage point the
+  internal ingress serves, and shows the version.
 - `kubectl exec` shows the share mounted read-only: a `touch` under `/video`
   fails with `EROFS`. That is the check the dry-run safety rests on; if it
   succeeds, the mount is wrong.

@@ -28,7 +28,7 @@ going to read documentation.
 - Every correction is logged with its evidence, ready to become an eval sample
   (*Testing*, layer 4).
 - Server-rendered with HTMX, phone-first, no SPA build. LAN-only, on the internal
-  ingress like `arm.immortalkeep.com`. Whether it needs auth beyond that is a
+  ingress like ARM's own web UI. Whether it needs auth beyond that is a
   question to raise with Will, not a default to pick.
 
 ## Done when

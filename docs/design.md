@@ -532,7 +532,7 @@ language ("Episode 5 – Something Fishy Around Here, from title_0"), and for ea
 uncertain item the evidence that made it uncertain — a frame grab, a transcript
 excerpt, the runtime comparison. Actions: accept, correct (search TMDB, pick an
 episode, label an edition), or "not sure — leave for Will". The page links into
-ARM's job page for context. LAN-only, like `arm.immortalkeep.com`.
+ARM's job page for context. LAN-only, like ARM's own web UI.
 
 ### The case photo
 
