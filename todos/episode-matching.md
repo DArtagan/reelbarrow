@@ -39,13 +39,13 @@
    NOVA's ground truth first; some of those filings were wrong.
 
 Prototypes from the design sessions (transcripts, synopses, prompts, the scorer)
-are in Will's vulcanus-proxmox checkout under
-`captures/video-library-ingest/tweety/`. They are gitignored and not on GitHub.
+are in `captures/design/tweety/` in Will's checkout. They are gitignored and
+not on GitHub. The Whisper model, `ggml-base.en`, is a public download.
 
 ## Secrets
 
 The Anthropic API key, with a spend cap set in the Console, goes into
-vulcanus-proxmox's reelbarrow secret.
+reelbarrow's secret in the deployment repository.
 
 ## Done when
 

@@ -6,9 +6,8 @@ rips into an archival video library. It identifies films and episodes, keeps eac
 disc's raw copy beside its transcode, writes sidecars that any player can read,
 and asks a person only when it cannot be excellently sure.
 
-It is built for one home server, deployed by
-[vulcanus-proxmox](https://github.com/DArtagan/vulcanus-proxmox), and is in its
-dry-run phase: it plans, records, and changes nothing.
+It is built for one home server's Kubernetes cluster, and is in its dry-run
+phase: it plans, records, and changes nothing.
 
 - [docs/design.md](docs/design.md): what it does and why, with the evidence
 - [docs/releasing.md](docs/releasing.md): how versions are cut and deployed

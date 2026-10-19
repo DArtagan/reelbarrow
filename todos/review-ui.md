@@ -23,8 +23,8 @@ going to read documentation.
   "not sure, leave for Will". A correction replans the job and goes back
   through the gate. It does not bypass the gate.
 - Pushover: "filed" or "review needed", with a link. ARM's Pushover keys are
-  in vulcanus-proxmox's `automatic-ripping-machine/api-keys.sops.yaml`. A
-  separate app token keeps reelbarrow's messages distinguishable.
+  in the deployment repository, with ARM's other keys. A separate app token
+  keeps reelbarrow's messages distinguishable.
 - Every correction is logged with its evidence, ready to become an eval sample
   (*Testing*, layer 4).
 - Server-rendered with HTMX, phone-first, no SPA build. LAN-only, on the internal

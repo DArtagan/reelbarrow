@@ -4,17 +4,16 @@ reelbarrow files what the automatic-ripping-machine (ARM) rips into an archival
 video library that Plex reads: films and episodes identified, raw disc copies kept
 beside their transcodes, sidecars written, leftovers tidied.
 
-This design was worked out from 2026-10-03 to 10-08 in vulcanus-proxmox's
-`todos/video-library-ingest.md` and moved here on 2026-10-18, when this
-repository was created. It was verified against ARM `2.24.4`, Plex `1.43.4`, and the
+This design was worked out from 2026-10-03 to 10-08 in the deployment
+repository's spec for this project (see *The deployment half* in `CLAUDE.md`),
+and moved here on 2026-10-18, when this repository was created. It was verified against ARM `2.24.4`, Plex `1.43.4`, and the
 share as it stood on those dates, unless a passage says otherwise. All of that
 work was read-only: no file under `media/video` was moved or written.
 
 "Will" is the repository's owner. His brother hosts the server and the drive, and
-inserts the discs. Paths such as `kubernetes/…`, `docs/automatic-ripping-machine.md`
-and `captures/video-library-ingest/` are in the
-[vulcanus-proxmox](https://github.com/DArtagan/vulcanus-proxmox) repository; the
-captures are gitignored and exist only in Will's checkout.
+inserts the discs. *disc-ripping*, *the filename-charset migration* and
+*backups* are projects in the deployment repository. Experiment artefacts are in
+`captures/design/`, which is gitignored and exists only in Will's checkout.
 
 The work that remains is broken into specs in [`todos/`](../todos/README.md).
 When a finding here is overturned, the passage is rewritten in place, and the
@@ -48,7 +47,7 @@ Archivist goals:
 > 4. Files are metadata-complete (tagging, subtitles, audio channels, maybe movie
 >    posters, etc.)
 
-The two priorities from [disc-ripping.md](https://github.com/DArtagan/vulcanus-proxmox/blob/main/todos/disc-ripping.md) govern here too:
+The two priorities from the disc-ripping project govern here too:
 **data integrity** first, **self-service by Will's brother** second. The server
 and the discs are at his house; he inserts them and holds the cases.
 
@@ -69,7 +68,7 @@ Recorded verbatim where Will gave words, so they are not relitigated.
   contribute play-all identification upstream."* So the ingest consumes ARM's
   transcodes; it does not re-encode.
 - **A raw copy that preserves menus is a requirement** (2026-10-03, *"Yes, this
-  is a requirement."*), but DVD-to-ISO belongs to [disc-ripping.md](https://github.com/DArtagan/vulcanus-proxmox/blob/main/todos/disc-ripping.md):
+  is a requirement."*), but DVD-to-ISO belongs to the disc-ripping project:
   *"Let's design for the present realities, but I'll take for the separate
   `disc-ripping` project the task of how to also rip DVDs to ISO."* The ingest
   files whatever raw form ARM produced and must not assume it.
@@ -92,7 +91,7 @@ Recorded verbatim where Will gave words, so they are not relitigated.
   succeeds. *"We want to tend toward being tidy. I have a number of ZFS
   snapshots should the worst happen."* Verified: `rpool/storage/media` holds 96
   snapshots, hourly to 2026-10-03 22:00, monthlies back to 2021-01-10, and is
-  replicated to mini-nas ([docs/backups.md](https://github.com/DArtagan/vulcanus-proxmox/blob/main/docs/backups.md)).
+  replicated to mini-nas.
 - **Portability over Plex-only** (2026-10-03): *"I've been wanting to be as
   complete as possible to preserve portability of moving to other players in
   the future."* Applies to sidecars and to how editions are named.
@@ -146,8 +145,7 @@ Recorded verbatim where Will gave words, so they are not relitigated.
 | picked up by | beets-flask, 30 s debounce | **nothing** |
 | reaches library | automatically | never |
 
-Plex mounts `video/movies` and `video/shows` only (read-only subPaths in
-`kubernetes/apps/plex/deployment.yaml`). `filebot` and `media-toolkit-webtop`
+Plex mounts `video/movies` and `video/shows` only, as read-only subPaths. `filebot` and `media-toolkit-webtop`
 mount the whole video share; both are manual UIs. `import/` and the library are
 on the **same share and dataset**, so filing is a `rename()` — instant and atomic,
 no copy.
@@ -237,13 +235,13 @@ and HandBrake's view of every title. None of it is written next to the output.
 
 ### Raw is not what the docs say
 
-`docs/automatic-ripping-machine.md` says `RIPMETHOD: backup_dvd` keeps a full
+The deployment's ARM documentation says `RIPMETHOD: backup_dvd` keeps a full
 `VIDEO_TS`. In 2.24.4 it does not: `rip_with_mkv` (`makemkv.py:753`) backs up
 the whole disc only for Blu-ray, and a DVD gets `makemkvcon mkv … all
 --minlength=420`. **A DVD's raw copy is per-title MKVs of seven minutes or
 more — no menus, no short titles.** Every DVD under `raw/` confirms it
 (`raw/The-Hallelujah-Trail/B1_t00.mkv`). Blu-rays do get full `BDMV` backups.
-The fix is Will's, in [disc-ripping.md](https://github.com/DArtagan/vulcanus-proxmox/blob/main/todos/disc-ripping.md); the docs drift belongs
+The fix is Will's, in the disc-ripping project; the documentation drift belongs
 there too.
 
 ---
@@ -409,7 +407,7 @@ deterministic for identical input, so equal hashes mean interchangeable files.
 **2. Same work, different work, or an edit of it: audio fingerprint alignment.**
 Chromaprint (`fpcalc -raw -length 0`) over each file's first audio track at
 11,025 Hz mono, then map every 15-second window of the shorter onto the longer by
-voting on frame offsets (`captures/video-library-ingest/robinhood/align.py`).
+voting on frame offsets (`captures/design/robinhood/align.py`).
 
 | pair | coverage of the shorter by the longer |
 |---|---|
@@ -479,7 +477,7 @@ notification the video script looks up the job by `$PPID` = `job.pid` and writes
 year, IMDb ID, video type, label, disc type, `crc_id`, status, paths) and its
 track rows. It writes on "Found disc" (so the service can ask for a case photo
 while the disc is in the drive) and again on completion or failure. The hook
-lives in vulcanus-proxmox, beside ARM's deployment.
+lives in the deployment repository, beside ARM's deployment.
 
 A file on the share rather than an HTTP call because it is durable: if the
 service is down, nothing is lost, and the manifest outlives ARM's own job-log
@@ -493,7 +491,7 @@ For the existing jobs, manifests are exported once from ARM's database.
 Python (ffmpeg, chromaprint and Whisper bindings all live there, as do ARM and
 beets), a server-rendered web UI (FastAPI + HTMX — phone-first, no SPA build),
 SQLite for job state and the ledger, one worker process. This repository's CI
-builds and releases the image; Flux in vulcanus-proxmox deploys it
+builds and releases the image; Flux deploys it from the deployment repository
 ([releasing.md](releasing.md)).
 
 **Dry run** (Will, 2026-10-18): *"Initially we won't want to make actual changes,
@@ -570,9 +568,9 @@ discs to review rather than misfiling them.
 
 TMDB and fanart.tv keys, the LLM API key, Pushover keys (ARM's pair, or a new
 app token), and a Plex token, all read from the environment. They are
-SOPS-encrypted in vulcanus-proxmox; none is ever committed here. Pushover and a
-Plex key may already exist there in ARM's `api-keys.sops.yaml` and the homepage
-secret respectively.
+SOPS-encrypted in the deployment repository; none is ever committed here.
+Pushover and Plex keys may already exist there, with ARM's keys and the
+dashboard's respectively.
 
 ---
 
@@ -872,7 +870,7 @@ Kept so it is not lost, each deliberately outside the specs in `todos/`:
   plus metadata may suffice.
 - **Play-all filtering upstream in ARM**, using the sum-of-others rule — Will's
   suggestion for when transcode time matters.
-- **DVD raw as ISO**, owned by [disc-ripping.md](https://github.com/DArtagan/vulcanus-proxmox/blob/main/todos/disc-ripping.md).
+- **DVD raw as ISO**, owned by the disc-ripping project.
 - **Re-transcoding from raw**, which `disc.json` is designed to make possible.
 
 ---
@@ -880,7 +878,7 @@ Kept so it is not lost, each deliberately outside the specs in `todos/`:
 ## Experiments
 
 All read-only against the cluster and the share. Artefacts in
-`captures/video-library-ingest/` (gitignored).
+`captures/design/` (gitignored).
 
 | # | date | what | result |
 |---|---|---|---|
@@ -901,7 +899,7 @@ All read-only against the cluster and the share. Artefacts in
 | E15 | 10-03 | ARM notification and audio-handoff code | `BASH_SCRIPT` is the only hook; `$PPID` = `job.pid` from source |
 | E16 | 10-03 | Plex GUIDs and poster sources | 91/96 online-matched, posters from the agent |
 | E17 | 10-03 | Jellyfin naming docs; TMDB season page | `[tmdbid-…]` naming; TMDB missing 11/13 overviews |
-| E18 | 10-04 | `zfs list` on vulcanus | `rpool/storage/media`: 96 snapshots, hourly current, back to 2021 |
+| E18 | 10-04 | `zfs list` on the Proxmox host | `rpool/storage/media`: 96 snapshots, hourly current, back to 2021 |
 | E19 | 10-04 | Chromaprint alignment: Robin Hood cuts, Rescuers pair, two controls | 94.9% vs 0.0% ×3; Whisper at 10:00/40:00 shows the Rescuers pair are two films |
 | E20 | 10-04 | video-stream MD5 of Tweety D2, jobs 22 vs 33 | 6/6 identical, all renumbered |
 | E21 | 10-04 | Plex editions and Jellyfin versions docs | the naming conflict in *Editions* |
@@ -918,14 +916,16 @@ All read-only against the cluster and the share. Artefacts in
 
 ## Related
 
-- [disc-ripping.md](https://github.com/DArtagan/vulcanus-proxmox/blob/main/todos/disc-ripping.md) — produces what this consumes. Owns DVD-to-ISO,
-  D12 (misidentification), the play-all observation, and the drift in
-  `docs/automatic-ripping-machine.md` about `backup_dvd`.
-- [smb-charset-utf8.md](https://github.com/DArtagan/vulcanus-proxmox/blob/main/todos/smb-charset-utf8.md) — library names come from TMDB and
-  will contain curly apostrophes and en dashes, which the share currently
-  rejects with `EIO`. The service must apply the same Latin-1 folding as
-  `arm-title-charset.sh` until that migration lands, and must not assume a
-  failed write is anything but this.
-- [backups.md](https://github.com/DArtagan/vulcanus-proxmox/blob/main/docs/backups.md) — `media/video` is snapshotted and replicated, which is
-  what makes deleting leftovers acceptable; deleted data still occupies space
+Projects in the deployment repository:
+
+- **disc-ripping** — produces what this consumes. Owns DVD-to-ISO, D12
+  (misidentification), the play-all observation, and the drift in the ARM
+  documentation about `backup_dvd`.
+- **the filename-charset migration** — library names come from TMDB and will
+  contain curly apostrophes and en dashes, which the share currently rejects
+  with `EIO`. The service must fold names to Latin-1 the same way ARM's title
+  hook does until that migration lands, and must not assume a failed write is
+  anything but this.
+- **backups** — `media/video` is snapshotted and replicated, which is what makes
+  deleting leftovers acceptable; deleted data still occupies space
   until the snapshots holding it expire (monthlies are kept two years).

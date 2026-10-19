@@ -17,12 +17,12 @@ the share.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 1 | [release-pipeline](release-pipeline.md) | First release end to end: tag, image, Flux, pod | vulcanus deployment manifests |
+| 1 | [release-pipeline](release-pipeline.md) | First release end to end: tag, image, Flux, pod | deployment manifests |
 | 2 | [analysis](analysis.md) | The measuring primitives: ffprobe, video MD5, fingerprints and alignment, Blu-ray hashes | — |
 | 3 | [fixtures](fixtures.md) | Frozen fixtures for every job in the fixtures table, captured from the share | 1, 2; ARM manifests exported |
 | 4 | [dry-run-planner](dry-run-planner.md) | Intake → analyse → classify → identify films → plan → gate, recorded and shown, executing nothing | 2, 3 |
 | 5 | [movie-filing](movie-filing.md) | The executor: the four unambiguous films filed for real, Plex refreshed, leftovers deleted | 4 |
-| 6 | [metrics](metrics.md) | What the service exports, so vulcanus can alert on the absence of success | 5 |
+| 6 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | 5 |
 | 7 | [review-ui](review-ui.md) | Review page and Pushover: accept, correct, defer | 4 |
 | 8 | [editions](editions.md) | Prove the editions naming in Plex, Jellyfin and Kodi before using it | — |
 | 9 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | 5, 7, 8 |

@@ -36,17 +36,17 @@ manifest changes.
 
 - Choosing the best copy never uses size or bitrate (*Correction: the Rescuers
   "duplicate"*).
-- Library names come from TMDB and must be folded to Latin-1 the way
-  `arm-title-charset.sh` does in vulcanus-proxmox, until that repo's
-  `smb-charset-utf8` work lands. A name the share would reject with `EIO` is a
+- Library names come from TMDB and must be folded to Latin-1 the way ARM's
+  title hook does in the deployment, until the filename-charset migration
+  lands. A name the share would reject with `EIO` is a
   planning error to catch here, not at filing time.
 - The thresholds are starting points, and the evaluation sets them.
 
 ## Secrets
 
 A TMDB API key (a free personal key) is the first secret the service needs. Add
-it to a SOPS secret in vulcanus-proxmox's `kubernetes/apps/reelbarrow/`, read
-it from the environment, and keep it out of logs.
+it to reelbarrow's encrypted secret in the deployment repository, read it from
+the environment, and keep it out of logs.
 
 ## Done when
 

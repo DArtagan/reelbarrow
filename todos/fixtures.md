@@ -16,9 +16,8 @@ jobs that form the acceptance test.
 ## Inputs
 
 - **ARM manifests for jobs 1–41.** These are exported once from ARM's database by
-  the vulcanus-proxmox half (its `todos/video-library-ingest.md`) into
-  `import/automatic-ripping-machine/manifests/`. If they are not there yet, that
-  step comes first, in vulcanus.
+  the deployment half into `import/automatic-ripping-machine/manifests/`. If
+  they are not there yet, that step comes first, in the deployment repository.
 - **The share, read through the reelbarrow pod.** Do not use `kubectl exec`
   streaming: it ran at 17.6 MB/s (E25) and truncated a fingerprint. Run the
   analysis inside the pod, which mounts the share directly, and copy out only

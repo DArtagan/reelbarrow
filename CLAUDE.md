@@ -48,8 +48,8 @@ a new file first.
 - **Real media never enters the repository.** Tests run on frozen fixtures
   derived from the media: ffprobe JSON, fingerprints, transcripts, manifests.
   The repository is public, so a fixture holds what a decision needs and no more.
-  Secrets live in vulcanus-proxmox's SOPS files and reach the service through
-  the environment.
+  Secrets live in the deployment repository, encrypted, and reach the service
+  through the environment.
 
 ## Project workflow
 
@@ -69,18 +69,21 @@ deploys nothing until the release pull request is merged.
 
 ### The deployment half
 
-The Kubernetes manifests, secrets, ARM's manifest hook and the alert rules live
-in [vulcanus-proxmox](https://github.com/DArtagan/vulcanus-proxmox), checked out
-at `~/repositories/vulcanus-proxmox`. Its `todos/video-library-ingest.md` tracks
-that half, and its own `CLAUDE.md` governs changes there: a branch in a worktree,
-a frozen-base review, and SOPS for anything sensitive. A spec here that needs a
-deployment change says so and names what to change.
+reelbarrow runs on a Kubernetes cluster deployed by Flux from a separate GitOps
+repository, called **the deployment repository** throughout this one. It holds
+reelbarrow's manifests and secrets, ARM's manifest hook and the alert rules, and
+has its own spec for that half and its own rules for changing it. A spec here
+that needs a deployment change says what has to change, not how that repository
+is laid out. Where it is checked out is in `CLAUDE.local.md`, which is not
+committed.
 
 ### Debugging captures
 
 Anything pulled from a running system, such as ffprobe dumps, fingerprints,
 transcripts or logs, goes under `captures/<topic>/` at the root of the checkout.
-`.gitignore` excludes it. Whatever a conclusion rests on beyond the session
+`.gitignore` excludes it. `captures/design/` holds the prototypes and results
+from the design sessions; the experiments table in the design names what each
+is. Whatever a conclusion rests on beyond the session
 belongs in a spec or in `docs/` as quoted figures.
 
 ## How it is phrased

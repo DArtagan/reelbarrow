@@ -25,15 +25,15 @@ Actions to create and approve pull requests*.
 
 ## How it reaches the cluster
 
-vulcanus-proxmox deploys reelbarrow from `kubernetes/apps/reelbarrow/`. Flux
-polls GHCR, and an `ImagePolicy` with the semver range `>=0.1.0 <1.0.0` selects
-the newest release. Flux Bot then commits the new tag into that directory's
-`deployment.yaml` on vulcanus-proxmox's `main`. Crossing to 1.0 is a deliberate
-edit of that range.
+Flux deploys reelbarrow from the deployment repository (see *The deployment
+half* in `CLAUDE.md`). It polls GHCR, and an `ImagePolicy` with the semver range
+`>=0.1.0 <1.0.0` selects the newest release. Flux Bot then commits the new tag
+into reelbarrow's `Deployment` there. Crossing to 1.0 is a deliberate edit of
+that range.
 
 Dry run or live is a property of the deployment, not of a release. Turning
 filing on means setting `REELBARROW_DRY_RUN` to `"false"` **and** making the
-share mount writable, together, in vulcanus-proxmox.
+share mount writable, together, in the deployment repository.
 
 ## Checking a release
 

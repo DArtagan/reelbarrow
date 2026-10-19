@@ -19,7 +19,7 @@ other evidence.
 ## Scope
 
 - Triggered by the "Found disc" manifest, which ARM's hook writes before the rip
-  starts. Confirm the vulcanus half writes it at that point.
+  starts. Confirm the deployment's hook writes it at that point.
 - A page that is a camera button and nothing else. The photo is stored with the
   job.
 - Vision extraction through the same model interface as
