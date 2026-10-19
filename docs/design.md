@@ -469,22 +469,25 @@ episodes lack distinctive proper nouns; any non-English audio.
 
 ### The ARM manifest
 
-The one interface between ARM and reelbarrow. ARM's `BASH_SCRIPT` hook becomes a
-dispatcher that calls the existing audio handoff and a new video script. On each
-notification the video script looks up the job by `$PPID` = `job.pid` and writes
+The one interface between ARM and reelbarrow, and so a script that ships with
+reelbarrow and runs inside ARM's container, set as ARM's `BASH_SCRIPT`. A site
+that already runs another hook calls both from a dispatcher of its own. On each
+notification the script looks up the job by `$PPID` = `job.pid` and writes
 `manifests/job-<id>.json` under ARM's video mount, which is
 `import/automatic-ripping-machine/manifests/` on the share: the job row (title,
 year, IMDb ID, video type, label, disc type, `crc_id`, status, paths) and its
-track rows. It writes on "Found disc" (so the service can ask for a case photo
-while the disc is in the drive) and again on completion or failure. The hook
-lives in the deployment repository, beside ARM's deployment.
+track rows. The first write comes at "Found disc" (so the service can ask for a
+case photo while the disc is in the drive), and each later notification rewrites
+it with the job's current status. How it is built is
+[`todos/arm-manifest-hook.md`](../todos/arm-manifest-hook.md).
 
 A file on the share rather than an HTTP call because it is durable: if the
 service is down, nothing is lost, and the manifest outlives ARM's own job-log
 retention. The service finds new manifests by scanning on an interval. A
 notifying HTTP ping can be added for latency if the interval proves too slow.
 
-For the existing jobs, manifests are exported once from ARM's database.
+For the existing jobs, the same script exports manifests once from ARM's
+database.
 
 ### The service
 

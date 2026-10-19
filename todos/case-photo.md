@@ -18,8 +18,9 @@ other evidence.
 
 ## Scope
 
-- Triggered by the "Found disc" manifest, which ARM's hook writes before the rip
-  starts. Confirm the deployment's hook writes it at that point.
+- Triggered by the manifest [arm-manifest-hook](arm-manifest-hook.md) writes at
+  "Found disc", before the rip starts. That spec's last check proves the
+  timing.
 - A page that is a camera button and nothing else. The photo is stored with the
   job.
 - Vision extraction through the same model interface as
