@@ -13,7 +13,11 @@ A release is a deliberate act: merging a commit to `main` does not deploy it.
    commits since the last release.
 3. Merging that pull request tags `vX.Y.Z` and creates a GitHub release. The
    `publish` job then builds the image **from the tag** and pushes
-   `ghcr.io/dartagan/reelbarrow:X.Y.Z`.
+   `ghcr.io/dartagan/reelbarrow:X.Y.Z`, and `latest`.
+
+Releases are immutable once published: GitHub refuses to change a release's
+tag. That is why 0.1.0 alone is tagged `reelbarrow-v0.1.0`, from before tags
+dropped the package name; `v0.1.0` marks the same commit.
 
 Below 1.0, a breaking change bumps the minor version rather than the major, and
 so do `feat` commits; `fix` bumps the patch.
