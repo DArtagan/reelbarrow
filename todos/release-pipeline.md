@@ -23,33 +23,29 @@ Written and checked locally:
   `kubernetes/apps/kustomization.yaml`, because the image it names does not exist
   yet, and listing it would leave a pod in `ImagePullBackOff`.
 
+Verified on GitHub, 2026-10-18:
+
+- CI on `main` passes both jobs, `devenv test` on the runner included.
+- Release-please opened PR #1, `chore(main): release reelbarrow 0.1.0`. Its diff
+  bumps `pyproject.toml`, `.release-please-manifest.json` and the `reelbarrow`
+  entry in `uv.lock`, and writes `CHANGELOG.md`, so the `toml` jsonpath in
+  `release-please-config.json` matches.
+
 Never exercised:
 
-- **release-please's update of `uv.lock`.** `release-please-config.json` bumps
-  the root package's version there through a `toml` extra-file with the
-  jsonpath `$.package[?(@.name.value=='reelbarrow')].version`. That expression
-  was written from memory of others' configs, not tested. If it matches nothing,
-  the release PR bumps `pyproject.toml` alone, and `uv sync --locked` then fails
-  in both CI and the image build.
-- `devenv test` on a GitHub runner, using `nix profile install nixpkgs#devenv`.
-  The runner's devenv may not be the 2.4.0 the lock was made with.
+- The `publish` job, which runs only when a release PR is merged.
 - Whether the GHCR package comes out public. trello-randomizer's did, from the
   same kind of workflow, and its deployment pulls with no credentials.
 
 ## Steps
 
-1. Push `main` and watch CI. Fix whatever the runner disagrees with.
-2. Confirm release-please opened `chore(main): release 0.1.0`, and **read its
-   diff before merging**: `pyproject.toml`, `uv.lock` and `CHANGELOG.md` must all
-   say `0.1.0`. If `uv.lock` does not, fix the jsonpath; release-please's
-   `toml` updater docs and its tests are the reference.
-3. Merge it. Check the `publish` job built from the tag, using the commands in
-   *Checking a release* in `docs/releasing.md`. Make the GHCR package public if it
-   is not.
-4. In vulcanus-proxmox, following its `CLAUDE.md`: add `reelbarrow` to
+1. Merge release PR #1. Check the `publish` job built from the tag, using the
+   commands in *Checking a release* in `docs/releasing.md`. Make the GHCR package
+   public if it is not.
+2. In vulcanus-proxmox, following its `CLAUDE.md`: add `reelbarrow` to
    `kubernetes/apps/kustomization.yaml` on the `video-library-ingest` branch,
    set the image tag to `0.1.0`, and deploy.
-5. Check that Flux's `ImagePolicy` `apps:reelbarrow` resolves `0.1.0`
+3. Check that Flux's `ImagePolicy` `apps:reelbarrow` resolves `0.1.0`
    (`flux get image policy -n apps reelbarrow`).
 
 ## Done when

@@ -17,10 +17,11 @@ A release is a deliberate act: merging a commit to `main` does not deploy it.
 Below 1.0, a breaking change bumps the minor version rather than the major, and
 so do `feat` commits; `fix` bumps the patch.
 
-Release PRs are opened with `GITHUB_TOKEN`, and GitHub starts no workflows for
-those, so CI does not run on them. They change only versions and the changelog,
-and CI runs on `main` once one is merged. Opening them needs the repository
-setting *Allow GitHub Actions to create and approve pull requests*.
+Release PRs are opened by `github-actions`, and GitHub holds CI on them at
+*action required* until someone approves the run from the PR. Approving is
+optional: they change only versions and the changelog, and CI runs on `main`
+once one is merged. Opening them needs the repository setting *Allow GitHub
+Actions to create and approve pull requests*.
 
 ## How it reaches the cluster
 
