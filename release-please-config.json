@@ -11,6 +11,10 @@
           "type": "toml",
           "path": "uv.lock",
           "jsonpath": "$.package[?(@.name.value=='reelbarrow')].version"
+        },
+        {
+          "type": "generic",
+          "path": "compose.yaml"
         }
       ]
     }

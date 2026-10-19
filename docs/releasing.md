@@ -8,8 +8,9 @@ A release is a deliberate act: merging a commit to `main` does not deploy it.
    The `convco` commit-msg hook refuses any that do not, because release-please
    reads nothing else.
 2. On every push to `main`, release-please updates a standing pull request,
-   `chore(main): release X.Y.Z`. It bumps the version in `pyproject.toml` and
-   `uv.lock` and writes `CHANGELOG.md` from the commits since the last release.
+   `chore(main): release X.Y.Z`. It bumps the version in `pyproject.toml`,
+   `uv.lock` and the example `compose.yaml`, and writes `CHANGELOG.md` from the
+   commits since the last release.
 3. Merging that pull request tags `vX.Y.Z` and creates a GitHub release. The
    `publish` job then builds the image **from the tag** and pushes
    `ghcr.io/dartagan/reelbarrow:X.Y.Z`.

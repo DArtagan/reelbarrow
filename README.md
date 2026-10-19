@@ -13,6 +13,18 @@ phase: it plans, records, and changes nothing.
 - [docs/releasing.md](docs/releasing.md): how versions are cut and deployed
 - [todos/](todos/README.md): the work remaining, one spec per step
 
+## Running it
+
+[`compose.yaml`](compose.yaml) is an example deployment, in dry run with the
+share mounted read-only:
+
+```bash
+VIDEO_ROOT=/path/to/video docker compose up -d
+```
+
+`VIDEO_ROOT` holds ARM's output and the `movies/` and `shows/` libraries, on one
+filesystem. The web UI is on port 8000.
+
 ## Development
 
 ```bash

@@ -1,0 +1,34 @@
+# An example deployment. Set VIDEO_ROOT to the directory holding both ARM's
+# output and the movies/ and shows/ libraries: filing is a rename(), so they must
+# be one filesystem. ARM's manifests are read from
+# import/automatic-ripping-machine/manifests/ beneath it.
+#
+#   VIDEO_ROOT=/srv/media/video docker compose up -d
+#
+# This runs in dry run: it plans and records, and changes nothing.
+services:
+  reelbarrow:
+    image: ghcr.io/dartagan/reelbarrow:0.1.0 # x-release-please-version
+    restart: unless-stopped
+    environment:
+      # Going live means setting this to "false" and removing `:ro` from the
+      # video mount below, together. The read-only mount is what stands between
+      # a bug in the flag's handling and the library.
+      REELBARROW_DRY_RUN: "true"
+    volumes:
+      - ${VIDEO_ROOT:?set VIDEO_ROOT to the video share}:/video:ro
+      - data:/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      # The image has no curl or wget.
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')
+      interval: 30s
+      start_period: 10s
+
+volumes:
+  data:
