@@ -1,0 +1,16 @@
+Disc Title: SYNTHETIC_DVD
+Title: 01, Length: 00:00:20.000 Chapters: 04, Cells: 04, Audio streams: 01, Subpictures: 00
+	Chapter: 01, Length: 00:00:04.800, Start Cell: 01
+	Chapter: 02, Length: 00:00:05.400, Start Cell: 02
+	Chapter: 03, Length: 00:00:04.800, Start Cell: 03
+	Chapter: 04, Length: 00:00:05.000, Start Cell: 04
+Title: 02, Length: 00:00:44.967 Chapters: 05, Cells: 05, Audio streams: 01, Subpictures: 00
+	Chapter: 01, Length: 00:00:10.200, Start Cell: 01
+	Chapter: 02, Length: 00:00:09.600, Start Cell: 02
+	Chapter: 03, Length: 00:00:10.200, Start Cell: 03
+	Chapter: 04, Length: 00:00:10.200, Start Cell: 04
+	Chapter: 05, Length: 00:00:04.767, Start Cell: 05
+Title: 03, Length: 00:00:08.000 Chapters: 01, Cells: 01, Audio streams: 01, Subpictures: 00
+	Chapter: 01, Length: 00:00:08.000, Start Cell: 01
+DVDDiscID: 940f4abaf70c962d7102ad1ed3b15909
+Longest track: 02

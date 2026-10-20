@@ -19,10 +19,11 @@ jobs that form the acceptance test.
   by the export mode of [arm-manifest-hook](arm-manifest-hook.md), into
   `import/automatic-ripping-machine/manifests/`. If they are not there yet, that
   step comes first.
-- **The share, read through the reelbarrow pod.** Do not use `kubectl exec`
-  streaming: it ran at 17.6 MB/s (E25) and truncated a fingerprint. Run the
-  analysis inside the pod, which mounts the share directly, and copy out only
-  the results.
+- **The share, read through the reelbarrow pod.** Do not stream media through
+  `kubectl exec`: it ran at 17.6 MB/s (E25) and truncated two fingerprints
+  (E30). Run the analysis inside the pod, which mounts the share directly, and
+  copy out only the results, comparing a checksum taken in the pod with one
+  taken after the copy. E30 copied four fingerprints out that way, verified.
 
 ## What to capture, per job
 
@@ -37,8 +38,9 @@ probably the right shape, and the planner's own intake will want it anyway.
 ## Decisions for this session
 
 - **What a public repository may hold.** ffprobe JSON and hashes are metadata.
-  Fingerprints are derived and cannot be reversed into audio (confirm that in
-  [analysis](analysis.md)). Whisper transcripts of copyrighted programmes are
+  Fingerprints are settled: committed, for the reason under *Testing*, layer 1,
+  in the design, and `tests/fixtures/fingerprints/` already holds four from
+  jobs 27 and 35. Whisper transcripts of copyrighted programmes are
   text excerpts. Settle whether they are committed whole, trimmed, or kept out
   of git and fetched for evaluations only, and record the reason here.
 - Whether the empty skeleton directories in the table are worth fixtures. The

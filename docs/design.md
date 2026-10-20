@@ -407,24 +407,31 @@ deterministic for identical input, so equal hashes mean interchangeable files.
 **2. Same work, different work, or an edit of it: audio fingerprint alignment.**
 Chromaprint (`fpcalc -raw -length 0`) over each file's first audio track at
 11,025 Hz mono, then map every 15-second window of the shorter onto the longer by
-voting on frame offsets (`captures/design/robinhood/align.py`).
+voting on frame offsets (`reelbarrow.analysis.alignment`).
 
 | pair | coverage of the shorter by the longer |
 |---|---|
-| Robin Hood 140.5 min cut vs 155.9 min cut | **94.9%**, offset rising monotonically 0 → +15.5 min across ~15 inserted passages, with a few scenes reordered |
-| Rescuers feature vs `title_71` | 0.0% |
-| control: Robin Hood vs Rescuers `title_71` | 0.0% |
-| control: Rescuers feature vs Robin Hood | 0.0% |
+| Robin Hood 140.5 min cut vs 155.9 min cut | **94.9%**, offset rising 0 → +15.5 min across ~15 inserted passages, with four scenes reordered |
+| Rescuers `title_71` (77:07) vs feature (77:12) | 0.0% |
+| control: either Robin Hood cut vs Rescuers `title_71` | 0.0% |
+| control: Rescuers feature vs either Robin Hood cut | 0.3% |
 
-The separation is total, which is what makes it usable as a gate. The unmatched
-windows in the Robin Hood pair are the 15-second slices straddling an edit. It
-works across codecs, so it also pairs a transcode with its raw source (AC3/DTS vs
-Opus), and it proves a play-all contains each episode.
+The 0.3% is a single window, and it is silence: the Rescuers feature's silent
+first 15 seconds against the silence that ends either cut. Silence matches
+silence and says nothing about identity, so one matched window is noise and a
+gate sits well above it. Past that the separation is total, which is what makes
+it usable as a gate. The unmatched windows in the Robin Hood pair are the
+15-second slices straddling an edit. It works across codecs, so it also pairs a
+transcode with its raw source (AC3/DTS vs Opus), and it proves a play-all
+contains each episode.
 
-Note one fingerprint arrived short — the feature's audio stream through `kubectl
-exec` was ~5 MB truncated (73:28 of 77:12). It did not change the result, but the
-service reads files directly and must check that the decoded duration matches the
-container's before trusting a fingerprint.
+**A fingerprint is trusted only once its length matches its container's.**
+Two of the four fingerprints the table was first measured on came back short
+through `kubectl exec`: the Rescuers feature by 224 s and the 140.5-minute cut
+by 154 s. The figures above are from complete fingerprints taken inside the pod
+(E30). fpcalc cannot catch a short read itself, because the duration it reports
+is the container's, not what it decoded. The frame count can: a complete
+fingerprint of *s* seconds has exactly ⌊(11025*s* − 4096) / 1365⌋ − 18 frames.
 
 **3. Which episode is this: speech transcript matched against references.**
 `whisper.cpp` with `ggml-base.en` on a 4-minute clip starting at 0:30 of each
@@ -685,6 +692,15 @@ transcripts, Blu-ray nav hashes, ARM manifests. These are small enough to commit
 so CI never needs the share. Model replies are recorded and replayed, so the
 gate's behaviour for a given set of answers is exactly reproducible.
 
+Fingerprints are safe to publish. Each frame is 16 two-bit comparisons between
+regions of a 12-bin chroma image, octaves folded together and timbre and phase
+discarded ([how Chromaprint works](https://oxygene.sk/2011/01/how-does-chromaprint-work)),
+about 260 bits a second, from which neither speech nor music can be recovered.
+AcoustID publishes millions of them under CC BY-SA
+([AcoustID database](https://acoustid.org/database)). They are stored as
+fpcalc's `-raw -plain` text beside the container duration they are checked
+against, as in `tests/fixtures/fingerprints/`.
+
 **2. Model evaluations — Inspect, on demand and on any prompt or model change.**
 [Inspect](https://inspect.aisi.org.uk/) (UK AISI; Python, `pip install
 inspect-ai`) maps onto this directly:
@@ -903,7 +919,7 @@ All read-only against the cluster and the share. Artefacts in
 | E16 | 10-03 | Plex GUIDs and poster sources | 91/96 online-matched, posters from the agent |
 | E17 | 10-03 | Jellyfin naming docs; TMDB season page | `[tmdbid-…]` naming; TMDB missing 11/13 overviews |
 | E18 | 10-04 | `zfs list` on the Proxmox host | `rpool/storage/media`: 96 snapshots, hourly current, back to 2021 |
-| E19 | 10-04 | Chromaprint alignment: Robin Hood cuts, Rescuers pair, two controls | 94.9% vs 0.0% ×3; Whisper at 10:00/40:00 shows the Rescuers pair are two films |
+| E19 | 10-04 | Chromaprint alignment: Robin Hood cuts, Rescuers pair, two controls | 94.9% vs 0.0% ×3; Whisper at 10:00/40:00 shows the Rescuers pair are two films. Two of the four fingerprints were truncated; see E30 |
 | E20 | 10-04 | video-stream MD5 of Tweety D2, jobs 22 vs 33 | 6/6 identical, all renumbered |
 | E21 | 10-04 | Plex editions and Jellyfin versions docs | the naming conflict in *Editions* |
 | E22 | 10-04 | library vs ARM output | Shrek the Third already filed (case 9) |
@@ -914,6 +930,7 @@ All read-only against the cluster and the share. Artefacts in
 | E27 | 10-05 | Haiku 4.5 episode matching, titles only vs synopses | 8/13 (confidently wrong) vs 13/13 |
 | E28 | 10-08 | the titles-only prompt three more times | 9, 6, 9 of 13; one file wrong in all four runs; one run broke the answer format |
 | E29 | 10-08 | Inspect documentation | datasets, solvers, scorers, epochs, caching, multi-provider; reducers not exercised |
+| E30 | 10-20 | E19's four fingerprints retaken inside the reelbarrow pod; fpcalc on a deliberately truncated file | two of E19's were short; complete ones match the frame-count formula exactly and E19's figures stand; fpcalc reports the container's duration for a truncated file |
 
 ---
 

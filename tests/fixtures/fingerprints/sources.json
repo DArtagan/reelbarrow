@@ -1,0 +1,22 @@
+{
+  "robinhood-155": {
+    "job": 35,
+    "file": "completed/movies/Robin-Hood (2010)/Robin-Hood (2010).mkv",
+    "duration": 9354.201
+  },
+  "robinhood-140": {
+    "job": 35,
+    "file": "completed/movies/Robin-Hood (2010)/extras/title_1.mkv",
+    "duration": 8430.801
+  },
+  "rescuers-feature": {
+    "job": 27,
+    "file": "completed/movies/The Rescuers (1977)_178961349896/The Rescuers (1977).mkv",
+    "duration": 4632.181
+  },
+  "rescuers-title71": {
+    "job": 27,
+    "file": "completed/movies/The Rescuers (1977)_178961349896/extras/title_71.mkv",
+    "duration": 4626.661
+  }
+}
