@@ -18,17 +18,16 @@ renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 1 | [analysis](analysis.md) | The measuring primitives: ffprobe, video MD5, fingerprints and alignment, Blu-ray hashes | — |
-| 2 | [arm-manifest-hook](arm-manifest-hook.md) | The script ARM runs to write job manifests, and a one-off export of past jobs | a real disc, for its last check |
-| 3 | [fixtures](fixtures.md) | Frozen fixtures for every job in the fixtures table, captured from the share | analysis, arm-manifest-hook |
-| 4 | [dry-run-planner](dry-run-planner.md) | Intake → analyse → classify → identify films → plan → gate, recorded and shown, executing nothing | analysis, fixtures |
-| 5 | [movie-filing](movie-filing.md) | The executor: the four unambiguous films filed for real, Plex refreshed, leftovers deleted | dry-run-planner |
-| 6 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | movie-filing |
-| 7 | [review-ui](review-ui.md) | Review page and Pushover: accept, correct, defer | dry-run-planner |
-| 8 | [editions](editions.md) | Prove the editions naming in Plex, Jellyfin and Kodi before using it | — |
-| 9 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | movie-filing, review-ui, editions |
-| 10 | [episode-matching](episode-matching.md) | Inspect harness, reference text, the LLM matcher; Tweety season 1 | movie-filing, review-ui |
-| 11 | [case-photo](case-photo.md) | Photo at insert time, read by a vision model, used as evidence | arm-manifest-hook, review-ui, episode-matching |
+| 1 | [arm-manifest-hook](arm-manifest-hook.md) | The script ARM runs to write job manifests, and a one-off export of past jobs | a real disc, for its last check |
+| 2 | [fixtures](fixtures.md) | Frozen fixtures for every job in the fixtures table, captured from the share | arm-manifest-hook |
+| 3 | [dry-run-planner](dry-run-planner.md) | Intake → analyse → classify → identify films → plan → gate, recorded and shown, executing nothing | fixtures |
+| 4 | [movie-filing](movie-filing.md) | The executor: the four unambiguous films filed for real, Plex refreshed, leftovers deleted | dry-run-planner |
+| 5 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | movie-filing |
+| 6 | [review-ui](review-ui.md) | Review page and Pushover: accept, correct, defer | dry-run-planner |
+| 7 | [editions](editions.md) | Prove the editions naming in Plex, Jellyfin and Kodi before using it | — |
+| 8 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | movie-filing, review-ui, editions |
+| 9 | [episode-matching](episode-matching.md) | Inspect harness, reference text, the LLM matcher; Tweety season 1 | movie-filing, review-ui |
+| 10 | [case-photo](case-photo.md) | Photo at insert time, read by a vision model, used as evidence | arm-manifest-hook, review-ui, episode-matching |
 
 editions needs nothing else and can run whenever there is a free session.
 
