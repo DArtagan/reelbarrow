@@ -60,6 +60,16 @@ with this split:
   already in the database. Jobs 1–41 predate the hook, and
   [fixtures](fixtures.md) needs their manifests. Run it against a copy of the
   database, not the live one.
+- **The manifest can't say which raw folder is the job's**, because ARM's database
+  records no raw path, and a raw folder keeps the name the job had when its rip
+  started. The deployment repository is adding a stamp for that: an
+  `arm-job.json` that a patch to ARM writes into each raw folder as it creates
+  it, holding the job id, label, disc type, `crc_id`, `stage` and start time,
+  and later whether the backup is complete. Intake joins a raw folder to its
+  manifest on that job id. A site without the stamp, and the backlog, which
+  predates it, fall back to fingerprint pairing. Agree the stamp's fields and a
+  `schema` number with the deployment repository before relying on it; it is
+  designed, not built.
 - **Fail loudly and never block ARM.** If no row matches the pid, log it and exit
   non-zero. Check in ARM's source what it does with a hook's exit status, so a
   failure here cannot stop a rip or another site's handoff.
