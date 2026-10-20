@@ -14,6 +14,7 @@
     gh
     git
     jq
+    lsdvd
     skopeo
   ];
 
@@ -45,6 +46,10 @@
         "LICENSE"
         # Written by release-please.
         "CHANGELOG.md"
+        # Binary fixtures, which the whitespace formatter below would truncate.
+        "*.BUP"
+        "*.IFO"
+        "*.iso"
       ];
 
       programs = {
