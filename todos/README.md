@@ -18,9 +18,9 @@ renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 1 | [arm-manifest-hook](arm-manifest-hook.md) | The script ARM runs to write job manifests, and a one-off export of past jobs | a real disc, for its last check |
-| 2 | [analysis](analysis.md) | The measuring primitives: ffprobe, video MD5, fingerprints and alignment, Blu-ray hashes | — |
-| 3 | [fixtures](fixtures.md) | Frozen fixtures for every job in the fixtures table, captured from the share | arm-manifest-hook, analysis |
+| 1 | [analysis](analysis.md) | The measuring primitives: ffprobe, video MD5, fingerprints and alignment, Blu-ray hashes | — |
+| 2 | [arm-manifest-hook](arm-manifest-hook.md) | The script ARM runs to write job manifests, and a one-off export of past jobs | a real disc, for its last check |
+| 3 | [fixtures](fixtures.md) | Frozen fixtures for every job in the fixtures table, captured from the share | analysis, arm-manifest-hook |
 | 4 | [dry-run-planner](dry-run-planner.md) | Intake → analyse → classify → identify films → plan → gate, recorded and shown, executing nothing | analysis, fixtures |
 | 5 | [movie-filing](movie-filing.md) | The executor: the four unambiguous films filed for real, Plex refreshed, leftovers deleted | dry-run-planner |
 | 6 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | movie-filing |
