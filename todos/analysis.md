@@ -26,8 +26,8 @@ Whisper transcription belongs to [episode-matching](episode-matching.md), not he
 
 ## Starting material
 
-Prototypes from the design sessions are in Will's vulcanus-proxmox checkout,
-under `captures/video-library-ingest/` (gitignored, not on GitHub):
+Prototypes from the design sessions are in `captures/design/` in Will's
+checkout (gitignored, not on GitHub):
 
 - `robinhood/align.py`: the alignment that produced the 94.9% / 0.0% table, and
   `robinhood/*.fp`, the fingerprints it ran on

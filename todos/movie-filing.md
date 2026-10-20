@@ -29,16 +29,16 @@
 - **Write permission.** The image runs as uid 1000, and the CIFS mount of
   `video-pv` sets no `uid`, `gid`, `file_mode` or `dir_mode` (its options are just
   `rw`), so what that uid may write is unknown. Test it on a scratch directory
-  before anything else, and fix it in vulcanus-proxmox if needed.
+  before anything else, and fix the mount in the deployment if needed.
 - **Plex keeps watched state** when a folder is renamed and its file replaced.
   This matters for every re-ripped legacy title (*Case 9*). Test it once on a
   throwaway item.
 - **Snapshots are current** on `rpool/storage/media`. Deleting leftovers is
   acceptable only because of them (Will, 2026-10-04).
-- **Secrets** for fanart.tv and Plex added to vulcanus-proxmox's reelbarrow
-  secret.
+- **Secrets** for fanart.tv and Plex added to reelbarrow's secret in the
+  deployment repository.
 
-## The switch, in vulcanus-proxmox
+## The switch, in the deployment repository
 
 Set `REELBARROW_DRY_RUN` to `"false"` and drop `readOnly` from the video mount,
 in one commit. Only these four films should be gated automatic at that moment.
@@ -46,8 +46,8 @@ Every other job must come out review or hold, so confirm that in the dry-run
 plans first.
 
 Before turning it on, decide the backup for the ledger: once it records real
-moves, it is the only history of what was moved where. vulcanus-proxmox's
-`docs/kubernetes.md`, *Adding a stateful workload*, has the options. A SQLite
+moves, it is the only history of what was moved where. The deployment
+repository's guidance on adding a stateful workload has the options. A SQLite
 database with steady writes gets a dump.
 
 ## Done when

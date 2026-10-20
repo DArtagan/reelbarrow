@@ -37,3 +37,7 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Validate the example compose.yaml
+        run: docker compose config --quiet
+        env:
+          VIDEO_ROOT: /srv/video

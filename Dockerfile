@@ -22,6 +22,10 @@ RUN uv sync --locked --no-dev --no-install-project
 COPY src ./src
 RUN uv sync --locked --no-dev --no-editable
 
+# Owned by the runtime user, so a named volume mounted here inherits that
+# ownership. Kubernetes can fix ownership with fsGroup; Compose cannot.
+RUN mkdir /data && chown 1000:1000 /data
+
 USER 1000:1000
 EXPOSE 8000
 CMD ["reelbarrow", "serve"]

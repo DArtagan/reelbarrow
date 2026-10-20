@@ -11,31 +11,32 @@ name the sections they depend on rather than restating them.
 
 ## In order
 
-The design's fixtures table (*What is waiting*) is the acceptance test for
-steps 1 to 10. Dry run stays on through step 4; step 5 is the first that changes
-the share.
+The design's fixtures table (*What is waiting*) is the acceptance test for every
+spec here except case-photo. Dry run stays on until movie-filing, the first that
+changes the share. Specs are referred to by name, not number, so finishing one
+renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 1 | [release-pipeline](release-pipeline.md) | First release end to end: tag, image, Flux, pod | vulcanus deployment manifests |
+| 1 | [arm-manifest-hook](arm-manifest-hook.md) | The script ARM runs to write job manifests, and a one-off export of past jobs | a real disc, for its last check |
 | 2 | [analysis](analysis.md) | The measuring primitives: ffprobe, video MD5, fingerprints and alignment, Blu-ray hashes | — |
-| 3 | [fixtures](fixtures.md) | Frozen fixtures for every job in the fixtures table, captured from the share | 1, 2; ARM manifests exported |
-| 4 | [dry-run-planner](dry-run-planner.md) | Intake → analyse → classify → identify films → plan → gate, recorded and shown, executing nothing | 2, 3 |
-| 5 | [movie-filing](movie-filing.md) | The executor: the four unambiguous films filed for real, Plex refreshed, leftovers deleted | 4 |
-| 6 | [metrics](metrics.md) | What the service exports, so vulcanus can alert on the absence of success | 5 |
-| 7 | [review-ui](review-ui.md) | Review page and Pushover: accept, correct, defer | 4 |
+| 3 | [fixtures](fixtures.md) | Frozen fixtures for every job in the fixtures table, captured from the share | arm-manifest-hook, analysis |
+| 4 | [dry-run-planner](dry-run-planner.md) | Intake → analyse → classify → identify films → plan → gate, recorded and shown, executing nothing | analysis, fixtures |
+| 5 | [movie-filing](movie-filing.md) | The executor: the four unambiguous films filed for real, Plex refreshed, leftovers deleted | dry-run-planner |
+| 6 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | movie-filing |
+| 7 | [review-ui](review-ui.md) | Review page and Pushover: accept, correct, defer | dry-run-planner |
 | 8 | [editions](editions.md) | Prove the editions naming in Plex, Jellyfin and Kodi before using it | — |
-| 9 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | 5, 7, 8 |
-| 10 | [episode-matching](episode-matching.md) | Inspect harness, reference text, the LLM matcher; Tweety season 1 | 5, 7 |
-| 11 | [case-photo](case-photo.md) | Photo at insert time, read by a vision model, used as evidence | 7, 10 |
+| 9 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | movie-filing, review-ui, editions |
+| 10 | [episode-matching](episode-matching.md) | Inspect harness, reference text, the LLM matcher; Tweety season 1 | movie-filing, review-ui |
+| 11 | [case-photo](case-photo.md) | Photo at insert time, read by a vision model, used as evidence | arm-manifest-hook, review-ui, episode-matching |
 
-Step 8 needs nothing else and can run whenever there is a free session.
+editions needs nothing else and can run whenever there is a free session.
 
 ## After these
 
 The `unidentified/` and `raw/` backlog is Will's stated next project; see *The
-backlog, roughly* and *Future work* in the design. It gets a spec once step 9
-has proven the pipeline on hard cases.
+backlog, roughly* and *Future work* in the design. It gets a spec once
+hard-movie-cases has proven the pipeline on hard cases.
 
 ## Writing a spec
 

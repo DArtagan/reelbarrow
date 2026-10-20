@@ -16,3 +16,6 @@ __pycache__/
 
 # Pulled out of a running system; may hold anything the process held.
 captures/
+
+# Machine-local agent notes
+CLAUDE.local.md
