@@ -13,11 +13,12 @@
 Steps 1–6 of the pipeline in *The service*: intake, analyse, classify, identify,
 plan, gate. Step 7, file, is [movie-filing](movie-filing.md).
 
-- **Intake** reads a manifest and finds the job's directories by its `path`,
-  never by matching names.
+- **Intake** reads a manifest and finds the job's completed directory by its
+  `path` and its raw folder by the stamp carrying its `job_id`, never by
+  matching names.
 - **Classify** sorts each title into one of: feature, episode, play-all, extra,
-  exact duplicate, other cut, other work. It pairs transcodes with raw by
-  fingerprint.
+  exact duplicate, other cut, other work. It pairs transcodes with raw by the
+  stamp's title map where there is one, otherwise by fingerprint.
 - **Identify films**: ARM's IMDb ID → TMDB, checked against the feature's runtime
   (±3% to start). TV episodes are left unresolved and planned as review; that is
   [episode-matching](episode-matching.md).
@@ -41,6 +42,12 @@ manifest changes.
   lands. A name the share would reject with `EIO` is a
   planning error to catch here, not at filing time.
 - The thresholds are starting points, and the evaluation sets them.
+- Every job in the fixtures table predates the stamp (*The raw folder's stamp*),
+  so the table exercises only fingerprint pairing. The stamped path needs a case
+  of its own. Job 76, *Pinky and the Brain* D2, is the first stamped DVD, and
+  job 75 ripped the same disc the day before without a stamp, so the two give
+  both paths on one disc. Job 76's stamp predates `titles` unless the deployment
+  has since filled it in; check before relying on it.
 
 ## Secrets
 
