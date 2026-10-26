@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "job_id": 83,
+  "label": "DOWNTON_ABBEY_D2",
+  "disctype": "bluray",
+  "crc_id": null,
+  "stage": "179298456935",
+  "start_time": "2026-10-26T03:16:09.457630+00:00",
+  "complete": true,
+  "problems": [],
+  "titles": null,
+  "duplicates": {
+    "skipped": [
+      {
+        "title": 7,
+        "playlist": "00006.mpls",
+        "reason": "plays titles 2, 3, 4 in turn"
+      }
+    ],
+    "wholes": [
+      {
+        "title": 7,
+        "playlist": "00006.mpls",
+        "kept": "parts",
+        "interleaved": false,
+        "parts": [
+          {
+            "title": 2,
+            "playlist": "00001.mpls",
+            "start": 0.0
+          },
+          {
+            "title": 3,
+            "playlist": "00002.mpls",
+            "start": 2859.79
+          },
+          {
+            "title": 4,
+            "playlist": "00003.mpls",
+            "start": 5658.62
+          }
+        ]
+      }
+    ]
+  }
+}

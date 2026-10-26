@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "job_id": 76,
+  "label": "PINKY_AND_THE_BRAIN_D2",
+  "disctype": "dvd",
+  "crc_id": "7969bce42a920b30",
+  "stage": "179261218992",
+  "start_time": "2026-10-21T19:49:49.973701+00:00",
+  "complete": true,
+  "problems": [],
+  "titles": [
+    {
+      "disc_title": 1,
+      "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-B1_t00.mkv",
+      "length": 7649,
+      "handbrake_title": 1
+    },
+    {
+      "disc_title": 4,
+      "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-C1_t01.mkv",
+      "length": 1295,
+      "handbrake_title": 2
+    },
+    {
+      "disc_title": 5,
+      "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-C2_t02.mkv",
+      "length": 1274,
+      "handbrake_title": 3
+    },
+    {
+      "disc_title": 6,
+      "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-C4_t03.mkv",
+      "length": 1259,
+      "handbrake_title": 4
+    },
+    {
+      "disc_title": 7,
+      "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-D1_t04.mkv",
+      "length": 1275,
+      "handbrake_title": 5
+    },
+    {
+      "disc_title": 8,
+      "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-D3_t05.mkv",
+      "length": 1279,
+      "handbrake_title": 6
+    },
+    {
+      "disc_title": 9,
+      "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-D4_t06.mkv",
+      "length": 1267,
+      "handbrake_title": 7
+    }
+  ]
+}
