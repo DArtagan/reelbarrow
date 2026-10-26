@@ -8,6 +8,7 @@ comes with a fixture here.
 - job 76: a DVD, its title map written after the fact
 - job 77: a DVD, its title map written by the job
 - job 78: a Blu-ray movie
+- job 79: a Blu-ray movie with featurette variants
 - job 80: a Blu-ray series disc from before `duplicates`
 - job 82: a Blu-ray whose structure couldn't be read, so no `duplicates`
 - job 83: a Blu-ray series disc whose play-all was skipped
@@ -30,7 +31,7 @@ BASE = {
     "start_time",
     "complete",
     "problems",
-    "titles",
+    "extracted",
 }
 
 
@@ -44,13 +45,31 @@ def stamp(request: pytest.FixtureRequest) -> dict:
 
 
 def test_every_job_named_in_the_docstring_has_a_fixture():
-    assert [p.stem for p in FIXTURES] == [f"job-{n}" for n in (76, 77, 78, 80, 82, 83)]
+    assert [p.stem for p in FIXTURES] == [
+        f"job-{n}" for n in (76, 77, 78, 79, 80, 82, 83)
+    ]
 
 
 def test_schema_one_holds_the_base_fields(stamp):
     assert stamp["schema"] == 1
     assert set(stamp) >= BASE
     assert isinstance(stamp["job_id"], int)
+
+
+def test_a_title_number_is_always_named_for_its_numbering(stamp):
+    # HandBrake's number is `handbrake_title`, the disc's `disc_title` or
+    # `playlist`. A bare `title` or a `titles` list is the shape the stamp had
+    # before anything read it, and no stamp keeps it.
+    def keys(value):
+        if isinstance(value, dict):
+            for key, inner in value.items():
+                yield key
+                yield from keys(inner)
+        elif isinstance(value, list):
+            for inner in value:
+                yield from keys(inner)
+
+    assert not {"title", "titles"} & set(keys(stamp))
 
 
 def test_complete_agrees_with_its_problems(stamp):
@@ -64,15 +83,15 @@ def test_a_dvd_has_a_crc_and_a_blu_ray_neither_crc_nor_title_map(stamp):
     else:
         assert stamp["disctype"] == "bluray"
         assert stamp["crc_id"] is None
-        assert stamp["titles"] is None
+        assert stamp["extracted"] is None
 
 
 def test_a_title_map_gives_each_transcode_one_disc_title(stamp):
-    if not stamp["titles"]:
+    if not stamp["extracted"]:
         pytest.skip("no title map")
-    numbers = [t["handbrake_title"] for t in stamp["titles"] if t["handbrake_title"]]
+    numbers = [t["handbrake_title"] for t in stamp["extracted"] if t["handbrake_title"]]
     assert len(numbers) == len(set(numbers))
-    for title in stamp["titles"]:
+    for title in stamp["extracted"]:
         assert isinstance(title["disc_title"], int)
         assert title["mkv"].endswith(".mkv")
 
@@ -90,21 +109,25 @@ def test_duplicates_skip_only_what_a_whole_accounts_for(stamp):
         starts = [part["start"] for part in whole["parts"]]
         assert starts == sorted(starts)
         if whole["kept"] == "parts":
-            explained.add(whole["title"])
+            explained.add(whole["handbrake_title"])
         elif whole["kept"] == "whole":
-            explained.update(part["title"] for part in whole["parts"])
+            explained.update(part["handbrake_title"] for part in whole["parts"])
     for skipped in duplicates["skipped"]:
         assert source in skipped
         assert skipped["reason"]
-    assert {s["title"] for s in duplicates["skipped"]} <= explained
+    assert {s["handbrake_title"] for s in duplicates["skipped"]} <= explained
 
 
 def test_a_series_play_all_is_skipped_and_its_episodes_placed():
     duplicates = load("job-83.json")["duplicates"]
-    assert [s["title"] for s in duplicates["skipped"]] == [7]
+    assert [s["handbrake_title"] for s in duplicates["skipped"]] == [7]
     (whole,) = duplicates["wholes"]
-    assert (whole["title"], whole["kept"], whole["interleaved"]) == (7, "parts", False)
-    assert [p["title"] for p in whole["parts"]] == [2, 3, 4]
+    assert (whole["handbrake_title"], whole["kept"], whole["interleaved"]) == (
+        7,
+        "parts",
+        False,
+    )
+    assert [p["handbrake_title"] for p in whole["parts"]] == [2, 3, 4]
     assert [p["start"] for p in whole["parts"]] == [0.0, 2859.79, 5658.62]
 
 

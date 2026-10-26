@@ -243,9 +243,7 @@ creates it, from 2026-10-21. The deployment repository's ARM documentation
 defines it; this is what reelbarrow relies on. It is the only thing on the share
 that ties a raw folder to its job: ARM's database records no raw path, and the
 folder keeps the name the job had when its rip started, while a title corrected
-later renames only the completed folder. A DVD's, shortened. It is job 76's
-with the `titles` its disc yields; the stamp job 76 itself wrote predates
-`titles`:
+later renames only the completed folder. Job 76's, shortened:
 
 ```json
 {
@@ -258,7 +256,7 @@ with the `titles` its disc yields; the stamp job 76 itself wrote predates
   "start_time": "2026-10-21T19:49:49.973701+00:00",
   "complete": true,
   "problems": [],
-  "titles": [
+  "extracted": [
     {"disc_title": 1, "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-B1_t00.mkv", "length": 7649, "handbrake_title": 1},
     {"disc_title": 4, "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-C1_t01.mkv", "length": 1295, "handbrake_title": 2}
   ]
@@ -272,7 +270,9 @@ with the `titles` its disc yields; the stamp job 76 itself wrote predates
   `false` failed, `problems` says how, and the job failed before transcoding.
   `null` means the check never ran because the job died or was abandoned
   mid-backup, so the copy is partial.
-- **`titles`**, for a DVD, maps each title through its three numberings.
+- **`extracted`**, for a DVD, lists the titles MakeMKV extracted from the image,
+  so those of seven minutes or more, not every title on the disc, and maps each
+  through its three numberings.
   `disc_title` is the DVD's own title number, which opens the title in the image
   directly (`HandBrakeCLI -i <iso> -t <disc_title>`). The `_tNN` in the MKV's
   name is not it, since MakeMKV counts only the titles it kept: above, `t01` is
@@ -285,14 +285,15 @@ with the `titles` its disc yields; the stamp job 76 itself wrote predates
   main-feature flag or the largest file, and is often wrong on a bonus disc;
   the feature is decided here. Earlier jobs renamed it `<Title (Year)>.mkv`, so on a
   DVD the feature's number is the one missing among the transcodes, and on a
-  Blu-ray nothing on the share records it. `titles` is null for a Blu-ray, whose
+  Blu-ray nothing on the share records it. `extracted` is null for a Blu-ray, whose
   transcodes are made from `BDMV/` directly, and for a DVD whose job failed
   before extraction finished.
 - **`duplicates`**, from job 83 (2026-10-26), records the titles ARM chose not
   to transcode because other titles already play them, compared by what each
   plays from the disc (a Blu-ray playlist's clips and times, a DVD title's
-  cells), at 99% coverage. `skipped` lists each such title by HandBrake's
-  number, with its `playlist` (Blu-ray) or `disc_title` (DVD) and a `reason`. A
+  cells), at 99% coverage. `skipped` lists each such title by
+  `handbrake_title`, with its `playlist` (Blu-ray) or `disc_title` (DVD) and a
+  `reason`; the entries in `wholes` and their `parts` name titles the same way. A
   skipped title has no transcode, and its absence is neither a failed
   transcode nor an incomplete copy. `wholes` lists each title that two or more
   disjoint others play between them: `kept` (`parts`, `whole` or `both`),
@@ -309,17 +310,20 @@ with the `titles` its disc yields; the stamp job 76 itself wrote predates
   read, which transcodes every title. None of those says nothing repeated.
 - **`crc_id`** carries a DVD's identity into the raw folder (*Disc identity*).
 - **`schema`** other than 1 is refused, not guessed at, as for a manifest. A
-  field added leaves it at 1, as `titles` and `duplicates` were; removing a
+  field added leaves it at 1, as `duplicates` was; removing a
   field or changing what one means raises it. So a reader ignores fields it
   doesn't know and takes a missing one as not recorded, never as empty.
+- **Title numbers** are named for their numbering wherever they appear:
+  `handbrake_title` is HandBrake's, the *N* of `title_N.mkv`, and `disc_title`
+  or `playlist` the disc's own. No field is a bare `title`.
 
 Real stamps are test fixtures, `tests/fixtures/stamps/`, with a test holding
 each rule above against them. A change to the stamp brings a fixture.
 
 No raw folder from before 2026-10-21 has a stamp, and neither does any site that
 doesn't run the deployment's patch. Those are paired by fingerprint. By
-2026-10-26 it had been written on DVD jobs 76 and 77 and Blu-ray jobs 78, 80,
-82 and 83.
+2026-10-26 it had been written on DVD jobs 76 and 77 and Blu-ray jobs 78, 79,
+80, 82 and 83.
 
 ### What a raw folder holds
 

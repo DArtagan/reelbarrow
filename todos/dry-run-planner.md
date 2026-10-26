@@ -46,8 +46,8 @@ manifest changes.
   so the table exercises only fingerprint pairing. The stamped path needs a case
   of its own. Job 76, *Pinky and the Brain* D2, is the first stamped DVD, and
   job 75 ripped the same disc the day before without a stamp, so the two give
-  both paths on one disc. Job 76's stamp predates `titles` unless the deployment
-  has since filled it in; check before relying on it.
+  both paths on one disc. Job 76's title map was filled in after the job, and
+  matches job 77's, a re-rip of the same disc that wrote its own.
 - A stamp's `duplicates` (*The raw folder's stamp*) means a title can be absent
   from `completed/` on purpose. Read it before calling a job's output
   incomplete. Downton Abbey gives both paths on one series: job 80 (D1) predates

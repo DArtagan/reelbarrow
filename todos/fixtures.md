@@ -32,8 +32,8 @@ raw folder's `arm-job.json` where it has one. Store them under
 `tests/fixtures/<job>/` in a layout the planner can load as if it were the
 share.
 
-The stamps already frozen are in `tests/fixtures/stamps/` (jobs 76, 77, 78,
-80, 82, 83), with the contract test that holds them. Every job in the fixtures
+The stamps already frozen are in `tests/fixtures/stamps/` (jobs 76–80, 82,
+83), with the contract test that holds them. Every job in the fixtures
 table predates the stamp, so they are the only stamped cases. A job's own
 fixture copies its stamp from there rather than freezing a second one. The
 first movie disc with `duplicates`, the *Robin Hood* bonus DVD's re-rip, joins
