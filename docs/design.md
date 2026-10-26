@@ -304,14 +304,22 @@ with the `titles` its disc yields; the stamp job 76 itself wrote predates
   re-encoding. Interleaved parts, featurettes cut into a film, are kept and the
   whole skipped. A series ARM filed as a movie therefore arrives as one long
   file, and `start` is where to split it. Both lists are empty when nothing
-  repeats. A stamp without `duplicates` predates it, or comes from a job whose
-  disc structure couldn't be read, which transcodes every title.
+  repeats. A stamp without `duplicates` predates it, comes from a job that
+  ended before transcoding began, or from one whose disc structure couldn't be
+  read, which transcodes every title. None of those says nothing repeated.
 - **`crc_id`** carries a DVD's identity into the raw folder (*Disc identity*).
-- **`schema`** other than 1 is refused, not guessed at, as for a manifest.
+- **`schema`** other than 1 is refused, not guessed at, as for a manifest. A
+  field added leaves it at 1, as `titles` and `duplicates` were; removing a
+  field or changing what one means raises it. So a reader ignores fields it
+  doesn't know and takes a missing one as not recorded, never as empty.
+
+Real stamps are test fixtures, `tests/fixtures/stamps/`, with a test holding
+each rule above against them. A change to the stamp brings a fixture.
 
 No raw folder from before 2026-10-21 has a stamp, and neither does any site that
 doesn't run the deployment's patch. Those are paired by fingerprint. By
-2026-10-22 the stamp had been written on one DVD job and no Blu-ray.
+2026-10-26 it had been written on DVD jobs 76 and 77 and Blu-ray jobs 78, 80,
+82 and 83.
 
 ### What a raw folder holds
 
@@ -568,7 +576,15 @@ notification the script looks up the job by `$PPID` = `job.pid` and writes
 year, IMDb ID, video type, label, disc type, `crc_id`, status, paths) and its
 track rows. The first write comes at "Found disc" (so the service can ask for a
 case photo while the disc is in the drive), and each later notification rewrites
-it with the job's current status. How it is built is
+it with the job's current status.
+
+A track row's `ripped` is not "transcoded". ARM sets it when it registers a
+title longer than `MINLENGTH`, before any transcode, and sets it again once the
+transcode is done. A title the deployment's ARM chose not to transcode (the
+stamp's `duplicates`) keeps `ripped` true and an empty `filename`: job 83's
+skipped play-all, track 7, reads so. A title has a transcode when its
+`filename` is set. The deployment may later clear `ripped` on a skipped title;
+reading `filename` holds either way. How it is built is
 [`todos/arm-manifest-hook.md`](../todos/arm-manifest-hook.md).
 
 A file on the share rather than an HTTP call because it is durable: if the

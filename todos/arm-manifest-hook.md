@@ -55,7 +55,10 @@ with this split:
 - **Version the schema** with a top-level `"schema": 1`, so reelbarrow's intake
   can refuse a manifest it does not understand rather than misread it. Contents
   are as *The ARM manifest* lists: the job row (title, year, IMDb ID, video type,
-  label, disc type, `crc_id`, status, `path`) and its track rows.
+  label, disc type, `crc_id`, status, `path`) and its track rows, exported as
+  ARM holds them. `ripped` is not "transcoded" (*The ARM manifest*): don't
+  reinterpret it here, so intake reads one meaning however the deployment
+  sets it.
 - **An export mode** (for example `--all`) writes manifests for every job
   already in the database. Jobs 1–41 predate the hook, and
   [fixtures](fixtures.md) needs their manifests. Run it against a copy of the
