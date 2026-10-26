@@ -277,12 +277,35 @@ with the `titles` its disc yields; the stamp job 76 itself wrote predates
   directly (`HandBrakeCLI -i <iso> -t <disc_title>`). The `_tNN` in the MKV's
   name is not it, since MakeMKV counts only the titles it kept: above, `t01` is
   DVD title 4. `handbrake_title` is the *N* of the transcode's `title_N.mkv`, or
-  null for a title MakeMKV listed and did not save. In `completed/` a series
-  keeps `title_N.mkv`. A movie's largest transcode becomes `<Title (Year)>.mkv`
-  and the rest keep `title_N.mkv` under `extras/`, so the feature's number is
-  the one missing there. `titles` is null for a Blu-ray, whose transcodes are
-  made from `BDMV/` directly, and for a DVD whose job failed before extraction
-  finished.
+  null for a title MakeMKV listed and did not save. In `completed/` every
+  transcode keeps its `title_N.mkv` once the deployment's patch for it is in
+  (2026-10-26; the first job after it is the first so named): flat for a
+  series, and for a movie the title ARM took for the feature sits above
+  `extras/`, the rest inside it. That placement is ARM's guess, from HandBrake's
+  main-feature flag or the largest file, and is often wrong on a bonus disc;
+  the feature is decided here. Earlier jobs renamed it `<Title (Year)>.mkv`, so on a
+  DVD the feature's number is the one missing among the transcodes, and on a
+  Blu-ray nothing on the share records it. `titles` is null for a Blu-ray, whose
+  transcodes are made from `BDMV/` directly, and for a DVD whose job failed
+  before extraction finished.
+- **`duplicates`**, from job 83 (2026-10-26), records the titles ARM chose not
+  to transcode because other titles already play them, compared by what each
+  plays from the disc (a Blu-ray playlist's clips and times, a DVD title's
+  cells), at 99% coverage. `skipped` lists each such title by HandBrake's
+  number, with its `playlist` (Blu-ray) or `disc_title` (DVD) and a `reason`. A
+  skipped title has no transcode, and its absence is neither a failed
+  transcode nor an incomplete copy. `wholes` lists each title that two or more
+  disjoint others play between them: `kept` (`parts`, `whole` or `both`),
+  `interleaved`, and its `parts`, each with `start`, the second of the whole at
+  which it begins. A series keeps the parts, so a play-all is skipped. A movie
+  disc keeps a whole whose parts follow one another with a chapter at each
+  join, a documentary in parts, and skips the parts; its transcode has a
+  keyframe at each chapter, so a part can be cut out at `start` without
+  re-encoding. Interleaved parts, featurettes cut into a film, are kept and the
+  whole skipped. A series ARM filed as a movie therefore arrives as one long
+  file, and `start` is where to split it. Both lists are empty when nothing
+  repeats. A stamp without `duplicates` predates it, or comes from a job whose
+  disc structure couldn't be read, which transcodes every title.
 - **`crc_id`** carries a DVD's identity into the raw folder (*Disc identity*).
 - **`schema`** other than 1 is refused, not guessed at, as for a manifest.
 
@@ -370,7 +393,7 @@ something that has actually happened on this share.
 | 5 | **two cuts of one film on one disc** | Robin Hood job 35: 155.9 min and 140.5 min | audio of the shorter is found, in order, inside the longer |
 | 6 | **two films on one disc** | The Rescuers job 27: `title_71` is *The Rescuers Down Under* | two feature-length titles whose audio does not overlap at all |
 | 7 | **a misidentified disc** | job 24 named The Polar Express "The Adventures of Mary-Kate and Ashley" (D12 in disc-ripping) | the runtime check; disc identity shared with a correctly named job |
-| 8 | **a play-all title** | Tweety: 168.8 min on D1, 105.7 min on D2 | length ≈ sum of the others, *and* every episode's audio is found inside it |
+| 8 | **a play-all title** | Tweety: 168.8 min on D1, 105.7 min on D2 | the stamp's `duplicates`; without one, length ≈ sum of the others, *and* every episode's audio is found inside it |
 | 9 | **already in the library** | Shrek the Third | the target folder exists |
 
 Underneath all of them: **`title_N` carries no identity.** Re-ripping Tweety D2
@@ -586,7 +609,9 @@ The pipeline, per ARM job (and later per backlog folder):
    fingerprint.
 3. **Classify titles**: feature, episode, play-all, extra, exact duplicate, other
    cut of the same work, other work. Pair each transcode with its raw source by
-   the stamp's title map where there is one, otherwise by fingerprint.
+   the stamp's title map where there is one, otherwise by fingerprint. A
+   stamp's `duplicates` names the play-alls, and the wholes and parts, that ARM
+   resolved before transcoding.
 4. **Identify.** Film: ARM's IMDb ID → TMDB, checked against the feature's
    runtime. Series: episodes by transcript. Evidence from a case photo, if any.
 5. **Plan.** A complete list of operations — renames, sidecar writes,
@@ -659,9 +684,9 @@ read as a test case.
 | decision | automatic when | otherwise |
 |---|---|---|
 | this disc is film X | ARM's identification (OMDb hit, CRC64 hit, or confirmed in the manual wait) **and** exactly one title within ±3% of TMDB's runtime for X | review — this is what catches case 7 |
-| a title is a play-all | its length within 0.5% of the sum of ≥2 others **and** each of those others' audio is found inside it | treat as an ordinary title |
+| a title is a play-all | the stamp's `duplicates` lists it as a whole whose parts are kept, **or** its length within 0.5% of the sum of ≥2 others **and** each of those others' audio is found inside it | treat as an ordinary title |
 | a file is a duplicate | identical video MD5 to a file being kept | not a duplicate |
-| best copy | rule 1: identical MD5 → keep the earliest successful job's. Rule 2: same disc identity, one copy incomplete (failed job, a stamp whose `complete` isn't `true`, missing files, decoded length short of the track table) → keep the complete one | ask — never choose by size or bitrate |
+| best copy | rule 1: identical MD5 → keep the earliest successful job's. Rule 2: same disc identity, one copy incomplete (failed job, a stamp whose `complete` isn't `true`, missing files other than titles the stamp's `duplicates` skipped, decoded length short of the track table) → keep the complete one | ask — never choose by size or bitrate |
 | a transcode is raw title X | the raw folder's stamp pairs them (`handbrake_title`) **and** their lengths agree within 1% (MakeMKV's and HandBrake's differed by at most 0.3% on job 76) | pair by fingerprint |
 | a title is an extra of film X | shorter than the feature, not another cut or another work (fingerprint), from a disc identified as X or as X's bonus disc | review |
 | two cuts of one film | fingerprint coverage ≥ 90% with a monotonic offset | edition **labels** always need a source — the case photo, or TMDB/IMDb release data naming those exact runtimes |
@@ -903,8 +928,9 @@ shows/
       SYLVESTER_TWEETY_MYSTERY_D2 [dvd-7da9a52fcee55723]/
 ```
 
-The play-all's transcode is a leftover; its raw stays, because it is part of the
-disc.
+The play-all's transcode, where ARM made one, is a leftover; its raw stays,
+because it is part of the disc. A job whose stamp carries `duplicates` has no
+play-all transcode.
 
 ### Editions
 
@@ -956,8 +982,6 @@ Kept so it is not lost, each deliberately outside the specs in `todos/`:
 - **The `youtube-dl` and legacy `import/` buckets** as further sources. This is
   where name matching — FileBot's one strength — would matter; an LLM over names
   plus metadata may suffice.
-- **Play-all filtering upstream in ARM**, using the sum-of-others rule — Will's
-  suggestion for when transcode time matters.
 - **Re-transcoding from raw**, which `disc.json` is designed to make possible.
 
 ---

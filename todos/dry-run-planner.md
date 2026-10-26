@@ -48,6 +48,16 @@ manifest changes.
   job 75 ripped the same disc the day before without a stamp, so the two give
   both paths on one disc. Job 76's stamp predates `titles` unless the deployment
   has since filled it in; check before relying on it.
+- A stamp's `duplicates` (*The raw folder's stamp*) means a title can be absent
+  from `completed/` on purpose. Read it before calling a job's output
+  incomplete. Downton Abbey gives both paths on one series: job 80 (D1) predates
+  `duplicates` and transcoded its 207-minute play-all, and job 83 (D2) skipped
+  its 157-minute one and recorded the episodes' starts. Its first movie-disc
+  case, a whole kept and its parts skipped, is the *Robin Hood* bonus DVD's
+  re-rip, which hasn't run as of 2026-10-26.
+- A movie's feature arrives as `title_N.mkv` above `extras/` once the
+  deployment stops ARM renaming it, and as `<Title (Year)>.mkv` before. Intake
+  takes neither name, nor the placement, as the identification.
 
 ## Secrets
 
