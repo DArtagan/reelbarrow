@@ -35,17 +35,13 @@ decision needs of them; the manifest; and the raw folder's `arm-job.json` where
 it has one. Store them under `tests/fixtures/<job>/` in a layout the planner can
 load as if it were the share.
 
-The stamps already frozen are in `tests/fixtures/stamps/` (jobs 76–80, 82,
-83), with the contract test that holds them. Every job in the fixtures
-table predates the stamp, so they are the only stamped cases. A job's own
+The stamps frozen are in `tests/fixtures/stamps/`, every one on the share as
+it stood on 2026-10-28: those ARM wrote (jobs 76–80, 82–86) and those the
+deployment backfilled (jobs 7, 8, 23, 25 and 27, among them *The Rescuers* job
+27 of the fixtures table), with the contract test that holds them. A job's own
 fixture copies its stamp from there rather than freezing a second one. The
 first movie disc with `duplicates`, the *Robin Hood* bonus DVD's re-rip, joins
-them once it has run, and so does the first Blu-ray stamp with `playlists`.
-
-A Blu-ray job's title map comes from the manifest export, which reads it from
-the job's log (*arm-manifest-hook*). For *The Rescuers* job 27 that log is the
-only record, so its fixture needs the export, or the copy in
-`captures/arm-logs/`, before the log runs out in December.
+them once it has run.
 
 A `reelbarrow analyse <path> --out <dir>` command that does this in the pod is
 probably the right shape, and the planner's own intake will want it anyway.

@@ -63,16 +63,13 @@ with this split:
   already in the database. Jobs 1–41 predate the hook, and
   [fixtures](fixtures.md) needs their manifests. Run it against a copy of the
   database, not the live one.
-- **The export carries each Blu-ray job's title map from its job log**, the
-  `+ playlist:` line after each `Transcoding title N to …/title_N.mkv`, as the
-  stamp's `playlists` would (*The raw folder's stamp*). ARM's database holds no
-  playlist, and the log is the only record for a job before the stamp's map. ARM
-  keeps a log 90 days: as of 2026-10-28, 14 of the 19 Blu-ray jobs still had
-  theirs, jobs 5–9's were gone, and the oldest left, jobs 23–27 from September,
-  run out in December. So run the export before then. A copy taken 2026-10-28
-  is in `captures/arm-logs/` in Will's checkout, should one run out first. Find
-  a job's log by its `logfile` in the database, never by its label: re-rips of
-  one disc share a label.
+- **The export needn't read ARM's job logs.** A Blu-ray's title map, which only
+  a job's log held before the stamp had one, is in the stamp of every raw
+  folder that holds the whole disc: the deployment backfilled them from their
+  logs on 2026-10-28 (*The raw folder's stamp*). A job's log is found by its
+  `logfile` in the database and is its own only if it opens when the job
+  started: re-rips of one disc share a label, and job 2's row names job 61's
+  log.
 - **The manifest doesn't say which raw folder is the job's**, because ARM's
   database records no raw path. The deployment's ARM writes that into the raw
   folder instead, as `arm-job.json` (*The raw folder's stamp* in the design), and
