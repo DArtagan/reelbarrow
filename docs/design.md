@@ -5,7 +5,7 @@ video library that Plex reads: films and episodes identified, raw disc copies ke
 beside their transcodes, sidecars written, leftovers tidied.
 
 This design was worked out from 2026-10-03 to 10-08 in the deployment
-repository's spec for this project (see *The deployment half* in `CLAUDE.md`),
+repository's spec for this project (see *The deployment half* in `AGENTS.md`),
 and moved here on 2026-10-18, when this repository was created. It was verified against ARM `2.24.4`, Plex `1.43.4`, and the
 share as it stood on those dates, unless a passage says otherwise. All of that
 work was read-only: no file under `media/video` was moved or written.
@@ -714,7 +714,7 @@ read as a test case.
 | episode N | the LLM matcher assigns it with high confidence **and** an independent signal agrees (the TF-IDF baseline's assignment, the reference runtime, or the case photo's episode list) **and** the season assignment is one-to-one with no duplicates | review the disc's whole mapping |
 | filing into an existing folder (case 9) | the existing entry is the same work by TMDB ID **and** every role below resolves by its own rule | review the whole fold |
 | … which transcode is the film | same cut (fingerprint coverage ≥ 90%, lengths within 1%) **and** the newer is encoded from a source of equal or higher resolution → keep the newer, current-preset transcode (Will, 2026-10-05) | a different cut is an edition (case 5), not a replacement; a newer transcode from a *lower*-resolution source (a DVD rip beside a Blu-ray one) → review |
-| … which raw survives | a decrypted full-disc image (ISO, `VIDEO_TS`, `BDMV`) whose long-title list matches the per-title MKVs (each length within 3 s, chapters within 1) is a superset of them → keep the image, drop the MKVs. A stamped DVD folder whose `complete` is `true` and whose every file in `titles/` is in its `titles` → keep the image and the stamp, drop `titles/`. Two raws of different discs (a DVD and a Blu-ray of one film) are both kept, each in its own `raw/<disc>/` | review |
+| … which raw survives | a decrypted full-disc image (ISO, `VIDEO_TS`, `BDMV`) whose long-title list matches the per-title MKVs (each length within 3 s, chapters within 1) is a superset of them → keep the image, drop the MKVs. A stamped DVD folder whose `complete` is `true` and whose every file in `titles/` is in its `extracted` → keep the image and the stamp, drop `titles/`. Two raws of different discs (a DVD and a Blu-ray of one film) are both kept, each in its own `raw/<disc>/` | review |
 
 **The episode matcher.** Whisper transcripts from two windows per episode (to
 survive a cold open or recap), plus reference text from several sources, given

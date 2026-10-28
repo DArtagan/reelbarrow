@@ -31,7 +31,7 @@ Actions to create and approve pull requests*.
 ## How it reaches the cluster
 
 Flux deploys reelbarrow from the deployment repository (see *The deployment
-half* in `CLAUDE.md`). It polls GHCR, and an `ImagePolicy` with the semver range
+half* in `AGENTS.md`). It polls GHCR, and an `ImagePolicy` with the semver range
 `>=0.1.0 <1.0.0` selects the newest release. Flux Bot then commits the new tag
 into reelbarrow's `Deployment` there. Crossing to 1.0 is a deliberate edit of
 that range.
