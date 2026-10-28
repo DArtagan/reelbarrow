@@ -666,7 +666,9 @@ reaches that chapter, at the keyframe before its mark. A stub chapter 0.25 s
 from the end is common, so a Blu-ray transcode is up to a second short. Taken
 from the playlist and its clip's keyframes, the length is predictable within
 two frames (E35), and that, not a tolerance, is what pairs a Blu-ray without a
-title map.
+title map. `reelbarrow.analysis.bluray.handbrake_duration` makes the prediction
+from the playlist and the entry points in each clip's `.clpi` EP map, the
+I-picture times libbluray finds a mark by, so it needs no video read (E36).
 
 ---
 
@@ -1179,6 +1181,7 @@ All read-only against the cluster and the share. Artefacts in
 | E33 | 10-28 | MakeMKV `info` over job 76's image; ARM's `convert_to_seconds`; ffprobe of job 76's and job 28's transcodes against their MKVs | MakeMKV's reported duration is Σ⌊cell⌋ in IFO time over the cells it keeps, exact on all 7 of job 76's titles and all 5 of Shrek's; a transcode's length equals its MKV's to the millisecond, chapters within 0.13 s |
 | E34 | 10-28 | ffprobe of jobs 78, 79, 80 and 83's 21 transcodes against their playlists; job 79's job log; every Blu-ray job log's title-to-playlist lines | transcodes run 1.0 s shorter to 0.05 s longer than their playlist, chapters within 0.67 s; 17 of 21 unambiguous by length; job 79's variants share their clips and nearest length mispaired `title_76`; 14 of 19 Blu-ray jobs still have their logs, jobs 5–9's are gone |
 | E35 | 10-28 | job 79's playlists, clips and job log; HandBrake 1.11.2's `bd.c` and `reader.c`; keyframes at each playlist's last mark; thumbnails of transcode and clip frames | the near-identical playlists differ only by clips of black silence; HandBrake drops a chapter starting within 1.5 s of the end and stops the encode at the keyframe before it; that prediction is within −0.084 to +0.048 s on all 22 transcodes, and separates the variants by ≥ 1.4 s |
+| E36 | 10-28 | the `.clpi` EP maps of jobs 78, 79, 80 and 83 through `bluray_clips`, against ffprobe's keyframes and the 22 transcodes | every keyframe is an entry point, 2–5 ms early as the map's 5.7 ms steps store it; `handbrake_duration` from playlists and EP maps alone is within −0.079 to +0.048 s of all 22, and each of job 79's variants is nearest its own playlist of 92, the next 1.4 s or more away |
 
 ---
 

@@ -30,8 +30,8 @@ jobs that form the acceptance test.
 ffprobe JSON for every file in its completed and transcode directories and its
 raw candidates; video MD5s; fingerprints; Blu-ray hashes; what each raw title
 plays (*Title identity* 4), as a DVD image's `lsdvd -c -d -v -Oy` output and a
-Blu-ray's playlists read by `bluray_playlists`, as JSON, which is all a
-decision needs of them; the manifest; and the raw folder's `arm-job.json` where
+Blu-ray's playlists read by `bluray_playlists` and its clips' entry points by
+`bluray_clips`, as JSON, which is all a decision needs of them; the manifest; and the raw folder's `arm-job.json` where
 it has one. Store them under `tests/fixtures/<job>/` in a layout the planner can
 load as if it were the share.
 
