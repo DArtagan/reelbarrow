@@ -362,7 +362,7 @@ evidence is in *The cases*. "Leftovers" means deleted once filing succeeds.
 | `movies/Field-of-Dreams (1989)` | 30, 31 — **both failed**; file recovered by hand | **review**: no successful job vouches for the file. Two raw copies whose video hashes match (disc-ripping, 2026-09-20): keep one |
 | `movies/Shrek-the-Third (2007)` | 28 | **fold** (case 9): ARM's AV1 transcode replaces the 2013 `.m4v`; the 2009 `.iso` is kept as raw and ARM's five per-title MKVs are leftovers, because the ISO is a decrypted superset of them (measured); the folder gains `{tmdb-N}` and fresh sidecars. Automatic only if every fold rule in *Confidence* holds |
 | `movies/Robin-Hood (2010)` | 35 | **review** for labels: two cuts, verified as one film (case 5) |
-| `movies/Robin-Hood (2010)_178999705941` | 36, different `crc_id` | **review**: a bonus disc whose 62.7-minute featurette ARM named `Robin-Hood (2010).mkv`; everything → `extras/` of Robin Hood |
+| `movies/Robin-Hood (2010)_178999705941` | 36, different `crc_id` | **review**: a bonus disc whose 62.7-minute documentary ARM named `Robin-Hood (2010).mkv`; it and two featurettes → `extras/` of Robin Hood, and the documentary's three parts, also transcoded, are leftovers (*Title identity* 4) |
 | `movies/The Rescuers (1977)_178961349896` | 27; 5, 7, 8, 23 earlier | two films on one disc (case 6), split: the feature, the raw disc and the three extras → *The Rescuers (1977)*; `title_71` → *The Rescuers Down Under (1990)* with a pointer file. ARM never identified the second film, so it files automatically only if its identity meets the bar (transcript + runtime), else review. The four other raw backups are the same disc and are leftovers |
 | `movies/Around-the-World-in-80-Days (1956)` | 39 ok; 40, 41 (disc 2) failed empty | **hold**: probably one film split across two discs (case 4); disc 2 not yet ripped |
 | `tv/The-Sylvester-and-Tweety-Mysteries (1995-2002)` (+ two `_<stage>` siblings) | 21 (D1), 22 (D2), 33 (D2 again) | **auto** if the episode matcher meets the bar, else review: S01E01–E13; both play-alls dropped; job 33's six files are byte-identical duplicates of job 22's |
@@ -467,6 +467,16 @@ Measured 2026-10-05:
   the image is stamped 2009-12-29 19:38 — the night the image was made, not
   the disc's mastering date. **A re-authored image will never match a pressed
   disc's CRC**, so for images the identity check has to be structural, as above.
+- **The IFO's lengths run 0.1% short on NTSC.** An NTSC DVD's IFO counts 30
+  frames to each second of its timecode while the video runs at 30000/1001, so
+  what lsdvd prints, the table above included, is short of what plays: 5.1 s on
+  the feature. `reelbarrow.analysis.dvd` scales to playback seconds, and so
+  every DVD length reelbarrow compares is in those. Against the scaled lengths,
+  ffprobe's durations for job 28's five raw MKVs are each 0.50 s shorter, the
+  0.5 s stub chapter MakeMKV dropped from each, and job 76's seven agree with
+  its image within 0.06 s, or 0.50 s on the one whose stub was dropped (E31).
+  An MKV left with one chapter lists none, so in *Confidence* an MKV with no
+  chapters counts as one.
 
 So the fold is: ARM's transcode becomes the film (Will's call: newer, current
 conventions); the ISO becomes `raw/SHREK_THE_THIRD […]/`; ARM's five raw MKVs
@@ -499,7 +509,7 @@ it: raw MKVs can't, pydvdid over the 2009 Shrek ISO gave a different CRC64
 because the image had re-stamped every file (E24), and over one of ARM's images
 it is untested.
 
-### Title identity — three tools, each measured
+### Title identity — four tools, each measured
 
 **1. Exact duplicate: video-stream MD5.** `ffmpeg -map 0:v -c copy -f md5`. All
 six Tweety D2 titles hash identically across jobs 22 and 33 despite different
@@ -555,6 +565,32 @@ its own. See *Confidence* for how the real matcher works.
 
 Not measured: Whisper speed on worker-0's CPU; transcripts of a show whose
 episodes lack distinctive proper nouns; any non-English audio.
+
+**4. Which titles repeat which: what each plays from the disc.** Where the raw
+keeps the disc's structure, a `BDMV/` backup or a DVD image, each title is a
+sequence of segments: a Blu-ray playlist's clips between their in and out
+times, or a DVD title's cells as sector ranges of its title set
+(`reelbarrow.analysis.segments`). Two titles play the same material exactly
+where their segments overlap, so a play-all, or a documentary the disc also
+offers in parts, is found without decoding anything, and each part's start is
+read off the whole's own clock. The definitions are those the deployment's ARM
+skips titles by (*The raw folder's stamp*, `duplicates`): a part is at least 95%
+inside the whole, parts overlap one another by less than 5% (a DVD's episodes
+can share a closing cell that their play-all plays once), and between them they
+play at least 99% of it. A part's start is placed by what only it plays, since
+episodes can share a recap and featurettes an intro.
+
+| disc | whole | parts | the whole played by them | each part's start |
+|---|---|---|---|---|
+| Downton Abbey D2, job 83, Blu-ray | `00006.mpls`, 157.1 min | `00001`–`00003.mpls`, each 100% inside | 99.94% | 0.000, 2859.790, 5658.620 s: the stamp's figures exactly, each on a chapter |
+| Pinky and the Brain D2, job 76, DVD image | disc title 1, 127.9 min | disc titles 4–9, each ≥ 99.98% inside, sharing a 0.5 s closing cell | 100% | each on a chapter of the whole |
+
+A DVD ripped before images (*What a raw folder holds*) keeps only per-title
+MKVs, and there fingerprints stand in: each part's audio is found inside the
+whole (2), and the offset it is found at is its start. Robin Hood's bonus disc,
+job 36, is that case. Its raw `E1` (3761.6 s, chapters at 0, 1086.1 and
+2854.4 s) is `E2`, `E3` and `E4` (1086.1, 1768.3 and 907.2 s) end to end by
+length, each join on a chapter. Their audio has not been aligned.
 
 ---
 
@@ -631,14 +667,16 @@ The pipeline, per ARM job (and later per backlog folder):
    `path`, never by name-matching) and the raw folder whose stamp carries the
    job's `job_id`, or, where no stamp does, the raw candidates.
 2. **Analyse.** For every output file: duration, streams, chapters, video MD5,
-   audio fingerprint. For raw: Blu-ray nav and completeness hashes, per-title
+   audio fingerprint. For raw: Blu-ray nav and completeness hashes, a DVD
+   image's titles, what each title plays (*Title identity* 4), per-title
    fingerprints. Verify decoded duration against the container before trusting a
    fingerprint.
 3. **Classify titles**: feature, episode, play-all, extra, exact duplicate, other
    cut of the same work, other work. Pair each transcode with its raw source by
    the stamp's title map where there is one, otherwise by fingerprint. A
    stamp's `duplicates` names the play-alls, and the wholes and parts, that ARM
-   resolved before transcoding.
+   resolved before transcoding. Without it, the raw's structure or the
+   fingerprints find them, and the same rule decides which to keep.
 4. **Identify.** Film: ARM's IMDb ID → TMDB, checked against the feature's
    runtime. Series: episodes by transcript. Evidence from a case photo, if any.
 5. **Plan.** A complete list of operations — renames, sidecar writes,
@@ -711,7 +749,8 @@ read as a test case.
 | decision | automatic when | otherwise |
 |---|---|---|
 | this disc is film X | ARM's identification (OMDb hit, CRC64 hit, or confirmed in the manual wait) **and** exactly one title within ±3% of TMDB's runtime for X | review — this is what catches case 7 |
-| a title is a play-all | the stamp's `duplicates` lists it as a whole whose parts are kept, **or** its length within 0.5% of the sum of ≥2 others **and** each of those others' audio is found inside it | treat as an ordinary title |
+| a title is a whole of others: a play-all, or a documentary in parts | the stamp's `duplicates` lists it, **or** its raw keeps the disc's structure and ≥2 others each ≥95% inside it, overlapping one another by <5%, play ≥99% of it (*Title identity* 4), **or** its length within 0.5% of the sum of ≥2 others **and** each of those others' audio is found inside it | treat as an ordinary title |
+| … which of a whole and its parts is kept | as the deployment's ARM decides (Will, 2026-10-28): a series keeps the parts, and the whole's transcode is a leftover; a movie disc keeps the whole when each part after the first starts within 1 s of one of its chapters and the parts follow one another, and the parts' transcodes are leftovers; parts that interleave are kept, and the whole's transcode is a leftover | keep both |
 | a file is a duplicate | identical video MD5 to a file being kept | not a duplicate |
 | best copy | rule 1: identical MD5 → keep the earliest successful job's. Rule 2: same disc identity, one copy incomplete (failed job, a stamp whose `complete` isn't `true`, missing files other than titles the stamp's `duplicates` skipped, decoded length short of the track table) → keep the complete one | ask — never choose by size or bitrate |
 | a transcode is raw title X | the raw folder's stamp pairs them (`handbrake_title`) **and** their lengths agree within 1% (MakeMKV's and HandBrake's differed by at most 0.3% on job 76) | pair by fingerprint |
@@ -1059,6 +1098,7 @@ All read-only against the cluster and the share. Artefacts in
 | E28 | 10-08 | the titles-only prompt three more times | 9, 6, 9 of 13; one file wrong in all four runs; one run broke the answer format |
 | E29 | 10-08 | Inspect documentation | datasets, solvers, scorers, epochs, caching, multi-provider; reducers not exercised |
 | E30 | 10-20 | E19's four fingerprints retaken inside the reelbarrow pod; fpcalc on a deliberately truncated file | two of E19's were short; complete ones match the frame-count formula exactly and E19's figures stand; fpcalc reports the container's duration for a truncated file |
+| E31 | 10-28 | lsdvd over job 76's and 77's images and the Shrek ISO's IFOs, against ffprobe of job 76's `titles/` and job 28's raw MKVs; job 83's playlists and job 76's cells through `reelbarrow.analysis.segments`; ffprobe of job 36's raw | NTSC IFO lengths are 0.1% short, and scaled agree within 0.06 s bar dropped 0.5 s stubs; lsdvd's title numbers are the stamp's `disc_title`; job 83's whole and starts reproduced exactly; job 36's `E1` is `E2`–`E4` by length |
 
 ---
 
