@@ -475,8 +475,12 @@ Measured 2026-10-05:
   ffprobe's durations for job 28's five raw MKVs are each 0.50 s shorter, the
   0.5 s stub chapter MakeMKV dropped from each, and job 76's seven agree with
   its image within 0.06 s, or 0.50 s on the one whose stub was dropped (E31).
-  An MKV left with one chapter lists none, so in *Confidence* an MKV with no
-  chapters counts as one.
+  Chapter by chapter it is closer still: MakeMKV's chapters start within
+  0.10 s of the image's, on job 76's two-hour title and job 28's feature, and
+  HandBrake's within 0.21 s, where IFO time drifts to 7.7 s and 5.0 s by the
+  last chapter (E32). An MKV left with one chapter lists none. The table above
+  sets lsdvd against ARM's track table, which is no MKV's length: 5549 s for a
+  feature whose MKV runs 5561.8 s. *Confidence* compares the MKVs themselves.
 
 So the fold is: ARM's transcode becomes the film (Will's call: newer, current
 conventions); the ISO becomes `raw/SHREK_THE_THIRD […]/`; ARM's five raw MKVs
@@ -760,7 +764,7 @@ read as a test case.
 | episode N | the LLM matcher assigns it with high confidence **and** an independent signal agrees (the TF-IDF baseline's assignment, the reference runtime, or the case photo's episode list) **and** the season assignment is one-to-one with no duplicates | review the disc's whole mapping |
 | filing into an existing folder (case 9) | the existing entry is the same work by TMDB ID **and** every role below resolves by its own rule | review the whole fold |
 | … which transcode is the film | same cut (fingerprint coverage ≥ 90%, lengths within 1%) **and** the newer is encoded from a source of equal or higher resolution → keep the newer, current-preset transcode (Will, 2026-10-05) | a different cut is an edition (case 5), not a replacement; a newer transcode from a *lower*-resolution source (a DVD rip beside a Blu-ray one) → review |
-| … which raw survives | a decrypted full-disc image (ISO, `VIDEO_TS`, `BDMV`) whose long-title list matches the per-title MKVs (each length within 3 s, chapters within 1) is a superset of them → keep the image, drop the MKVs. A stamped DVD folder whose `complete` is `true` and whose every file in `titles/` is in its `extracted` → keep the image and the stamp, drop `titles/`. Two raws of different discs (a DVD and a Blu-ray of one film) are both kept, each in its own `raw/<disc>/` | review |
+| … which raw survives | a decrypted full-disc image (ISO, `VIDEO_TS`, `BDMV`) of the same disc (`crc_id`, or for an image without one its label) holding, for each per-title MKV, a title whose chapters start within 0.25 s of the MKV's (by ffprobe; an MKV with none has one, at 0) and whose length is within 0.25 s of the MKV's, the title allowed one final chapter of ≤ 1 s more than the MKV, the stub MakeMKV drops, and its length then taken without it, is a superset of them → keep the image, drop the MKVs. Structure can't tell two pressings with the same edit apart, a widescreen and a full-screen one, which is why disc identity comes first (*Case 9*). A stamped DVD folder whose `complete` is `true` and whose every file in `titles/` is in its `extracted` → keep the image and the stamp, drop `titles/`. Two raws of different discs (a DVD and a Blu-ray of one film) are both kept, each in its own `raw/<disc>/` | review |
 
 **The episode matcher.** Whisper transcripts from two windows per episode (to
 survive a cold open or recap), plus reference text from several sources, given
@@ -1099,6 +1103,7 @@ All read-only against the cluster and the share. Artefacts in
 | E29 | 10-08 | Inspect documentation | datasets, solvers, scorers, epochs, caching, multi-provider; reducers not exercised |
 | E30 | 10-20 | E19's four fingerprints retaken inside the reelbarrow pod; fpcalc on a deliberately truncated file | two of E19's were short; complete ones match the frame-count formula exactly and E19's figures stand; fpcalc reports the container's duration for a truncated file |
 | E31 | 10-28 | lsdvd over job 76's and 77's images and the Shrek ISO's IFOs, against ffprobe of job 76's `titles/` and job 28's raw MKVs; job 83's playlists and job 76's cells through `reelbarrow.analysis.segments`; ffprobe of job 36's raw | NTSC IFO lengths are 0.1% short, and scaled agree within 0.06 s bar dropped 0.5 s stubs; lsdvd's title numbers are the stamp's `disc_title`; job 83's whole and starts reproduced exactly; job 36's `E1` is `E2`–`E4` by length |
+| E32 | 10-28 | ffprobe chapters of job 76's `B1_t00` and its transcode, and job 28's raw feature and its transcode, against their images' chapter starts | MakeMKV's within 0.10 s of the scaled starts, HandBrake's within 0.21 s; unscaled, 7.7 s and 5.0 s off by the last chapter |
 
 ---
 
