@@ -13,7 +13,7 @@
 - **The executor**: the single choke point for every write, rename and delete
   under the video root, which refuses all of them while `dry_run` is true. Add the
   test that no other module writes there (see *Rules that protect the library*
-  in `CLAUDE.md`).
+  in `AGENTS.md`).
 - **Order**: renames on the same filesystem, then sidecars, then leftover
   deletion, then the ledger entry. Then a Plex partial scan of the touched folder
   (`/library/sections/{id}/refresh?path=…`), because Plex's own change detection

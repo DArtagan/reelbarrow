@@ -4,7 +4,7 @@ One self-contained spec per step, each meant to be opened cold in its own
 session. A file here means the work has not been done. When it is, its permanent
 facts go into `docs/`, the spec is deleted, and
 [`docs/project_log.md`](../docs/project_log.md) gets a line. See *Project
-workflow* in [`CLAUDE.md`](../CLAUDE.md).
+workflow* in [`AGENTS.md`](../AGENTS.md).
 
 The design every spec builds on is [`docs/design.md`](../docs/design.md). Specs
 name the sections they depend on rather than restating them.

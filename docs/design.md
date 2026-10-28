@@ -5,7 +5,7 @@ video library that Plex reads: films and episodes identified, raw disc copies ke
 beside their transcodes, sidecars written, leftovers tidied.
 
 This design was worked out from 2026-10-03 to 10-08 in the deployment
-repository's spec for this project (see *The deployment half* in `CLAUDE.md`),
+repository's spec for this project (see *The deployment half* in `AGENTS.md`),
 and moved here on 2026-10-18, when this repository was created. It was verified against ARM `2.24.4`, Plex `1.43.4`, and the
 share as it stood on those dates, unless a passage says otherwise. All of that
 work was read-only: no file under `media/video` was moved or written.
