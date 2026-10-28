@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "job_id": 84,
+  "label": "DOWNTON_ABBEY_2_D1",
+  "disctype": "bluray",
+  "crc_id": null,
+  "stage": "179306029568",
+  "start_time": "2026-10-27T00:18:15.720212+00:00",
+  "complete": true,
+  "problems": [],
+  "title_map": [
+    {
+      "playlist": "00001.mpls",
+      "handbrake_title": 2
+    },
+    {
+      "playlist": "00002.mpls",
+      "handbrake_title": 3
+    },
+    {
+      "playlist": "00003.mpls",
+      "handbrake_title": 4
+    },
+    {
+      "playlist": "00006.mpls",
+      "handbrake_title": 6
+    }
+  ],
+  "duplicates": {
+    "skipped": [
+      {
+        "handbrake_title": 6,
+        "playlist": "00006.mpls",
+        "reason": "plays titles 2, 3, 4 in turn"
+      }
+    ],
+    "wholes": [
+      {
+        "handbrake_title": 6,
+        "playlist": "00006.mpls",
+        "kept": "parts",
+        "interleaved": false,
+        "parts": [
+          {
+            "handbrake_title": 2,
+            "playlist": "00001.mpls",
+            "start": 0.0
+          },
+          {
+            "handbrake_title": 3,
+            "playlist": "00002.mpls",
+            "start": 4149.979
+          },
+          {
+            "handbrake_title": 4,
+            "playlist": "00003.mpls",
+            "start": 7467.835
+          }
+        ]
+      }
+    ]
+  }
+}

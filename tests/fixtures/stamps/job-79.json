@@ -8,5 +8,42 @@
   "start_time": "2026-10-23T13:18:55.879352+00:00",
   "complete": true,
   "problems": [],
-  "extracted": null
+  "title_map": [
+    {
+      "playlist": "00800.mpls",
+      "handbrake_title": 57
+    },
+    {
+      "playlist": "01223.mpls",
+      "handbrake_title": 72
+    },
+    {
+      "playlist": "01224.mpls",
+      "handbrake_title": 73
+    },
+    {
+      "playlist": "01226.mpls",
+      "handbrake_title": 75
+    },
+    {
+      "playlist": "01227.mpls",
+      "handbrake_title": 76
+    },
+    {
+      "playlist": "01228.mpls",
+      "handbrake_title": 77
+    },
+    {
+      "playlist": "01234.mpls",
+      "handbrake_title": 83
+    },
+    {
+      "playlist": "01235.mpls",
+      "handbrake_title": 84
+    },
+    {
+      "playlist": "01236.mpls",
+      "handbrake_title": 85
+    }
+  ]
 }
