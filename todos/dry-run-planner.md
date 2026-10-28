@@ -69,12 +69,15 @@ manifest changes.
   fingerprint, since only MKVs survive. Job 36 has to keep `E1`'s transcode and
   drop those of `E2`–`E4`. Placing a part by fingerprint within the 1 s a
   chapter join allows is unmeasured; measure it on job 36 first.
-- **A DVD whole's `start` in a stamp is IFO time.** The deployment's ARM reads
-  it from lsdvd's lengths unscaled (its code as of 2026-10-28), so on NTSC it
-  is 0.1% early against the transcode, where reelbarrow's measurements are in
-  playback seconds (*Case 9*). No stamp on the share has a DVD whole yet.
-  Scale it on reading, or have the deployment scale it before the first one,
-  and say which here.
+- **A DVD whole's `start` is in playback seconds once the deployment scales
+  it** (Will, 2026-10-28: the deployment scales, not the reader). Until then
+  its ARM places DVD parts from lsdvd's unscaled lengths, 0.1% early on NTSC.
+  The fix is in the deployment's disc-ripping review and, run over job 76's
+  real lsdvd output, gives the starts `analysis.segments` does. No stamp on
+  the share has a DVD whole yet, so none needs rewriting, provided the fix is
+  deployed before the *Robin Hood* bonus DVD's re-rip. Check that it was
+  before trusting that stamp's starts: they should sit within 0.25 s of its
+  transcode's chapters.
 - A movie's feature arrives as `title_N.mkv` above `extras/` once the
   deployment stops ARM renaming it, and as `<Title (Year)>.mkv` before. Intake
   takes neither name, nor the placement, as the identification.

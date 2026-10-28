@@ -298,7 +298,8 @@ later renames only the completed folder. Job 76's, shortened:
   transcode nor an incomplete copy. `wholes` lists each title that two or more
   disjoint others play between them: `kept` (`parts`, `whole` or `both`),
   `interleaved`, and its `parts`, each with `start`, the second of the whole at
-  which it begins. A series keeps the parts, so a play-all is skipped. A movie
+  which it begins, in the playback time its transcode's chapters keep, a DVD's
+  as a Blu-ray's (*Case 9*). A series keeps the parts, so a play-all is skipped. A movie
   disc keeps a whole whose parts follow one another with a chapter at each
   join, a documentary in parts, and skips the parts; its transcode has a
   keyframe at each chapter, so a part can be cut out at `start` without
