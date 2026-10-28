@@ -1,8 +1,9 @@
 """The title structure of a DVD image or VIDEO_TS directory.
 
-This is the identity check for images. pydvdid hashes file timestamps, and an
-image re-authored from a disc restamps every file, so its CRC never matches
-the pressed disc's. The lengths and chapter counts of its titles do.
+This is the identity check for an image whose `crc_id` no stamp carries.
+pydvdid hashes file timestamps, and an image re-authored from a disc restamps
+every file, so its CRC never matches the pressed disc's. The lengths and
+chapter counts of its titles do.
 """
 
 import re
@@ -22,7 +23,8 @@ _CHAPTER = re.compile(r"^\tChapter: (\d+), Length: (\d+):(\d+):([\d.]+),")
 
 @dataclass(frozen=True, slots=True)
 class DvdTitle:
-    number: int
+    # The DVD's own title number, the one the stamp calls `disc_title`.
+    disc_title: int
     duration: float
     # The length of each chapter, in order.
     chapters: tuple[float, ...]
