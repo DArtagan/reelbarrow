@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.1](https://github.com/DArtagan/reelbarrow/compare/v0.2.0...v0.2.1) (2026-10-28)
+
+
+### Documentation
+
+* **design:** name the stamp's fields for their numbering ([a9a3dac](https://github.com/DArtagan/reelbarrow/commit/a9a3dac17387049f6c8c79d81af60fcb3008096b))
+* **design:** name the stamp's title map by its field, `extracted` ([bb867c8](https://github.com/DArtagan/reelbarrow/commit/bb867c8a5e603f5a9c8e996dfed9047de007c6df))
+* **design:** pair raw folders by the deployment's job stamp ([df3fb71](https://github.com/DArtagan/reelbarrow/commit/df3fb71ae98fef3d89f7a227349952c3a8797a24))
+* **design:** pair raw folders by the deployment's job stamp ([b418158](https://github.com/DArtagan/reelbarrow/commit/b4181583583db1332d9b7b2eebb74bb7228b4532))
+* **design:** read the stamp's duplicates and ARM's unrenamed feature ([c8e745d](https://github.com/DArtagan/reelbarrow/commit/c8e745daeed1d0fbf1fb9dbb20ea812a49060116))
+* **design:** state the stamp's evolution rule and what `ripped` means ([62a20ce](https://github.com/DArtagan/reelbarrow/commit/62a20cecc8a13fd758467b57dbb8518c1eece918))
+* fix references left by the AGENTS.md rename and the stamp field ([ad5da0f](https://github.com/DArtagan/reelbarrow/commit/ad5da0ffb07fde252b3055750b9b141b11dd38c5))
+* point references to CLAUDE.md at AGENTS.md ([643f622](https://github.com/DArtagan/reelbarrow/commit/643f622f0195f9f57af431728af60061a28aab51))
+
 ## [0.2.0](https://github.com/DArtagan/reelbarrow/compare/v0.1.1...v0.2.0) (2026-10-20)
 
 
