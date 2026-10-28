@@ -40,7 +40,12 @@ The stamps already frozen are in `tests/fixtures/stamps/` (jobs 76–80, 82,
 table predates the stamp, so they are the only stamped cases. A job's own
 fixture copies its stamp from there rather than freezing a second one. The
 first movie disc with `duplicates`, the *Robin Hood* bonus DVD's re-rip, joins
-them once it has run.
+them once it has run, and so does the first Blu-ray stamp with `playlists`.
+
+A Blu-ray job's title map comes from the manifest export, which reads it from
+the job's log (*arm-manifest-hook*). For *The Rescuers* job 27 that log is the
+only record, so its fixture needs the export, or the copy in
+`captures/arm-logs/`, before the log runs out in December.
 
 A `reelbarrow analyse <path> --out <dir>` command that does this in the pod is
 probably the right shape, and the planner's own intake will want it anyway.

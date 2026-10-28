@@ -18,7 +18,11 @@ plan, gate. Step 7, file, is [movie-filing](movie-filing.md).
   matching names.
 - **Classify** sorts each title into one of: feature, episode, play-all, extra,
   exact duplicate, other cut, other work. It pairs transcodes with raw by the
-  stamp's title map where there is one, otherwise by fingerprint.
+  raw's form, as *Confidence* (a transcode is raw title X) and the flowchart
+  under *Identity* lay out: the stamp's or the job log's map confirmed by
+  structure, structure alone where there is no map, and fingerprints only
+  where structure can't decide. Job 79 is the case that has to go to review,
+  or be decided by its map: featurette variants that share their clips.
 - **Identify films**: ARM's IMDb ID → TMDB, checked against the feature's runtime
   (±3% to start). TV episodes are left unresolved and planned as review; that is
   [episode-matching](episode-matching.md).
