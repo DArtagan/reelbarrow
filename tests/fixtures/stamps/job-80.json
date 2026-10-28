@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "job_id": 80,
+  "label": "DOWNTON_ABBEY_D1",
+  "disctype": "bluray",
+  "crc_id": null,
+  "stage": "179280640613",
+  "start_time": "2026-10-24T01:46:46.200578+00:00",
+  "complete": true,
+  "problems": [],
+  "extracted": null
+}

@@ -28,9 +28,17 @@ jobs that form the acceptance test.
 ## What to capture, per job
 
 ffprobe JSON for every file in its completed and transcode directories and its
-raw candidates; video MD5s; fingerprints; Blu-ray hashes; the manifest. Store
-them under `tests/fixtures/<job>/` in a layout the planner can load as if it
-were the share.
+raw candidates; video MD5s; fingerprints; Blu-ray hashes; the manifest; and the
+raw folder's `arm-job.json` where it has one. Store them under
+`tests/fixtures/<job>/` in a layout the planner can load as if it were the
+share.
+
+The stamps already frozen are in `tests/fixtures/stamps/` (jobs 76–80, 82,
+83), with the contract test that holds them. Every job in the fixtures
+table predates the stamp, so they are the only stamped cases. A job's own
+fixture copies its stamp from there rather than freezing a second one. The
+first movie disc with `duplicates`, the *Robin Hood* bonus DVD's re-rip, joins
+them once it has run.
 
 A `reelbarrow analyse <path> --out <dir>` command that does this in the pod is
 probably the right shape, and the planner's own intake will want it anyway.

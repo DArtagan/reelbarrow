@@ -13,11 +13,12 @@
 Steps 1–6 of the pipeline in *The service*: intake, analyse, classify, identify,
 plan, gate. Step 7, file, is [movie-filing](movie-filing.md).
 
-- **Intake** reads a manifest and finds the job's directories by its `path`,
-  never by matching names.
+- **Intake** reads a manifest and finds the job's completed directory by its
+  `path` and its raw folder by the stamp carrying its `job_id`, never by
+  matching names.
 - **Classify** sorts each title into one of: feature, episode, play-all, extra,
-  exact duplicate, other cut, other work. It pairs transcodes with raw by
-  fingerprint.
+  exact duplicate, other cut, other work. It pairs transcodes with raw by the
+  stamp's title map where there is one, otherwise by fingerprint.
 - **Identify films**: ARM's IMDb ID → TMDB, checked against the feature's runtime
   (±3% to start). TV episodes are left unresolved and planned as review; that is
   [episode-matching](episode-matching.md).
@@ -41,6 +42,22 @@ manifest changes.
   lands. A name the share would reject with `EIO` is a
   planning error to catch here, not at filing time.
 - The thresholds are starting points, and the evaluation sets them.
+- Every job in the fixtures table predates the stamp (*The raw folder's stamp*),
+  so the table exercises only fingerprint pairing. The stamped path needs a case
+  of its own. Job 76, *Pinky and the Brain* D2, is the first stamped DVD, and
+  job 75 ripped the same disc the day before without a stamp, so the two give
+  both paths on one disc. Job 76's title map was filled in after the job, and
+  matches job 77's, a re-rip of the same disc that wrote its own.
+- A stamp's `duplicates` (*The raw folder's stamp*) means a title can be absent
+  from `completed/` on purpose. Read it before calling a job's output
+  incomplete. Downton Abbey gives both paths on one series: job 80 (D1) predates
+  `duplicates` and transcoded its 207-minute play-all, and job 83 (D2) skipped
+  its 157-minute one and recorded the episodes' starts. Its first movie-disc
+  case, a whole kept and its parts skipped, is the *Robin Hood* bonus DVD's
+  re-rip, which hasn't run as of 2026-10-26.
+- A movie's feature arrives as `title_N.mkv` above `extras/` once the
+  deployment stops ARM renaming it, and as `<Title (Year)>.mkv` before. Intake
+  takes neither name, nor the placement, as the identification.
 
 ## Secrets
 

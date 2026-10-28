@@ -10,8 +10,8 @@
 
 ## Why it lives here (decided 2026-10-19)
 
-The manifest is the one interface between ARM and reelbarrow, so the script that
-writes it ships with reelbarrow and every user runs the same one. Will agreed
+The manifest is how reelbarrow learns of ARM's jobs, so the script that writes it
+ships with reelbarrow and every user runs the same one. Will agreed
 with this split:
 
 - **Here:** the manifest writer, its schema, and its tests.
@@ -55,11 +55,20 @@ with this split:
 - **Version the schema** with a top-level `"schema": 1`, so reelbarrow's intake
   can refuse a manifest it does not understand rather than misread it. Contents
   are as *The ARM manifest* lists: the job row (title, year, IMDb ID, video type,
-  label, disc type, `crc_id`, status, `path`) and its track rows.
+  label, disc type, `crc_id`, status, `path`) and its track rows, exported as
+  ARM holds them. `ripped` is not "transcoded" (*The ARM manifest*): don't
+  reinterpret it here, so intake reads one meaning however the deployment
+  sets it.
 - **An export mode** (for example `--all`) writes manifests for every job
   already in the database. Jobs 1–41 predate the hook, and
   [fixtures](fixtures.md) needs their manifests. Run it against a copy of the
   database, not the live one.
+- **The manifest doesn't say which raw folder is the job's**, because ARM's
+  database records no raw path. The deployment's ARM writes that into the raw
+  folder instead, as `arm-job.json` (*The raw folder's stamp* in the design), and
+  intake joins the two on `job_id`. So this script needn't look for raw at all,
+  and shouldn't guess it from names. The stamp has its own `schema`, separate
+  from the manifest's.
 - **Fail loudly and never block ARM.** If no row matches the pid, log it and exit
   non-zero. Check in ARM's source what it does with a hook's exit status, so a
   failure here cannot stop a rip or another site's handoff.
