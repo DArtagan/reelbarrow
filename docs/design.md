@@ -285,9 +285,20 @@ later renames only the completed folder. Job 76's, shortened:
   main-feature flag or the largest file, and is often wrong on a bonus disc;
   the feature is decided here. Earlier jobs renamed it `<Title (Year)>.mkv`, so on a
   DVD the feature's number is the one missing among the transcodes, and on a
-  Blu-ray nothing on the share records it. `extracted` is null for a Blu-ray, whose
-  transcodes are made from `BDMV/` directly, and for a DVD whose job failed
-  before extraction finished.
+  Blu-ray only ARM's job log records it, for its 90 days. `extracted` is null for
+  a Blu-ray, whose transcodes are made from `BDMV/` directly, and for a DVD whose
+  job failed before extraction finished. Its `length` is MakeMKV's duration,
+  each kept cell's IFO length rounded down to a whole second and summed, so
+  short of what plays by up to a second a cell plus 0.1%: 22.8 s on job 76's
+  30-cell title (E33). It names a title's length and doesn't measure it; the
+  image does.
+- **`playlists`**, for a Blu-ray, maps each `handbrake_title` HandBrake was
+  given to the `playlist` it plays, from the scan the deployment's duplicate
+  check runs. Lengths can't recover it: four of job 79's featurettes come in
+  variants 1–3 s apart that share 99–100% of their clips, and nearest length
+  paired `title_76` with the playlist that made `title_84` (E34). A Blu-ray stamp
+  without it predates it. For such a job, ARM's job log holds the same pairs
+  for its 90 days, a `+ playlist:` line after each `Transcoding title N`.
 - **`duplicates`**, from job 83 (2026-10-26), records the titles ARM chose not
   to transcode because other titles already play them, compared by what each
   plays from the disc (a Blu-ray playlist's clips and times, a DVD title's
@@ -496,6 +507,47 @@ on a throwaway item.
 ---
 
 ## Identity: what is this disc, and what is this title
+
+From whatever arrives to a filed or reviewed plan. Each box's rule, and its
+threshold, is in the section it names; *Confidence* holds the bars.
+
+```mermaid
+flowchart TD
+  arm["ARM job: its manifest, completed/ by its path,<br/>the raw folder whose stamp has its job_id"]
+  backlog["Backlog folder: no manifest,<br/>a title supplied by hand"]
+  raw{"What raw is there?<br/>What a raw folder holds"}
+  arm --> raw
+  backlog --> raw
+  raw -->|DVD image and stamp| pIso["Pair by the stamp's extracted,<br/>confirmed by the image title's chapters"]
+  raw -->|DVD MKVs, no stamp| pMkv["Pair each transcode with its source MKV:<br/>equal length and chapters"]
+  raw -->|Blu-ray BDMV| pBd["Pair by the stamp's playlists or the job log;<br/>else length and chapters, one to one"]
+  raw -->|none usable| pNone["Nothing to pair:<br/>the transcode is the only copy"]
+  pIso -.->|image unreadable| pMkv
+  pIso & pMkv & pBd -.->|ambiguous| pFp["Pair by fingerprint;<br/>shared audio goes to review"]
+  roles["Each title's role, Title identity:<br/>MD5 duplicate, whole or part, other cut, other work, extra"]
+  pIso & pMkv & pBd & pFp & pNone --> roles
+  disc{"Which disc? Disc identity"}
+  roles --> disc
+  disc -->|DVD| dDvd["crc_id from the manifest or stamp;<br/>an image without one: label and structure"]
+  disc -->|Blu-ray| dBd["nav hash"]
+  disc -->|no raw| dNone["none: the work's identity stands alone"]
+  work{"Which work?"}
+  dDvd & dBd & dNone --> work
+  work -->|film| film["IMDb ID or the supplied title to TMDB:<br/>one title within 3% of its runtime"]
+  work -->|series| series["transcripts to the episode matcher,<br/>and an independent signal"]
+  film -.->|no title near the runtime| bonus["a bonus disc? review"]
+  film -.->|the feature far short| split["one film across discs: hold"]
+  gate{"Gate: Confidence"}
+  film & series --> gate
+  gate -->|every decision meets its bar| filed["file"]
+  gate -->|any falls short| review["review the whole plan"]
+```
+
+The raw copy is needed only to pair, to place wholes and parts by structure, and
+to identify a disc no ARM job vouches for. Where it is missing, each of those
+falls back as the chart shows, and the work is identified from its transcodes
+alone. A stamped DVD job with transcodes had a complete image when it ran,
+since a backup that fails its check stops the job before transcoding.
 
 ### Disc identity
 
@@ -758,7 +810,7 @@ read as a test case.
 | … which of a whole and its parts is kept | as the deployment's ARM decides (Will, 2026-10-28): a series keeps the parts, and the whole's transcode is a leftover; a movie disc keeps the whole when each part after the first starts within 1 s of one of its chapters and the parts follow one another, and the parts' transcodes are leftovers; parts that interleave are kept, and the whole's transcode is a leftover | keep both |
 | a file is a duplicate | identical video MD5 to a file being kept | not a duplicate |
 | best copy | rule 1: identical MD5 → keep the earliest successful job's. Rule 2: same disc identity, one copy incomplete (failed job, a stamp whose `complete` isn't `true`, missing files other than titles the stamp's `duplicates` skipped, decoded length short of the track table) → keep the complete one | ask — never choose by size or bitrate |
-| a transcode is raw title X | the raw folder's stamp pairs them (`handbrake_title`) **and** their lengths agree within 1% (MakeMKV's and HandBrake's differed by at most 0.3% on job 76) | pair by fingerprint |
+| a transcode is raw title X | by the raw's form. **DVD image:** the stamp's `extracted` pairs them **and** the image's `disc_title` matches the transcode as in *which raw survives*. **DVD MKVs:** the MKV, which is the transcode's source, matches it in length and chapters within 0.25 s, one to one. **Blu-ray:** the stamp's `playlists`, or the job log's pairs, pair them **and** the transcode is 0–1.1 s shorter than the playlist or up to 0.1 s longer, its chapters within 0.75 s; with neither, that fit assigned one to one, playlists playing the same clips counting as one (E34). The stamp's `length` is never the measure (E33) | pair by fingerprint; candidates that share their audio, as featurette variants do, → review |
 | a title is an extra of film X | shorter than the feature, not another cut or another work (fingerprint), from a disc identified as X or as X's bonus disc | review |
 | two cuts of one film | fingerprint coverage ≥ 90% with a monotonic offset | edition **labels** always need a source — the case photo, or TMDB/IMDb release data naming those exact runtimes |
 | a bonus disc | no title near the film's runtime **and** the disc says so (label, embedded disc name, or the case photo) | review — otherwise indistinguishable from a misidentified disc |
@@ -1105,6 +1157,8 @@ All read-only against the cluster and the share. Artefacts in
 | E30 | 10-20 | E19's four fingerprints retaken inside the reelbarrow pod; fpcalc on a deliberately truncated file | two of E19's were short; complete ones match the frame-count formula exactly and E19's figures stand; fpcalc reports the container's duration for a truncated file |
 | E31 | 10-28 | lsdvd over job 76's and 77's images and the Shrek ISO's IFOs, against ffprobe of job 76's `titles/` and job 28's raw MKVs; job 83's playlists and job 76's cells through `reelbarrow.analysis.segments`; ffprobe of job 36's raw | NTSC IFO lengths are 0.1% short, and scaled agree within 0.06 s bar dropped 0.5 s stubs; lsdvd's title numbers are the stamp's `disc_title`; job 83's whole and starts reproduced exactly; job 36's `E1` is `E2`–`E4` by length |
 | E32 | 10-28 | ffprobe chapters of job 76's `B1_t00` and its transcode, and job 28's raw feature and its transcode, against their images' chapter starts | MakeMKV's within 0.10 s of the scaled starts, HandBrake's within 0.21 s; unscaled, 7.7 s and 5.0 s off by the last chapter |
+| E33 | 10-28 | MakeMKV `info` over job 76's image; ARM's `convert_to_seconds`; ffprobe of job 76's and job 28's transcodes against their MKVs | the stamp's `length` is MakeMKV's, Σ⌊cell⌋ in IFO time over the cells it keeps, exact on all 7 of job 76's titles and all 5 of Shrek's; a transcode's length equals its MKV's to the millisecond, chapters within 0.13 s |
+| E34 | 10-28 | ffprobe of jobs 78, 79, 80 and 83's 21 transcodes against their playlists; job 79's job log; every Blu-ray job log's title-to-playlist lines | transcodes run 1.0 s shorter to 0.05 s longer than their playlist, chapters within 0.67 s; 17 of 21 unambiguous by length; job 79's variants share their clips and nearest length mispaired `title_76`; 14 of 19 Blu-ray jobs still have their logs, jobs 5–9's are gone |
 
 ---
 
