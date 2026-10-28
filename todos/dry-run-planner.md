@@ -55,6 +55,26 @@ manifest changes.
   its 157-minute one and recorded the episodes' starts. Its first movie-disc
   case, a whole kept and its parts skipped, is the *Robin Hood* bonus DVD's
   re-rip, which hasn't run as of 2026-10-26.
+- **Where no stamp's `duplicates` decided it, the planner decides wholes and
+  parts itself, by the deployment's rule** (Will, 2026-10-28; *Confidence*, which
+  of a whole and its parts is kept). Port the decision from
+  `_arm_duplicates` in the deployment's ARM patches, its thresholds and its
+  final pass that unskips until every skipped title is played by those kept,
+  with its tests as the model. The measurements are already here:
+  `analysis.segments` over `bluray_playlists` and `dvd_structure`'s cells
+  (*Title identity* 4), checked against job 83's recorded result. The cases,
+  one per path: job 80 (Blu-ray, before `duplicates`, its play-all
+  transcoded) and job 76 (a DVD image whose stamp predates `duplicates`; disc
+  title 1 plays titles 4–9) by structure; *Robin Hood* job 36 and Tweety by
+  fingerprint, since only MKVs survive. Job 36 has to keep `E1`'s transcode and
+  drop those of `E2`–`E4`. Placing a part by fingerprint within the 1 s a
+  chapter join allows is unmeasured; measure it on job 36 first.
+- **A DVD whole's `start` in a stamp is IFO time.** The deployment's ARM reads
+  it from lsdvd's lengths unscaled (its code as of 2026-10-28), so on NTSC it
+  is 0.1% early against the transcode, where reelbarrow's measurements are in
+  playback seconds (*Case 9*). No stamp on the share has a DVD whole yet.
+  Scale it on reading, or have the deployment scale it before the first one,
+  and say which here.
 - A movie's feature arrives as `title_N.mkv` above `extras/` once the
   deployment stops ARM renaming it, and as `<Title (Year)>.mkv` before. Intake
   takes neither name, nor the placement, as the identification.
