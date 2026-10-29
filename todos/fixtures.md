@@ -36,12 +36,12 @@ it has one. Store them under `tests/fixtures/<job>/` in a layout the planner can
 load as if it were the share.
 
 The stamps frozen are in `tests/fixtures/stamps/`, every one on the share as
-it stood on 2026-10-28: those ARM wrote (jobs 76–80, 82–86) and those the
-deployment backfilled (jobs 7, 8, 23, 25 and 27, among them *The Rescuers* job
-27 of the fixtures table), with the contract test that holds them. A job's own
-fixture copies its stamp from there rather than freezing a second one. The
-first movie disc with `duplicates`, the *Robin Hood* bonus DVD's re-rip, joins
-them once it has run.
+it stood on 2026-10-29: those ARM wrote (jobs 76–80 and 82–87, job 87 being
+the *Robin Hood* bonus DVD's re-rip, the first movie disc with `duplicates`)
+and those the deployment backfilled (jobs 7, 8, 23, 25 and 27, among them
+*The Rescuers* job 27 of the fixtures table), with the contract test that
+holds them. A job's own fixture copies its stamp from there rather than
+freezing a second one.
 
 A `reelbarrow analyse <path> --out <dir>` command that does this in the pod is
 probably the right shape, and the planner's own intake will want it anyway.

@@ -334,8 +334,8 @@ later renames only the completed folder. Job 76's, shortened:
 Real stamps are test fixtures, `tests/fixtures/stamps/`, with a test holding
 each rule above against them. A change to the stamp brings a fixture.
 
-ARM writes it from job 76 on: DVD jobs 76 and 77 and Blu-ray jobs 78–80 and
-82–86 by 2026-10-28. A raw folder from before then has one only where it holds
+ARM writes it from job 76 on: DVD jobs 76, 77 and 87 and Blu-ray jobs 78–80
+and 82–86 by 2026-10-29. A raw folder from before job 76 has one only where it holds
 the whole disc and is provably its job's, by its `_<stage>` suffix or the job's
 own log, written afterwards by the deployment from ARM's database and that log:
 Blu-ray jobs 7, 8, 23, 25 and 27. Such a stamp has no `duplicates`, as its job
