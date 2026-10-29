@@ -1,0 +1,741 @@
+{
+  "streams": [
+    {
+      "index": 0,
+      "codec_name": "av1",
+      "codec_long_name": "Alliance for Open Media AV1",
+      "profile": "Main",
+      "codec_type": "video",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "width": 720,
+      "height": 354,
+      "coded_width": 720,
+      "coded_height": 354,
+      "closed_captions": 0,
+      "film_grain": 0,
+      "has_b_frames": 0,
+      "sample_aspect_ratio": "32:27",
+      "display_aspect_ratio": "1280:531",
+      "pix_fmt": "yuv420p10le",
+      "level": 1,
+      "color_range": "tv",
+      "color_space": "smpte170m",
+      "color_transfer": "smpte170m",
+      "color_primaries": "smpte170m",
+      "chroma_location": "left",
+      "refs": 1,
+      "r_frame_rate": "24000/1001",
+      "avg_frame_rate": "24000/1001",
+      "time_base": "1/1000",
+      "start_pts": 0,
+      "start_time": "0.000000",
+      "extradata_size": 20,
+      "disposition": {
+        "default": 1,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "DURATION": "02:20:30.801000000"
+      }
+    },
+    {
+      "index": 1,
+      "codec_name": "opus",
+      "codec_long_name": "Opus (Opus Interactive Audio Codec)",
+      "codec_type": "audio",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "sample_fmt": "fltp",
+      "sample_rate": "48000",
+      "channels": 2,
+      "channel_layout": "stereo",
+      "bits_per_sample": 0,
+      "initial_padding": 312,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "extradata_size": 19,
+      "disposition": {
+        "default": 1,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "eng",
+        "title": "Surround 5.1",
+        "DURATION": "02:20:30.801000000"
+      }
+    },
+    {
+      "index": 2,
+      "codec_name": "opus",
+      "codec_long_name": "Opus (Opus Interactive Audio Codec)",
+      "codec_type": "audio",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "sample_fmt": "fltp",
+      "sample_rate": "48000",
+      "channels": 6,
+      "channel_layout": "5.1",
+      "bits_per_sample": 0,
+      "initial_padding": 312,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "extradata_size": 27,
+      "disposition": {
+        "default": 0,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "eng",
+        "title": "Surround 5.1",
+        "DURATION": "02:20:30.801000000"
+      }
+    },
+    {
+      "index": 3,
+      "codec_name": "opus",
+      "codec_long_name": "Opus (Opus Interactive Audio Codec)",
+      "codec_type": "audio",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "sample_fmt": "fltp",
+      "sample_rate": "48000",
+      "channels": 2,
+      "channel_layout": "stereo",
+      "bits_per_sample": 0,
+      "initial_padding": 312,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "extradata_size": 19,
+      "disposition": {
+        "default": 0,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "spa",
+        "DURATION": "02:20:30.801000000"
+      }
+    },
+    {
+      "index": 4,
+      "codec_name": "opus",
+      "codec_long_name": "Opus (Opus Interactive Audio Codec)",
+      "codec_type": "audio",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "sample_fmt": "fltp",
+      "sample_rate": "48000",
+      "channels": 2,
+      "channel_layout": "stereo",
+      "bits_per_sample": 0,
+      "initial_padding": 312,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "extradata_size": 19,
+      "disposition": {
+        "default": 0,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "fre",
+        "DURATION": "02:20:30.801000000"
+      }
+    },
+    {
+      "index": 5,
+      "codec_name": "opus",
+      "codec_long_name": "Opus (Opus Interactive Audio Codec)",
+      "codec_type": "audio",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "sample_fmt": "fltp",
+      "sample_rate": "48000",
+      "channels": 2,
+      "channel_layout": "stereo",
+      "bits_per_sample": 0,
+      "initial_padding": 312,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "extradata_size": 19,
+      "disposition": {
+        "default": 0,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "eng",
+        "DURATION": "02:20:30.801000000"
+      }
+    },
+    {
+      "index": 6,
+      "codec_name": "dvd_subtitle",
+      "codec_long_name": "DVD subtitles",
+      "codec_type": "subtitle",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "width": 720,
+      "height": 480,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "duration_ts": 8430801,
+      "duration": "8430.801000",
+      "extradata_size": 511,
+      "disposition": {
+        "default": 1,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 1,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "eng",
+        "DURATION": "02:20:28.309000000"
+      }
+    },
+    {
+      "index": 7,
+      "codec_name": "dvd_subtitle",
+      "codec_long_name": "DVD subtitles",
+      "codec_type": "subtitle",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "width": 720,
+      "height": 480,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "duration_ts": 8430801,
+      "duration": "8430.801000",
+      "extradata_size": 511,
+      "disposition": {
+        "default": 0,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "spa",
+        "DURATION": "02:20:28.309000000"
+      }
+    },
+    {
+      "index": 8,
+      "codec_name": "dvd_subtitle",
+      "codec_long_name": "DVD subtitles",
+      "codec_type": "subtitle",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "width": 720,
+      "height": 480,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "duration_ts": 8430801,
+      "duration": "8430.801000",
+      "extradata_size": 511,
+      "disposition": {
+        "default": 0,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "fre",
+        "DURATION": "02:20:28.309000000"
+      }
+    },
+    {
+      "index": 9,
+      "codec_name": "dvd_subtitle",
+      "codec_long_name": "DVD subtitles",
+      "codec_type": "subtitle",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "width": 720,
+      "height": 480,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "duration_ts": 8430801,
+      "duration": "8430.801000",
+      "extradata_size": 511,
+      "disposition": {
+        "default": 0,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "spa",
+        "DURATION": "02:20:28.309000000"
+      }
+    },
+    {
+      "index": 10,
+      "codec_name": "dvd_subtitle",
+      "codec_long_name": "DVD subtitles",
+      "codec_type": "subtitle",
+      "codec_tag_string": "[0][0][0][0]",
+      "codec_tag": "0x0000",
+      "width": 720,
+      "height": 480,
+      "r_frame_rate": "0/0",
+      "avg_frame_rate": "0/0",
+      "time_base": "1/1000",
+      "start_pts": -7,
+      "start_time": "-0.007000",
+      "duration_ts": 8430801,
+      "duration": "8430.801000",
+      "extradata_size": 511,
+      "disposition": {
+        "default": 0,
+        "dub": 0,
+        "original": 0,
+        "comment": 0,
+        "lyrics": 0,
+        "karaoke": 0,
+        "forced": 0,
+        "hearing_impaired": 0,
+        "visual_impaired": 0,
+        "clean_effects": 0,
+        "attached_pic": 0,
+        "timed_thumbnails": 0,
+        "non_diegetic": 0,
+        "captions": 0,
+        "descriptions": 0,
+        "metadata": 0,
+        "dependent": 0,
+        "still_image": 0,
+        "multilayer": 0
+      },
+      "tags": {
+        "language": "fre",
+        "DURATION": "02:20:28.309000000"
+      }
+    }
+  ],
+  "chapters": [
+    {
+      "id": 1,
+      "time_base": "1/1000000000",
+      "start": 0,
+      "start_time": "0.000000",
+      "end": 690330000000,
+      "end_time": "690.330000",
+      "tags": {
+        "title": "Chapter 1"
+      }
+    },
+    {
+      "id": 2,
+      "time_base": "1/1000000000",
+      "start": 690330000000,
+      "start_time": "690.330000",
+      "end": 1071869000000,
+      "end_time": "1071.869000",
+      "tags": {
+        "title": "Chapter 2"
+      }
+    },
+    {
+      "id": 3,
+      "time_base": "1/1000000000",
+      "start": 1071869000000,
+      "start_time": "1071.869000",
+      "end": 1334140000000,
+      "end_time": "1334.140000",
+      "tags": {
+        "title": "Chapter 3"
+      }
+    },
+    {
+      "id": 4,
+      "time_base": "1/1000000000",
+      "start": 1334140000000,
+      "start_time": "1334.140000",
+      "end": 1829836000000,
+      "end_time": "1829.836000",
+      "tags": {
+        "title": "Chapter 4"
+      }
+    },
+    {
+      "id": 5,
+      "time_base": "1/1000000000",
+      "start": 1829836000000,
+      "start_time": "1829.836000",
+      "end": 2120459000000,
+      "end_time": "2120.459000",
+      "tags": {
+        "title": "Chapter 5"
+      }
+    },
+    {
+      "id": 6,
+      "time_base": "1/1000000000",
+      "start": 2120459000000,
+      "start_time": "2120.459000",
+      "end": 2672387000000,
+      "end_time": "2672.387000",
+      "tags": {
+        "title": "Chapter 6"
+      }
+    },
+    {
+      "id": 7,
+      "time_base": "1/1000000000",
+      "start": 2672387000000,
+      "start_time": "2672.387000",
+      "end": 3069241000000,
+      "end_time": "3069.241000",
+      "tags": {
+        "title": "Chapter 7"
+      }
+    },
+    {
+      "id": 8,
+      "time_base": "1/1000000000",
+      "start": 3069241000000,
+      "start_time": "3069.241000",
+      "end": 3524320000000,
+      "end_time": "3524.320000",
+      "tags": {
+        "title": "Chapter 8"
+      }
+    },
+    {
+      "id": 9,
+      "time_base": "1/1000000000",
+      "start": 3524320000000,
+      "start_time": "3524.320000",
+      "end": 3911548000000,
+      "end_time": "3911.548000",
+      "tags": {
+        "title": "Chapter 9"
+      }
+    },
+    {
+      "id": 10,
+      "time_base": "1/1000000000",
+      "start": 3911548000000,
+      "start_time": "3911.548000",
+      "end": 4440777000000,
+      "end_time": "4440.777000",
+      "tags": {
+        "title": "Chapter 10"
+      }
+    },
+    {
+      "id": 11,
+      "time_base": "1/1000000000",
+      "start": 4440777000000,
+      "start_time": "4440.777000",
+      "end": 4973309000000,
+      "end_time": "4973.309000",
+      "tags": {
+        "title": "Chapter 11"
+      }
+    },
+    {
+      "id": 12,
+      "time_base": "1/1000000000",
+      "start": 4973309000000,
+      "start_time": "4973.309000",
+      "end": 5324827000000,
+      "end_time": "5324.827000",
+      "tags": {
+        "title": "Chapter 12"
+      }
+    },
+    {
+      "id": 13,
+      "time_base": "1/1000000000",
+      "start": 5324827000000,
+      "start_time": "5324.827000",
+      "end": 5704707000000,
+      "end_time": "5704.707000",
+      "tags": {
+        "title": "Chapter 13"
+      }
+    },
+    {
+      "id": 14,
+      "time_base": "1/1000000000",
+      "start": 5704707000000,
+      "start_time": "5704.707000",
+      "end": 6106275000000,
+      "end_time": "6106.275000",
+      "tags": {
+        "title": "Chapter 14"
+      }
+    },
+    {
+      "id": 15,
+      "time_base": "1/1000000000",
+      "start": 6106275000000,
+      "start_time": "6106.275000",
+      "end": 6485654000000,
+      "end_time": "6485.654000",
+      "tags": {
+        "title": "Chapter 15"
+      }
+    },
+    {
+      "id": 16,
+      "time_base": "1/1000000000",
+      "start": 6485654000000,
+      "start_time": "6485.654000",
+      "end": 6839841000000,
+      "end_time": "6839.841000",
+      "tags": {
+        "title": "Chapter 16"
+      }
+    },
+    {
+      "id": 17,
+      "time_base": "1/1000000000",
+      "start": 6839841000000,
+      "start_time": "6839.841000",
+      "end": 7380714000000,
+      "end_time": "7380.714000",
+      "tags": {
+        "title": "Chapter 17"
+      }
+    },
+    {
+      "id": 18,
+      "time_base": "1/1000000000",
+      "start": 7380714000000,
+      "start_time": "7380.714000",
+      "end": 7640441000000,
+      "end_time": "7640.441000",
+      "tags": {
+        "title": "Chapter 18"
+      }
+    },
+    {
+      "id": 19,
+      "time_base": "1/1000000000",
+      "start": 7640441000000,
+      "start_time": "7640.441000",
+      "end": 7900499000000,
+      "end_time": "7900.499000",
+      "tags": {
+        "title": "Chapter 19"
+      }
+    },
+    {
+      "id": 20,
+      "time_base": "1/1000000000",
+      "start": 7900499000000,
+      "start_time": "7900.499000",
+      "end": 8430801000000,
+      "end_time": "8430.801000",
+      "tags": {
+        "title": "Chapter 20"
+      }
+    }
+  ],
+  "format": {
+    "filename": "/video/import/automatic-ripping-machine/completed/movies/Robin-Hood (2010)/extras/title_1.mkv",
+    "nb_streams": 11,
+    "nb_programs": 0,
+    "nb_stream_groups": 0,
+    "format_name": "matroska,webm",
+    "format_long_name": "Matroska / WebM",
+    "start_time": "-0.007000",
+    "duration": "8430.801000",
+    "size": "1593755999",
+    "bit_rate": "1512317",
+    "probe_score": 100,
+    "tags": {
+      "creation_time": "2026-09-21T03:48:14.000000Z",
+      "ENCODER": "Lavf62.3.102"
+    }
+  }
+}

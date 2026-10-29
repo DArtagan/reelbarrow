@@ -1,0 +1,145 @@
+lsdvd = {
+  'device' : 'synthetic.iso',
+  'title' : 'SYNTHETIC_DVD',
+  'vmg_id' : "DVDVIDEO-VMG",
+  'provider_id' : "DVDAuthor 0.7.2",
+  'track' : [
+    {
+      'ix' : 1,
+      'length' : 20.000,
+      'vts_id' : "DVDVIDEO-VTS",
+      'vts' : 1,
+      'ttn' : 1,
+      'fps' : 29.97,
+      'format' : 'NTSC',
+      'aspect' : '4/3',
+      'width' : 720,
+      'height' : 480,
+      'df' : '?',
+      'chapter' : [
+        {
+          'ix' : 1,
+          'length' : 4.800,
+          'startcell' : 1        },
+        {
+          'ix' : 2,
+          'length' : 5.400,
+          'startcell' : 2        },
+        {
+          'ix' : 3,
+          'length' : 4.800,
+          'startcell' : 3        },
+        {
+          'ix' : 4,
+          'length' : 5.000,
+          'startcell' : 4        }      ],
+      'cell' : [
+        {
+          'ix' : 1,
+          'length' : 4.800,
+          'first_sector' : 0,
+          'last_sector' : 340        },
+        {
+          'ix' : 2,
+          'length' : 5.400,
+          'first_sector' : 341,
+          'last_sector' : 690        },
+        {
+          'ix' : 3,
+          'length' : 4.800,
+          'first_sector' : 691,
+          'last_sector' : 970        },
+        {
+          'ix' : 4,
+          'length' : 5.000,
+          'first_sector' : 971,
+          'last_sector' : 1268        }      ]
+    },
+    {
+      'ix' : 2,
+      'length' : 44.967,
+      'vts_id' : "DVDVIDEO-VTS",
+      'vts' : 1,
+      'ttn' : 2,
+      'fps' : 29.97,
+      'format' : 'NTSC',
+      'aspect' : '4/3',
+      'width' : 720,
+      'height' : 480,
+      'df' : '?',
+      'chapter' : [
+        {
+          'ix' : 1,
+          'length' : 10.200,
+          'startcell' : 1        },
+        {
+          'ix' : 2,
+          'length' : 9.600,
+          'startcell' : 2        },
+        {
+          'ix' : 3,
+          'length' : 10.200,
+          'startcell' : 3        },
+        {
+          'ix' : 4,
+          'length' : 10.200,
+          'startcell' : 4        },
+        {
+          'ix' : 5,
+          'length' : 4.767,
+          'startcell' : 5        }      ],
+      'cell' : [
+        {
+          'ix' : 1,
+          'length' : 10.200,
+          'first_sector' : 1269,
+          'last_sector' : 1959        },
+        {
+          'ix' : 2,
+          'length' : 9.600,
+          'first_sector' : 1960,
+          'last_sector' : 2502        },
+        {
+          'ix' : 3,
+          'length' : 10.200,
+          'first_sector' : 2503,
+          'last_sector' : 3058        },
+        {
+          'ix' : 4,
+          'length' : 10.200,
+          'first_sector' : 3059,
+          'last_sector' : 3613        },
+        {
+          'ix' : 5,
+          'length' : 4.767,
+          'first_sector' : 3614,
+          'last_sector' : 3892        }      ]
+    },
+    {
+      'ix' : 3,
+      'length' : 8.000,
+      'vts_id' : "DVDVIDEO-VTS",
+      'vts' : 2,
+      'ttn' : 1,
+      'fps' : 29.97,
+      'format' : 'NTSC',
+      'aspect' : '4/3',
+      'width' : 720,
+      'height' : 480,
+      'df' : '?',
+      'chapter' : [
+        {
+          'ix' : 1,
+          'length' : 8.000,
+          'startcell' : 1        }      ],
+      'cell' : [
+        {
+          'ix' : 1,
+          'length' : 8.000,
+          'first_sector' : 0,
+          'last_sector' : 580        }      ]
+    }
+  ],
+  'dvddiscid' : '940f4abaf70c962d7102ad1ed3b15909',
+  'longest_track' : 2
+}

@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "job_id": 85,
+  "label": "DOWNTON_ABBEY_SEASON_2_D2",
+  "disctype": "bluray",
+  "crc_id": null,
+  "stage": "179310743101",
+  "start_time": "2026-10-27T13:23:51.119167+00:00",
+  "complete": true,
+  "problems": [],
+  "title_map": [
+    {
+      "playlist": "00001.mpls",
+      "handbrake_title": 2
+    },
+    {
+      "playlist": "00002.mpls",
+      "handbrake_title": 3
+    },
+    {
+      "playlist": "00003.mpls",
+      "handbrake_title": 4
+    },
+    {
+      "playlist": "00004.mpls",
+      "handbrake_title": 5
+    },
+    {
+      "playlist": "00006.mpls",
+      "handbrake_title": 6
+    }
+  ],
+  "duplicates": {
+    "skipped": [
+      {
+        "handbrake_title": 2,
+        "playlist": "00001.mpls",
+        "reason": "is played whole by title 6"
+      },
+      {
+        "handbrake_title": 3,
+        "playlist": "00002.mpls",
+        "reason": "is played whole by title 6"
+      },
+      {
+        "handbrake_title": 4,
+        "playlist": "00003.mpls",
+        "reason": "is played whole by title 6"
+      },
+      {
+        "handbrake_title": 5,
+        "playlist": "00004.mpls",
+        "reason": "is played whole by title 6"
+      }
+    ],
+    "wholes": [
+      {
+        "handbrake_title": 6,
+        "playlist": "00006.mpls",
+        "kept": "whole",
+        "interleaved": false,
+        "parts": [
+          {
+            "handbrake_title": 2,
+            "playlist": "00001.mpls",
+            "start": 0.0
+          },
+          {
+            "handbrake_title": 3,
+            "playlist": "00002.mpls",
+            "start": 3262.676
+          },
+          {
+            "handbrake_title": 4,
+            "playlist": "00003.mpls",
+            "start": 6590.0
+          },
+          {
+            "handbrake_title": 5,
+            "playlist": "00004.mpls",
+            "start": 9922.538
+          }
+        ]
+      }
+    ]
+  }
+}

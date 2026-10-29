@@ -8,5 +8,26 @@
   "start_time": "2026-10-24T01:46:46.200578+00:00",
   "complete": true,
   "problems": [],
-  "extracted": null
+  "title_map": [
+    {
+      "playlist": "00001.mpls",
+      "handbrake_title": 2
+    },
+    {
+      "playlist": "00002.mpls",
+      "handbrake_title": 3
+    },
+    {
+      "playlist": "00003.mpls",
+      "handbrake_title": 4
+    },
+    {
+      "playlist": "00004.mpls",
+      "handbrake_title": 5
+    },
+    {
+      "playlist": "00006.mpls",
+      "handbrake_title": 6
+    }
+  ]
 }

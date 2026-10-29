@@ -18,7 +18,13 @@ plan, gate. Step 7, file, is [movie-filing](movie-filing.md).
   matching names.
 - **Classify** sorts each title into one of: feature, episode, play-all, extra,
   exact duplicate, other cut, other work. It pairs transcodes with raw by the
-  stamp's title map where there is one, otherwise by fingerprint.
+  raw's form, as *Confidence* (a transcode is raw title X) and the flowchart
+  under *Identity* lay out: the stamp's title map confirmed by
+  structure, structure alone where there is no map, and fingerprints only
+  where structure can't decide. Job 79 is the case that has to go to review,
+  or be decided by its map: featurette variants that share their clips. A
+  Blu-ray without a map pairs by `analysis.bluray.handbrake_duration`, the
+  transcode's length predicted from its playlist and clips (E36).
 - **Identify films**: ARM's IMDb ID → TMDB, checked against the feature's runtime
   (±3% to start). TV episodes are left unresolved and planned as review; that is
   [episode-matching](episode-matching.md).
@@ -53,10 +59,31 @@ manifest changes.
   incomplete. Downton Abbey gives both paths on one series: job 80 (D1) predates
   `duplicates` and transcoded its 207-minute play-all, and job 83 (D2) skipped
   its 157-minute one and recorded the episodes' starts. Its first movie-disc
-  case, a whole kept and its parts skipped, is the *Robin Hood* bonus DVD's
-  re-rip, which hasn't run as of 2026-10-26.
-- A movie's feature arrives as `title_N.mkv` above `extras/` once the
-  deployment stops ARM renaming it, and as `<Title (Year)>.mkv` before. Intake
+  case, a whole kept and its parts skipped, is job 87, the *Robin Hood* bonus
+  DVD's re-rip: it transcoded disc title 1's documentary and the two
+  featurettes, and skipped titles 2–4.
+- **Where no stamp's `duplicates` decided it, the planner decides wholes and
+  parts itself, by the deployment's rule** (Will, 2026-10-28; *Confidence*, which
+  of a whole and its parts is kept). Port the decision from
+  `_arm_duplicates` in the deployment's ARM patches, its thresholds and its
+  final pass that unskips until every skipped title is played by those kept,
+  with its tests as the model. The measurements are already here:
+  `analysis.segments` over `bluray_playlists` and `dvd_structure`'s cells
+  (*Title identity* 4), checked against job 83's recorded result. The cases,
+  one per path: job 80 (Blu-ray, before `duplicates`, its play-all
+  transcoded) and job 76 (a DVD image whose stamp predates `duplicates`; disc
+  title 1 plays titles 4–9) by structure; *Robin Hood* job 36 and Tweety by
+  fingerprint, since only MKVs survive. Job 36 has to keep `E1`'s transcode and
+  drop those of `E2`–`E4`, which is what job 87 recorded for the same disc.
+  Placing a part by fingerprint within the 1 s a
+  chapter join allows is unmeasured; measure it on job 36 first.
+- **A DVD whole's `start` is in playback seconds** (Will, 2026-10-28: the
+  deployment scales, not the reader). lsdvd's unscaled lengths would place
+  parts 0.1% early on NTSC. Job 87, the first stamp with a DVD whole, ran
+  with the deployment's scaling: its starts equal its whole's MKV chapters to
+  the millisecond and sit within 0.07 s of its transcode's.
+- A movie's feature arrives as `title_N.mkv` above `extras/` since the
+  deployment stopped ARM renaming it, and as `<Title (Year)>.mkv` before. Intake
   takes neither name, nor the placement, as the identification.
 
 ## Secrets
