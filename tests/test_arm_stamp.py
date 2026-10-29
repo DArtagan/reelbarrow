@@ -16,6 +16,8 @@ ARM wrote these as each job ran:
 - job 82: a Blu-ray whose structure couldn't be read, so no `duplicates`
 - job 83: a Blu-ray series disc whose play-all was skipped
 - jobs 84, 85 and 86: later Blu-rays, each with a whole
+- job 87: the *Robin Hood* bonus DVD, a movie disc whose documentary was
+  kept whole and its three parts skipped
 
 The deployment backfilled these into folders older than the stamp, from ARM's
 database and the job's own log:
@@ -73,7 +75,7 @@ def stamp(request: pytest.FixtureRequest) -> dict:
 
 def test_every_job_named_in_the_docstring_has_a_fixture():
     assert [p.stem for p in FIXTURES] == [
-        f"job-{n}" for n in (*BACKFILLED, 76, 77, 78, 79, 80, 82, 83, 84, 85, 86)
+        f"job-{n}" for n in (*BACKFILLED, 76, 77, 78, 79, 80, 82, 83, 84, 85, 86, 87)
     ]
 
 
@@ -171,6 +173,21 @@ def test_a_series_play_all_is_skipped_and_its_episodes_placed():
     )
     assert [p["handbrake_title"] for p in whole["parts"]] == [2, 3, 4]
     assert [p["start"] for p in whole["parts"]] == [0.0, 2859.79, 5658.62]
+
+
+def test_a_movie_discs_whole_is_kept_and_its_parts_placed_in_playback_seconds():
+    duplicates = load(87)["duplicates"]
+    assert [s["handbrake_title"] for s in duplicates["skipped"]] == [4, 5, 6]
+    (whole,) = duplicates["wholes"]
+    assert (whole["handbrake_title"], whole["kept"], whole["interleaved"]) == (
+        3,
+        "whole",
+        False,
+    )
+    assert [p["handbrake_title"] for p in whole["parts"]] == [4, 5, 6]
+    # The whole's MKV has chapters at 1086.118 and 2854.385. lsdvd's unscaled
+    # lengths would put these about a second early.
+    assert [p["start"] for p in whole["parts"]] == [0.0, 1086.118, 2854.385]
 
 
 def test_a_missing_field_reads_as_not_recorded():
