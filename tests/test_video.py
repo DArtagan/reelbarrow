@@ -18,6 +18,19 @@ def test_same_video_in_different_files_hashes_equal(ffmpeg):
     assert video.md5(plain) == video.md5(remuxed)
 
 
+def test_cover_art_does_not_change_the_hash(ffmpeg):
+    plain = ffmpeg("plain.mkv", *PATTERN)
+    cover = ffmpeg(
+        "cover.png", "-f", "lavfi", "-i", "color=red:s=32x32", "-frames:v", "1"
+    )
+    covered = ffmpeg(
+        "covered.mkv",
+        *("-i", str(plain), "-c", "copy"),
+        *("-attach", str(cover), "-metadata:s:t", "mimetype=image/png"),
+    )
+    assert video.md5(plain) == video.md5(covered)
+
+
 def test_different_video_hashes_differ(ffmpeg):
     one = ffmpeg("one.mkv", *PATTERN)
     other = ffmpeg(

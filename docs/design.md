@@ -575,7 +575,7 @@ it is untested.
 
 ### Title identity — four tools, each measured
 
-**1. Exact duplicate: video-stream MD5.** `ffmpeg -map 0:v -c copy -f md5`. All
+**1. Exact duplicate: video-stream MD5.** `ffmpeg -map 0:V -c copy -f md5`. All
 six Tweety D2 titles hash identically across jobs 22 and 33 despite different
 numbering; Field of Dreams' two jobs did too. SVT-AV1 under ARM's preset is
 deterministic for identical input, so equal hashes mean interchangeable files.

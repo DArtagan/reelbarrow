@@ -8,7 +8,8 @@ def md5(path: Path) -> str:
 
     Equal hashes mean interchangeable files: the encoder ARM runs is
     deterministic for identical input, and the hash ignores the container,
-    audio and subtitles.
+    audio and subtitles. `0:V` rather than `0:v` leaves out cover art, which
+    ffmpeg presents as a video stream.
     """
     output = run(
         [
@@ -19,7 +20,7 @@ def md5(path: Path) -> str:
             "-i",
             str(path),
             "-map",
-            "0:v",
+            "0:V",
             "-c",
             "copy",
             "-f",
