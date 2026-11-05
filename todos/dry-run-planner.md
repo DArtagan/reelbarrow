@@ -23,7 +23,7 @@ plan, gate. Step 7, file, is [movie-filing](movie-filing.md).
   structure, structure alone where there is no map, and fingerprints only
   where structure can't decide. Job 79 is the case that has to go to review,
   or be decided by its map: featurette variants that share their clips. A
-  Blu-ray without a map pairs by `analysis.bluray.handbrake_duration`, the
+  Blu-ray without a map pairs by `analysis.bluray.Playlist.handbrake_duration`, the
   transcode's length predicted from its playlist and clips (E36).
 - **Identify films**: ARM's IMDb ID → TMDB, checked against the feature's runtime
   (±3% to start). TV episodes are left unresolved and planned as review; that is
@@ -68,7 +68,7 @@ manifest changes.
   `_arm_duplicates` in the deployment's ARM patches, its thresholds and its
   final pass that unskips until every skipped title is played by those kept,
   with its tests as the model. The measurements are already here:
-  `analysis.segments` over `bluray_playlists` and `dvd_structure`'s cells
+  `analysis.segments` over `bluray.playlists` and `dvd.structure`'s cells
   (*Title identity* 4), checked against job 83's recorded result. The cases,
   one per path: job 80 (Blu-ray, before `duplicates`, its play-all
   transcoded) and job 76 (a DVD image whose stamp predates `duplicates`; disc

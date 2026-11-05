@@ -561,7 +561,7 @@ since a backup that fails its check stops the job before transcoding.
 |---|---|---|
 | DVD | ARM's `crc_id` (pydvdid CRC64) | distinguishes Tweety D1 from D2, Robin Hood feature disc from bonus disc, Around the World disc 1 from disc 2; equal across re-rips |
 | Blu-ray | SHA-1 over `BDMV/PLAYLIST/*`, `BDMV/index.bdmv`, `BDMV/MovieObject.bdmv` (path + bytes) | equal across all five Rescuers backups, **and across complete vs incomplete copies** (Scott Pilgrim 49.3 GB vs 1.0 GB; both X-Men DoFP pairs); joins Polar Express to the misnamed Mary-Kate folder |
-| Blu-ray completeness | SHA-1 over relative path + size of every file under `BDMV/` | differs between complete and partial copies of the same disc |
+| Blu-ray listing | SHA-1 over relative path + size of every file under `BDMV/` | differs between complete and partial copies of the same disc. It says two copies differ, not which is whole: the stamp's `complete` does |
 
 **Do not use `CERTIFICATE/id.bdmv`.** Three different Dark Knight bonus discs
 share one; several discs lack it.
@@ -666,8 +666,8 @@ reaches that chapter, at the keyframe before its mark. A stub chapter 0.25 s
 from the end is common, so a Blu-ray transcode is up to a second short. Taken
 from the playlist and its clip's keyframes, the length is predictable within
 two frames (E35), and that, not a tolerance, is what pairs a Blu-ray without a
-title map. `reelbarrow.analysis.bluray.handbrake_duration` makes the prediction
-from the playlist and the entry points in each clip's `.clpi` EP map, the
+title map. `reelbarrow.analysis.bluray.Playlist.handbrake_duration` makes the
+prediction from the playlist and the entry points in each clip's `.clpi` EP map, the
 I-picture times libbluray finds a mark by, so it needs no video read (E36).
 
 ---
@@ -745,7 +745,7 @@ The pipeline, per ARM job (and later per backlog folder):
    `path`, never by name-matching) and the raw folder whose stamp carries the
    job's `job_id`, or, where no stamp does, the raw candidates.
 2. **Analyse.** For every output file: duration, streams, chapters, video MD5,
-   audio fingerprint. For raw: Blu-ray nav and completeness hashes, a DVD
+   audio fingerprint. For raw: Blu-ray nav and listing hashes, a DVD
    image's titles, what each title plays (*Title identity* 4), per-title
    fingerprints. Verify decoded duration against the container before trusting a
    fingerprint.
@@ -1156,7 +1156,7 @@ All read-only against the cluster and the share. Artefacts in
 | E8 | 10-03 | TF-IDF vs Wikipedia synopses | 11/13 top-1; 13/13 one-to-one, thin margins |
 | E9 | 10-03 | Plex library sections, read-only | modern agents only |
 | E10 | 10-03 | research: FileBot forum, mkv-episode-matcher, TheDiscDB, FileBot pricing | FileBot cannot; TheDiscDB has no Tweety entry; OpenSubtitles limits |
-| E11 | 10-03 | Blu-ray nav/completeness/`id.bdmv` hashes over 50 raw backups | nav hash is the identity; `id.bdmv` is not unique; Polar Express raw found misnamed |
+| E11 | 10-03 | Blu-ray nav/listing/`id.bdmv` hashes over 50 raw backups | nav hash is the identity; `id.bdmv` is not unique; Polar Express raw found misnamed |
 | E12 | 10-03 | streams and chapters of the Rescuers pair | different length, crop, chapters, subtitle coverage |
 | E13 | 10-03 | frames at 0:45 and 73:20 of the Rescuers pair | misread as a localised version — see E19 |
 | E14 | 10-03 | survey of `unidentified/` and `raw/` | 154/180 empty; 101 non-empty raw, 2.14 TB |
@@ -1181,7 +1181,7 @@ All read-only against the cluster and the share. Artefacts in
 | E33 | 10-28 | MakeMKV `info` over job 76's image; ARM's `convert_to_seconds`; ffprobe of job 76's and job 28's transcodes against their MKVs | MakeMKV's reported duration is Σ⌊cell⌋ in IFO time over the cells it keeps, exact on all 7 of job 76's titles and all 5 of Shrek's; a transcode's length equals its MKV's to the millisecond, chapters within 0.13 s |
 | E34 | 10-28 | ffprobe of jobs 78, 79, 80 and 83's 21 transcodes against their playlists; job 79's job log; every Blu-ray job log's title-to-playlist lines | transcodes run 1.0 s shorter to 0.05 s longer than their playlist, chapters within 0.67 s; 17 of 21 unambiguous by length; job 79's variants share their clips and nearest length mispaired `title_76`; 14 of 19 Blu-ray jobs still have their logs, jobs 5–9's are gone |
 | E35 | 10-28 | job 79's playlists, clips and job log; HandBrake 1.11.2's `bd.c` and `reader.c`; keyframes at each playlist's last mark; thumbnails of transcode and clip frames | the near-identical playlists differ only by clips of black silence; HandBrake drops a chapter starting within 1.5 s of the end and stops the encode at the keyframe before it; that prediction is within −0.084 to +0.048 s on all 22 transcodes, and separates the variants by ≥ 1.4 s |
-| E36 | 10-28 | the `.clpi` EP maps of jobs 78, 79, 80 and 83 through `bluray_clips`, against ffprobe's keyframes and the 22 transcodes | every keyframe is an entry point, 2–5 ms early as the map's 5.7 ms steps store it; `handbrake_duration` from playlists and EP maps alone is within −0.079 to +0.048 s of all 22, and each of job 79's variants is nearest its own playlist of 92, the next 1.4 s or more away |
+| E36 | 10-28 | the `.clpi` EP maps of jobs 78, 79, 80 and 83 through `bluray.clips`, against ffprobe's keyframes and the 22 transcodes | every keyframe is an entry point, 2–5 ms early as the map's 5.7 ms steps store it; `Playlist.handbrake_duration` from playlists and EP maps alone is within −0.079 to +0.048 s of all 22, and each of job 79's variants is nearest its own playlist of 92, the next 1.4 s or more away |
 
 ---
 

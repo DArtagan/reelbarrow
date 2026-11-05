@@ -15,17 +15,18 @@ NAV_DIR = "BDMV/PLAYLIST/"
 
 
 @dataclass(frozen=True, slots=True)
-class BlurayHashes:
+class Hashes:
     # SHA-1 over the path and bytes of each navigation file: the disc's identity.
     nav: str
     # SHA-1 over the path and size of every file under BDMV/: equal only for
-    # copies holding the same files.
-    completeness: str
+    # copies holding the same files. Two copies of one disc whose listings
+    # differ are not both whole; which is whole, the stamp's `complete` says.
+    listing: str
     files: int
     bytes: int
 
 
-def bluray_hashes(root: Path) -> BlurayHashes:
+def hashes(root: Path) -> Hashes:
     """Hash a raw Blu-ray copy, given the directory that holds its BDMV/."""
     if not (root / "BDMV").is_dir():
         raise AnalysisError(f"{root} has no BDMV directory")
@@ -47,18 +48,21 @@ def bluray_hashes(root: Path) -> BlurayHashes:
                 nav.update(os.fsencode(relative))
                 nav.update(path.read_bytes())
 
-    completeness = hashlib.sha1(os.fsencode("\n".join(entries))).hexdigest()
-    return BlurayHashes(nav.hexdigest(), completeness, len(entries), total)
+    listing = hashlib.sha1(os.fsencode("\n".join(entries))).hexdigest()
+    return Hashes(nav.hexdigest(), listing, len(entries), total)
 
 
 # A clip's times count a 45 kHz clock.
 TICKS = 45000
 # A playlist mark of this type is a chapter; type 2 is a link point.
 _ENTRY_MARK = 1
+# HandBrake drops a chapter that starts within this many seconds of a title's
+# end (libhb/bd.c, 1.10 and 1.11).
+HANDBRAKE_CHAPTER_MARGIN = 1.5
 
 
 @dataclass(frozen=True, slots=True)
-class BlurayPlaylist:
+class Playlist:
     # Its file name in BDMV/PLAYLIST/, as the stamp's `playlist` gives it.
     playlist: str
     # Each play item's clip between its in and out times, in play order.
@@ -89,8 +93,37 @@ class BlurayPlaylist:
             for item, stamp in self.chapter_marks
         )
 
+    def handbrake_duration(self, clips: dict[str, "Clip"]) -> float:
+        """The length HandBrake's transcode of this playlist comes out at, in seconds.
 
-def bluray_playlists(root: Path) -> tuple[BlurayPlaylist, ...]:
+        The playlist's own, unless a chapter starts within 1.5 s of its end.
+        HandBrake drops that chapter, and its reader ends the encode when playback
+        reaches it, which libbluray does at the clip's last entry point at or
+        before the mark. On 22 transcodes this is within two frames of the file
+        (E35); a tolerance on the playlist's length is up to a second wrong.
+        """
+        duration, starts = self.duration, self.item_starts
+        for (item, stamp), start in zip(
+            self.chapter_marks, self.chapter_starts, strict=True
+        ):
+            if duration - start >= HANDBRAKE_CHAPTER_MARGIN:
+                continue
+            segment = self.items[item]
+            if segment.source not in clips:
+                raise AnalysisError(
+                    f"{self.playlist} plays clip {segment.source}, which has no .clpi"
+                )
+            before = [
+                p
+                for p in clips[segment.source].entry_points
+                if segment.start <= p <= stamp
+            ]
+            point = max(before, default=segment.start)
+            return starts[item] + (point - segment.start) / TICKS
+        return duration
+
+
+def playlists(root: Path) -> tuple[Playlist, ...]:
     """Read every playlist of a raw Blu-ray copy, given the directory holding BDMV/."""
     folder = root / "BDMV" / "PLAYLIST"
     if not folder.is_dir():
@@ -102,7 +135,7 @@ def bluray_playlists(root: Path) -> tuple[BlurayPlaylist, ...]:
     )
 
 
-def parse_mpls(name: str, data: bytes) -> BlurayPlaylist:
+def parse_mpls(name: str, data: bytes) -> Playlist:
     """Read one playlist's play items and chapter marks.
 
     Only the first angle of a multi-angle item is read, the one a player starts
@@ -132,7 +165,7 @@ def parse_mpls(name: str, data: bytes) -> BlurayPlaylist:
                 marks.append((item, stamp))
     except (struct.error, UnicodeDecodeError) as error:
         raise AnalysisError(f"{name} is not a playlist this reads: {error}") from error
-    return BlurayPlaylist(name, tuple(items), tuple(marks))
+    return Playlist(name, tuple(items), tuple(marks))
 
 
 # An EP_map entry's stream type for video.
@@ -140,7 +173,7 @@ _EP_VIDEO = 1
 
 
 @dataclass(frozen=True, slots=True)
-class BlurayClip:
+class Clip:
     # Its number, which names its files in BDMV/CLIPINF/ and BDMV/STREAM/ and a
     # play item's clip.
     clip: str
@@ -150,7 +183,7 @@ class BlurayClip:
     entry_points: tuple[int, ...]
 
 
-def bluray_clips(root: Path) -> dict[str, BlurayClip]:
+def clips(root: Path) -> dict[str, Clip]:
     """Read every clip's entry points, given the directory holding BDMV/."""
     folder = root / "BDMV" / "CLIPINF"
     if not folder.is_dir():
@@ -163,7 +196,7 @@ def bluray_clips(root: Path) -> dict[str, BlurayClip]:
     return {clip.clip: clip for clip in clips}
 
 
-def parse_clpi(clip: str, data: bytes) -> BlurayClip:
+def parse_clpi(clip: str, data: bytes) -> Clip:
     """Read a clip's entry points from the EP map in its CPI.
 
     Each entry splits an I-picture's time between a coarse table and a fine
@@ -175,7 +208,7 @@ def parse_clpi(clip: str, data: bytes) -> BlurayClip:
         (cpi,) = struct.unpack_from(">I", data, 16)
         (length,) = struct.unpack_from(">I", data, cpi)
         if length == 0:
-            return BlurayClip(clip, ())
+            return Clip(clip, ())
         ep_map = cpi + 6
         for stream in range(data[ep_map + 1]):
             entry = ep_map + 2 + 12 * stream
@@ -184,14 +217,14 @@ def parse_clpi(clip: str, data: bytes) -> BlurayClip:
                 continue
             coarse_count, fine_count = (packed >> 18) & 0xFFFF, packed & 0x3FFFF
             (table,) = struct.unpack_from(">I", data, entry + 8)
-            return BlurayClip(
+            return Clip(
                 clip, _entry_points(data, ep_map + table, coarse_count, fine_count)
             )
     except (struct.error, IndexError) as error:
         raise AnalysisError(
             f"{clip}.clpi is not clip information this reads: {error}"
         ) from error
-    return BlurayClip(clip, ())
+    return Clip(clip, ())
 
 
 def _entry_points(
@@ -211,36 +244,3 @@ def _entry_points(
             (fine,) = struct.unpack_from(">I", data, table + fine_at + 4 * f)
             points.append(high + (((fine >> 17) & 0x7FF) << 8))
     return tuple(points)
-
-
-# HandBrake drops a chapter that starts within this many seconds of a title's
-# end (libhb/bd.c, 1.10 and 1.11).
-HANDBRAKE_CHAPTER_MARGIN = 1.5
-
-
-def handbrake_duration(playlist: BlurayPlaylist, clips: dict[str, BlurayClip]) -> float:
-    """The length HandBrake's transcode of a playlist comes out at, in seconds.
-
-    The playlist's own, unless a chapter starts within 1.5 s of its end. HandBrake
-    drops that chapter, and its reader ends the encode when playback reaches it,
-    which libbluray does at the clip's last entry point at or before the mark. On
-    22 transcodes this is within two frames of the file (E35); a tolerance on the
-    playlist's length is up to a second wrong.
-    """
-    duration, starts = playlist.duration, playlist.item_starts
-    for (item, stamp), start in zip(
-        playlist.chapter_marks, playlist.chapter_starts, strict=True
-    ):
-        if duration - start >= HANDBRAKE_CHAPTER_MARGIN:
-            continue
-        segment = playlist.items[item]
-        if segment.source not in clips:
-            raise AnalysisError(
-                f"{playlist.playlist} plays clip {segment.source}, which has no .clpi"
-            )
-        before = [
-            p for p in clips[segment.source].entry_points if segment.start <= p <= stamp
-        ]
-        point = max(before, default=segment.start)
-        return starts[item] + (point - segment.start) / TICKS
-    return duration

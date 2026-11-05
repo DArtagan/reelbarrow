@@ -36,7 +36,7 @@ _FREE_TEXT = re.compile(
 
 
 @dataclass(frozen=True, slots=True)
-class DvdTitle:
+class Title:
     # The DVD's own title number, the one the stamp calls `disc_title`.
     disc_title: int
     # The title set holding it, which its cells' sectors count within.
@@ -59,20 +59,20 @@ class DvdTitle:
 
 
 @dataclass(frozen=True, slots=True)
-class DvdStructure:
+class Structure:
     # The volume label of an image; None for a directory, which has none.
     label: str | None
-    titles: tuple[DvdTitle, ...]
+    titles: tuple[Title, ...]
 
 
-def dvd_structure(path: Path) -> DvdStructure:
+def structure(path: Path) -> Structure:
     """List every title of an ISO, or of a directory holding VIDEO_TS/."""
     output = run(["lsdvd", "-c", "-d", "-v", "-Oy", str(path)])
     return parse_lsdvd(output.decode(errors="replace"))
 
 
-def parse_lsdvd(output: str) -> DvdStructure:
-    """Read `lsdvd -c -d -v -Oy`, as produced by dvd_structure() or a fixture."""
+def parse_lsdvd(output: str) -> Structure:
+    """Read `lsdvd -c -d -v -Oy`, as produced by structure() or a fixture."""
     free_text: dict[str, str] = {}
 
     def lift(line: re.Match[str]) -> str:
@@ -90,10 +90,10 @@ def parse_lsdvd(output: str) -> DvdStructure:
 
     # libdvdread's answer when there is no volume label to read.
     label = None if free_text["title"] == "unknown" else free_text["title"]
-    return DvdStructure(label, tuple(_title(t) for t in disc.get("track", ())))
+    return Structure(label, tuple(_title(t) for t in disc.get("track", ())))
 
 
-def _title(track: dict) -> DvdTitle:
+def _title(track: dict) -> Title:
     fps = float(track["fps"])
     if fps not in SCALE:
         raise AnalysisError(f"title {track['ix']} has frame rate {fps}")
@@ -109,7 +109,7 @@ def _title(track: dict) -> DvdTitle:
             f"title {track['ix']}'s chapters sum to {sum(chapters):.3f} s,"
             f" not its {track['length'] * scale:.3f} s"
         )
-    return DvdTitle(
+    return Title(
         disc_title=int(track["ix"]),
         vts=vts,
         fps=fps,

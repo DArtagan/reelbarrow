@@ -1,6 +1,6 @@
 import pytest
 
-from reelbarrow.analysis.dvd import DvdTitle, dvd_structure, parse_lsdvd
+from reelbarrow.analysis import dvd
 from reelbarrow.analysis.segments import Segment
 from reelbarrow.analysis.tools import AnalysisError
 
@@ -9,7 +9,7 @@ NTSC = 1001 / 1000
 
 def title(disc_title, vts, chapters, cells):
     """A title of the synthetic image, from the IFO's lengths and sectors."""
-    return DvdTitle(
+    return dvd.Title(
         disc_title=disc_title,
         vts=vts,
         fps=29.97,
@@ -55,13 +55,13 @@ def assert_titles(actual):
 
 
 def test_an_image(fixtures):
-    structure = dvd_structure(fixtures / "dvd/synthetic.iso")
+    structure = dvd.structure(fixtures / "dvd/synthetic.iso")
     assert structure.label == "SYNTHETIC_DVD"
     assert_titles(structure.titles)
 
 
 def test_a_directory(fixtures):
-    structure = dvd_structure(fixtures / "dvd")
+    structure = dvd.structure(fixtures / "dvd")
     assert structure.label is None
     assert_titles(structure.titles)
 
@@ -70,7 +70,7 @@ def test_the_images_lsdvd(fixtures):
     # `lsdvd -c -d -v -Oy synthetic.iso` from Debian's lsdvd 0.20, which the
     # image installs. It quotes and punctuates differently from the devenv's
     # 0.17, and adds the disc ID.
-    structure = parse_lsdvd((fixtures / "dvd/lsdvd-0.20.txt").read_text())
+    structure = dvd.parse_lsdvd((fixtures / "dvd/lsdvd-0.20.txt").read_text())
     assert structure.label == "SYNTHETIC_DVD"
     assert_titles(structure.titles)
 
@@ -124,7 +124,7 @@ lsdvd = {{
 def test_quotes_in_free_text_are_read_as_text():
     # lsdvd copies these in unescaped. A legacy library file is named for its
     # film, apostrophes and all.
-    structure = parse_lsdvd(
+    structure = dvd.parse_lsdvd(
         lsdvd(
             device="/video/movies/Ocean's Eleven (2001)/Ocean's Eleven (2001).iso",
             label="OCEAN'S_11', 'track' : [], 'x' : '",
@@ -136,26 +136,26 @@ def test_quotes_in_free_text_are_read_as_text():
 
 
 def test_pal_is_not_scaled():
-    (only,) = parse_lsdvd(lsdvd(fps="25.00")).titles
+    (only,) = dvd.parse_lsdvd(lsdvd(fps="25.00")).titles
     assert only.duration == 20.0
     assert only.cells == (Segment(1, 0, 100, 20.0),)
 
 
 def test_an_unknown_frame_rate_is_refused():
     with pytest.raises(AnalysisError, match="frame rate"):
-        parse_lsdvd(lsdvd(fps="-1.0"))
+        dvd.parse_lsdvd(lsdvd(fps="-1.0"))
 
 
 def test_chapters_that_do_not_add_up_are_refused():
     with pytest.raises(AnalysisError, match="chapters sum"):
-        parse_lsdvd(lsdvd(chapters="12.000"))
+        dvd.parse_lsdvd(lsdvd(chapters="12.000"))
 
 
 def test_not_lsdvd_output():
     with pytest.raises(AnalysisError, match="not understood"):
-        parse_lsdvd("Disc Title: SYNTHETIC_DVD\n")
+        dvd.parse_lsdvd("Disc Title: SYNTHETIC_DVD\n")
 
 
 def test_not_a_dvd(tmp_path):
     with pytest.raises(AnalysisError, match="lsdvd"):
-        dvd_structure(tmp_path / "absent.iso")
+        dvd.structure(tmp_path / "absent.iso")
