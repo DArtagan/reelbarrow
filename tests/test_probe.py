@@ -7,8 +7,8 @@ from reelbarrow.analysis.tools import AnalysisError
 
 
 def test_arm_transcode(fixtures):
-    # ffprobe of ARM's 140.5-minute Robin Hood cut, job 35.
-    raw = json.loads((fixtures / "probe/robinhood-140.json").read_text())
+    # ffprobe of ARM's transcode of Robin Hood's theatrical cut.
+    raw = json.loads((fixtures / "probe/robin-hood-theatrical.json").read_text())
     probed = parse_probe(raw)
 
     assert probed.format_name == "matroska,webm"

@@ -331,8 +331,9 @@ later renames only the completed folder. Job 76's, shortened:
   `handbrake_title` is HandBrake's, the *N* of `title_N.mkv`, and `disc_title`
   or `playlist` the disc's own. No field is a bare `title`.
 
-Real stamps are test fixtures, `tests/fixtures/stamps/`, with a test holding
-each rule above against them. A change to the stamp brings a fixture.
+Real stamps are test fixtures, `tests/fixtures/stamps/`, each named for its
+case, with a test holding each rule above against them. A change to the stamp
+brings a fixture.
 
 ARM writes it from job 76 on: DVD jobs 76, 77 and 87 and Blu-ray jobs 78–80
 and 82–86 by 2026-10-29. A raw folder from before job 76 has one only where it holds
@@ -934,7 +935,13 @@ about 260 bits a second, from which neither speech nor music can be recovered.
 AcoustID publishes millions of them under CC BY-SA
 ([AcoustID database](https://acoustid.org/database)). They are stored as
 fpcalc's `-raw -plain` text beside the container duration they are checked
-against, as in `tests/fixtures/fingerprints/`.
+against, as in `tests/fixtures/fingerprints/`. Open films such as Blender's
+would avoid the question, but hold none of the cases: none has a second cut, and
+one made by splicing tests only the splice.
+
+A fixture is named for the case it holds, not for the job or file it was taken
+from. Filing empties the folders it came from, and a job number tells a reader of
+the tests nothing. Where it came from is in the commit that added it.
 
 **2. Model evaluations — Inspect, on demand and on any prompt or model change.**
 [Inspect](https://inspect.aisi.org.uk/) (UK AISI; Python, `pip install

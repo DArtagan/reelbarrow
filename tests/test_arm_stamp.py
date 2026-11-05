@@ -1,42 +1,54 @@
 """The raw folder's stamp, as the deployment writes it.
 
-Each fixture is a real `arm-job.json`, copied from a raw folder, and together
-they are every stamp on the share. The tests pin the rules *The raw folder's
-stamp* in the design states, so a stamp that breaks the contract fails here
-before any reader is built on it. A change to the stamp comes with a fixture
-here.
+Each fixture is a real `arm-job.json`, copied from a raw folder and named for
+the case it holds. The tests pin the rules *The raw folder's stamp* in the
+design states, so a stamp that breaks the contract fails here before any reader
+is built on it. A change to the stamp comes with a fixture here.
 
 ARM wrote these as each job ran:
 
-- job 76: a DVD, its title map written after the fact
-- job 77: a DVD, its title map written by the job
-- job 78: a Blu-ray movie
-- job 79: a Blu-ray movie with featurette variants
-- job 80: a Blu-ray series disc from before `duplicates`
-- job 82: a Blu-ray whose structure couldn't be read, so no `duplicates`
-- job 83: a Blu-ray series disc whose play-all was skipped
-- jobs 84, 85 and 86: later Blu-rays, each with a whole
-- job 87: the *Robin Hood* bonus DVD, a movie disc whose documentary was
-  kept whole and its three parts skipped
+- `dvd-series`: a DVD series disc, its title map written by the job
+- `dvd-series-map-added-later`: the same disc, its title map written after the
+  job
+- `dvd-whole-kept`: a movie's bonus DVD, its documentary kept whole and its
+  three parts skipped
+- `bluray-movie`: a Blu-ray movie
+- `bluray-featurette-variants`: a Blu-ray movie whose featurettes come in
+  variants that share their clips
+- `bluray-series-before-duplicates`: a Blu-ray series disc from before
+  `duplicates`
+- `bluray-structure-unread`: a Blu-ray whose structure couldn't be read, so no
+  `duplicates`
+- `bluray-parts-kept`: a Blu-ray series disc whose play-all was skipped
+- `bluray-parts-kept-among-others`: the same, with titles beside the play-all
+  and its episodes
+- `bluray-whole-kept`: a Blu-ray whose whole was kept and every part skipped
+- `bluray-whole-kept-among-others`: the same, with titles beside the whole and
+  its parts
 
 The deployment backfilled these into folders older than the stamp, from ARM's
 database and the job's own log:
 
-- jobs 7 and 8: failed Rescuers rips, proven by their `_<stage>` suffix; their
-  logs are gone, so no title map
-- job 23: a failed Rescuers rip, proven by its suffix and its log
-- job 25: the misidentified Polar Express, proven by its log alone
-- job 27: *The Rescuers* of the fixtures table
+- `backfilled-bluray-log-lost`: a failed rip, proven by its `_<stage>` suffix;
+  its log is gone, so no title map
+- `backfilled-bluray-log-lost-rerip`: the same disc ripped again, failed the
+  same way
+- `backfilled-bluray-failed-rip`: a failed rip, proven by its suffix and its log
+- `backfilled-bluray-misidentified`: a misidentified disc, proven by its log
+  alone
+- `backfilled-bluray-two-films`: two films on one disc, *The Rescuers* of the
+  fixtures table
 """
 
 import json
+import re
 from pathlib import Path
 
 import pytest
 
 STAMPS = Path(__file__).parent / "fixtures" / "stamps"
-FIXTURES = sorted(STAMPS.glob("job-*.json"), key=lambda p: int(p.stem[4:]))
-BACKFILLED = (7, 8, 23, 25, 27)
+NAMES = sorted(p.stem for p in STAMPS.glob("*.json"))
+BACKFILLED = [name for name in NAMES if name.startswith("backfilled-")]
 BASE = {
     "schema",
     "job_id",
@@ -54,8 +66,8 @@ TITLE_MAP = {
 }
 
 
-def load(job: int) -> dict:
-    return json.loads((STAMPS / f"job-{job}.json").read_text())
+def load(name: str) -> dict:
+    return json.loads((STAMPS / f"{name}.json").read_text())
 
 
 def keys(value):
@@ -68,15 +80,18 @@ def keys(value):
             yield from keys(inner)
 
 
-@pytest.fixture(params=FIXTURES, ids=lambda p: p.stem)
-def stamp(request: pytest.FixtureRequest) -> dict:
-    return json.loads(request.param.read_text())
+@pytest.fixture(params=NAMES)
+def name(request: pytest.FixtureRequest) -> str:
+    return request.param
 
 
-def test_every_job_named_in_the_docstring_has_a_fixture():
-    assert [p.stem for p in FIXTURES] == [
-        f"job-{n}" for n in (*BACKFILLED, 76, 77, 78, 79, 80, 82, 83, 84, 85, 86, 87)
-    ]
+@pytest.fixture
+def stamp(name: str) -> dict:
+    return load(name)
+
+
+def test_every_case_in_the_docstring_has_a_fixture():
+    assert sorted(re.findall(r"^- `([a-z-]+)`:", __doc__, re.MULTILINE)) == NAMES
 
 
 def test_schema_one_holds_the_base_fields(stamp):
@@ -94,10 +109,10 @@ def test_no_stamp_keeps_a_retired_field(stamp):
     )
 
 
-def test_complete_agrees_with_its_problems(stamp):
+def test_complete_agrees_with_its_problems(name, stamp):
     if "complete" not in stamp:
         # A backfilled stamp whose copy passed the size check: not recorded.
-        assert stamp["job_id"] in BACKFILLED
+        assert name in BACKFILLED
         assert "problems" not in stamp
         return
     assert stamp["complete"] in (True, False, None)
@@ -135,8 +150,11 @@ def test_a_blu_rays_map_includes_the_titles_it_skipped(stamp):
 
 
 def test_featurette_variants_map_to_their_own_playlists():
-    # Job 79's log shows these, which length alone pairs the wrong way round.
-    mapped = {t["handbrake_title"]: t["playlist"] for t in load(79)["title_map"]}
+    # The job's log shows these, which length alone pairs the wrong way round.
+    mapped = {
+        t["handbrake_title"]: t["playlist"]
+        for t in load("bluray-featurette-variants")["title_map"]
+    }
     assert (mapped[76], mapped[84]) == ("01227.mpls", "01235.mpls")
 
 
@@ -163,7 +181,7 @@ def test_duplicates_skip_only_what_a_whole_accounts_for(stamp):
 
 
 def test_a_series_play_all_is_skipped_and_its_episodes_placed():
-    duplicates = load(83)["duplicates"]
+    duplicates = load("bluray-parts-kept-among-others")["duplicates"]
     assert [s["handbrake_title"] for s in duplicates["skipped"]] == [7]
     (whole,) = duplicates["wholes"]
     assert (whole["handbrake_title"], whole["kept"], whole["interleaved"]) == (
@@ -176,7 +194,7 @@ def test_a_series_play_all_is_skipped_and_its_episodes_placed():
 
 
 def test_a_movie_discs_whole_is_kept_and_its_parts_placed_in_playback_seconds():
-    duplicates = load(87)["duplicates"]
+    duplicates = load("dvd-whole-kept")["duplicates"]
     assert [s["handbrake_title"] for s in duplicates["skipped"]] == [4, 5, 6]
     (whole,) = duplicates["wholes"]
     assert (whole["handbrake_title"], whole["kept"], whole["interleaved"]) == (
@@ -191,10 +209,11 @@ def test_a_movie_discs_whole_is_kept_and_its_parts_placed_in_playback_seconds():
 
 
 def test_a_missing_field_reads_as_not_recorded():
-    # Jobs 80 and 82 carry no `duplicates`: 80 predates it, 82 couldn't read
-    # its disc. Neither says nothing repeated. A backfilled stamp has none
-    # either, since its job skipped nothing, and job 7's no `complete`, since a
-    # backup's hash check can't be rerun.
-    for job in (80, 82, *BACKFILLED):
-        assert "duplicates" not in load(job)
-    assert "complete" not in load(7)
+    # A stamp from before `duplicates`, or from a job that couldn't read its
+    # disc, carries none, and neither says nothing repeated. A backfilled stamp
+    # has none either, since its job skipped nothing, and no `complete` unless
+    # its copy failed, since a backup's hash check can't be rerun.
+    unrecorded = ("bluray-series-before-duplicates", "bluray-structure-unread")
+    for name in (*unrecorded, *BACKFILLED):
+        assert "duplicates" not in load(name)
+    assert "complete" not in load("backfilled-bluray-log-lost")

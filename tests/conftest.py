@@ -17,14 +17,13 @@ def fixtures() -> Path:
 @pytest.fixture(scope="session")
 def fingerprints() -> dict[str, Fingerprint]:
     """The committed fingerprints, each of the first audio track of an ARM
-    transcode, checked against that track's duration as it loads."""
+    transcode, checked against that track's duration as it loads: Robin Hood's
+    two cuts, and the two films on The Rescuers' disc."""
     directory = FIXTURES / "fingerprints"
-    sources = json.loads((directory / "sources.json").read_text())
+    durations = json.loads((directory / "durations.json").read_text())
     return {
-        name: Fingerprint.from_text(
-            (directory / f"{name}.fp").read_text(), source["duration"]
-        )
-        for name, source in sources.items()
+        name: Fingerprint.from_text((directory / f"{name}.fp").read_text(), duration)
+        for name, duration in durations.items()
     }
 
 

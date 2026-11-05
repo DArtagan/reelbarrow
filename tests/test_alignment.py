@@ -15,16 +15,16 @@ def coverage(fingerprints, a, b) -> float:
 @pytest.mark.parametrize(
     ("a", "b", "percent"),
     [
-        # Two cuts of one film, Robin Hood job 35.
-        ("robinhood-140", "robinhood-155", 94.9),
-        # Two films on one disc, The Rescuers job 27.
-        ("rescuers-title71", "rescuers-feature", 0.0),
-        # Unrelated films. The 0.3% is one window: the Rescuers feature's
+        # Two cuts of one film.
+        ("robin-hood-theatrical", "robin-hood-directors-cut", 94.9),
+        # Two films on one disc.
+        ("rescuers-down-under", "rescuers", 0.0),
+        # Unrelated films. The 0.3% is one window: The Rescuers'
         # silent first 15 s matches the silence at the end of either cut.
-        ("robinhood-155", "rescuers-title71", 0.0),
-        ("robinhood-140", "rescuers-title71", 0.0),
-        ("rescuers-feature", "robinhood-155", 0.3),
-        ("rescuers-feature", "robinhood-140", 0.3),
+        ("robin-hood-directors-cut", "rescuers-down-under", 0.0),
+        ("robin-hood-theatrical", "rescuers-down-under", 0.0),
+        ("rescuers", "robin-hood-directors-cut", 0.3),
+        ("rescuers", "robin-hood-theatrical", 0.3),
     ],
 )
 def test_the_measured_table(fingerprints, a, b, percent):
@@ -33,8 +33,8 @@ def test_the_measured_table(fingerprints, a, b, percent):
 
 
 def test_the_shorter_is_windowed_whichever_comes_first(fingerprints):
-    short = fingerprints["robinhood-140"].frames
-    long = fingerprints["robinhood-155"].frames
+    short = fingerprints["robin-hood-theatrical"].frames
+    long = fingerprints["robin-hood-directors-cut"].frames
     assert align(short, long).shorter == "a"
     assert align(long, short).shorter == "b"
     assert align(long, short).length == len(short)
@@ -42,7 +42,8 @@ def test_the_shorter_is_windowed_whichever_comes_first(fingerprints):
 
 def test_a_longer_cut_shows_as_a_rising_offset(fingerprints):
     result = align(
-        fingerprints["robinhood-140"].frames, fingerprints["robinhood-155"].frames
+        fingerprints["robin-hood-theatrical"].frames,
+        fingerprints["robin-hood-directors-cut"].frames,
     )
     minutes = [w.offset * FRAME_SECONDS / 60 for w in result.windows if w.matched]
 

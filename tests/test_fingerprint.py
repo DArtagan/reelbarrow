@@ -25,9 +25,9 @@ def mixed(inputs: int = 2, label: str = "a") -> tuple[str, ...]:
 
 
 def test_committed_fingerprints_are_complete(fixtures, fingerprints):
-    sources = json.loads((fixtures / "fingerprints/sources.json").read_text())
-    for name, source in sources.items():
-        assert len(fingerprints[name].frames) == expected_frames(source["duration"])
+    durations = json.loads((fixtures / "fingerprints/durations.json").read_text())
+    for name, duration in durations.items():
+        assert len(fingerprints[name].frames) == expected_frames(duration)
 
 
 @pytest.mark.parametrize(
@@ -35,8 +35,8 @@ def test_committed_fingerprints_are_complete(fixtures, fingerprints):
     [
         # The lengths the design sessions' captures through kubectl exec came
         # back with: 154 s and 224 s short of their files.
-        ("robinhood-140", 66830),
-        ("rescuers-feature", 35584),
+        ("robin-hood-theatrical", 66830),
+        ("rescuers", 35584),
     ],
 )
 def test_the_truncated_captures_are_refused(fingerprints, name, captured_frames):
@@ -46,7 +46,7 @@ def test_the_truncated_captures_are_refused(fingerprints, name, captured_frames)
 
 
 def test_slack_is_a_couple_of_seconds(fingerprints):
-    complete = fingerprints["robinhood-155"]
+    complete = fingerprints["robin-hood-directors-cut"]
     frames = len(complete.frames)
     check_complete(frames - 16, complete.duration)
     with pytest.raises(IncompleteFingerprint):
@@ -56,7 +56,7 @@ def test_slack_is_a_couple_of_seconds(fingerprints):
 
 
 def test_text_round_trips(fingerprints):
-    complete = fingerprints["rescuers-title71"]
+    complete = fingerprints["rescuers-down-under"]
     again = Fingerprint.from_text(complete.to_text(), complete.duration)
     assert again == complete
 
