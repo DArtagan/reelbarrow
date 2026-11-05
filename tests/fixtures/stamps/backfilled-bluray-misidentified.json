@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "job_id": 25,
+  "label": "LOGICAL_VOLUME_ID",
+  "disctype": "bluray",
+  "crc_id": null,
+  "stage": "178850716455",
+  "start_time": "2026-09-04T07:32:44.574504+00:00",
+  "title_map": [
+    {
+      "playlist": "00000.mpls",
+      "handbrake_title": 1
+    },
+    {
+      "playlist": "00019.mpls",
+      "handbrake_title": 18
+    },
+    {
+      "playlist": "00026.mpls",
+      "handbrake_title": 25
+    },
+    {
+      "playlist": "00027.mpls",
+      "handbrake_title": 26
+    }
+  ]
+}

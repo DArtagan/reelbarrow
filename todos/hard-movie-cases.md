@@ -13,7 +13,7 @@
 | job | outcome expected by the table | depends on |
 |---|---|---|
 | Robin Hood, job 35 | two cuts, verified as one film by fingerprint; **labels need a source** (the case photo, or release data naming those exact runtimes) | [editions](editions.md), [review-ui](review-ui.md) |
-| Robin Hood, job 36 | a bonus disc; everything goes to Robin Hood's `extras/` | review-ui, since nothing but the case can confirm it's a bonus disc |
+| Robin Hood, job 36 | a bonus disc; its documentary and two featurettes go to Robin Hood's `extras/`, and the documentary's three parts are leftovers (*Confidence*, which of a whole and its parts is kept) | review-ui, since nothing but the case can confirm it's a bonus disc |
 | The Rescuers, job 27 | split into two films; raw and extras stay with *The Rescuers (1977)*; `title_71` becomes *The Rescuers Down Under (1990)*, with a pointer `.txt` | identity of the second film by transcript plus runtime, or review |
 | Field of Dreams, jobs 30–31 | review: no successful job vouches for the file; keep one of two identical raws | review-ui |
 | Shrek the Third, job 28 | fold: ARM's transcode replaces the `.m4v`; the ISO becomes the raw; ARM's MKVs and the old files are leftovers | the fold rules; Plex's watched-state test from [movie-filing](movie-filing.md) |
