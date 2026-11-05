@@ -1,10 +1,8 @@
-import subprocess
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
 from reelbarrow.analysis.probe import Probe, probe
-from reelbarrow.analysis.tools import AnalysisError
+from reelbarrow.analysis.tools import AnalysisError, pipe
 
 SAMPLE_RATE = 11025
 # Chromaprint's analysis frame is 4096 samples, advanced 1365 at a time.
@@ -74,58 +72,37 @@ def fingerprint(path: Path, probed: Probe | None = None) -> Fingerprint:
 
     # ffmpeg chooses the track: fpcalc on its own takes av_find_best_stream's
     # choice, which need not be the first.
-    with tempfile.TemporaryFile() as decode_errors:
-        decode = subprocess.Popen(
-            [
-                "ffmpeg",
-                "-nostdin",
-                "-v",
-                "error",
-                "-i",
-                str(path),
-                "-map",
-                "0:a:0",
-                "-ac",
-                "1",
-                "-ar",
-                str(SAMPLE_RATE),
-                "-f",
-                "s16le",
-                "-",
-            ],
-            stdout=subprocess.PIPE,
-            stderr=decode_errors,
-        )
-        assert decode.stdout is not None
-        try:
-            result = subprocess.run(
-                [
-                    "fpcalc",
-                    "-raw",
-                    "-plain",
-                    "-length",
-                    "0",
-                    "-format",
-                    "s16le",
-                    "-rate",
-                    str(SAMPLE_RATE),
-                    "-channels",
-                    "1",
-                    "-",
-                ],
-                stdin=decode.stdout,
-                capture_output=True,
-                check=False,
-            )
-        finally:
-            decode.stdout.close()
-            decode.wait()
-        decode_errors.seek(0)
-        decode_stderr = decode_errors.read().decode(errors="replace").strip()
-
-    if decode.returncode != 0:
-        raise AnalysisError(f"ffmpeg exited {decode.returncode}: {decode_stderr}")
-    if result.returncode != 0:
-        stderr = result.stderr.decode(errors="replace").strip()
-        raise AnalysisError(f"fpcalc exited {result.returncode}: {stderr}")
-    return Fingerprint.from_text(result.stdout.decode(), duration)
+    output = pipe(
+        [
+            "ffmpeg",
+            "-nostdin",
+            "-v",
+            "error",
+            "-i",
+            str(path),
+            "-map",
+            "0:a:0",
+            "-ac",
+            "1",
+            "-ar",
+            str(SAMPLE_RATE),
+            "-f",
+            "s16le",
+            "-",
+        ],
+        [
+            "fpcalc",
+            "-raw",
+            "-plain",
+            "-length",
+            "0",
+            "-format",
+            "s16le",
+            "-rate",
+            str(SAMPLE_RATE),
+            "-channels",
+            "1",
+            "-",
+        ],
+    )
+    return Fingerprint.from_text(output.decode(), duration)
