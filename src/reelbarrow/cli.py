@@ -1,8 +1,6 @@
 import argparse
-
-import uvicorn
-
-from reelbarrow.web import create_app
+import logging
+from pathlib import Path
 
 
 def main() -> None:
@@ -13,6 +11,43 @@ def main() -> None:
     serve.add_argument("--host", default="0.0.0.0")
     serve.add_argument("--port", type=int, default=8000)
 
+    export = commands.add_parser(
+        "export-manifests",
+        help="copy ARM's database out as job manifests, on an interval",
+    )
+    export.add_argument("--db", type=Path, required=True, help="ARM's arm.db")
+    export.add_argument(
+        "--out",
+        type=Path,
+        help="the manifest directory (default: REELBARROW_MANIFEST_DIR)",
+    )
+    export.add_argument(
+        "--interval", type=float, default=30.0, help="seconds between passes"
+    )
+    export.add_argument(
+        "--timeout",
+        type=float,
+        default=5.0,
+        help="seconds a pass waits on ARM's write lock before trying next time",
+    )
+    export.add_argument("--once", action="store_true", help="one pass, then exit")
+
     args = parser.parse_args()
     if args.command == "serve":
+        import uvicorn
+
+        from reelbarrow.web import create_app
+
         uvicorn.run(create_app(), host=args.host, port=args.port)
+    elif args.command == "export-manifests":
+        from reelbarrow.config import Settings
+        from reelbarrow.exporter import Exporter
+
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
+        )
+        out = args.out or Settings().manifest_dir
+        exporter = Exporter(db=args.db, out=out, timeout=args.timeout)
+        if args.once:
+            raise SystemExit(0 if exporter.run_pass() else 1)
+        exporter.run(args.interval)

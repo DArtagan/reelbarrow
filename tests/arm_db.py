@@ -1,0 +1,193 @@
+"""A SQLite database shaped like ARM 2.24.4's, for the exporter's tests.
+
+The DDL is what SQLAlchemy emits on SQLite for `arm/models/job.py` and
+`arm/models/track.py` at tag 2.24.4, with the declared types SQLite keeps:
+`String(n)` as VARCHAR(n), `DateTime` as DATETIME, `Boolean` as BOOLEAN,
+`BigInteger` as BIGINT. Rows are synthetic; a real arm.db is never committed.
+Values are stored as SQLAlchemy stores them: booleans 0/1, datetimes as text
+with a space before the time.
+"""
+
+import sqlite3
+from pathlib import Path
+
+JOB = """
+CREATE TABLE job (
+    job_id INTEGER NOT NULL,
+    arm_version VARCHAR(20),
+    crc_id VARCHAR(63),
+    logfile VARCHAR(256),
+    start_time DATETIME,
+    stop_time DATETIME,
+    job_length VARCHAR(12),
+    status VARCHAR(32),
+    stage VARCHAR(63),
+    no_of_titles INTEGER,
+    title VARCHAR(256),
+    title_auto VARCHAR(256),
+    title_manual VARCHAR(256),
+    year VARCHAR(4),
+    year_auto VARCHAR(4),
+    year_manual VARCHAR(4),
+    video_type VARCHAR(20),
+    video_type_auto VARCHAR(20),
+    video_type_manual VARCHAR(20),
+    imdb_id VARCHAR(15),
+    imdb_id_auto VARCHAR(15),
+    imdb_id_manual VARCHAR(15),
+    poster_url VARCHAR(256),
+    poster_url_auto VARCHAR(256),
+    poster_url_manual VARCHAR(256),
+    devpath VARCHAR(15),
+    mountpoint VARCHAR(20),
+    hasnicetitle BOOLEAN,
+    errors TEXT,
+    disctype VARCHAR(20),
+    label VARCHAR(256),
+    path VARCHAR(256),
+    ejected BOOLEAN,
+    updated BOOLEAN,
+    pid INTEGER,
+    pid_hash INTEGER,
+    is_iso BOOLEAN,
+    manual_start BOOLEAN,
+    manual_mode BOOLEAN,
+    PRIMARY KEY (job_id)
+)
+"""
+
+TRACK = """
+CREATE TABLE track (
+    track_id INTEGER NOT NULL,
+    job_id INTEGER,
+    track_number VARCHAR(4),
+    length INTEGER,
+    aspect_ratio VARCHAR(20),
+    fps FLOAT,
+    main_feature BOOLEAN,
+    basename VARCHAR(256),
+    filename VARCHAR(256),
+    orig_filename VARCHAR(256),
+    new_filename VARCHAR(256),
+    ripped BOOLEAN,
+    status VARCHAR(32),
+    error TEXT,
+    source VARCHAR(32),
+    process BOOLEAN,
+    chapters INTEGER,
+    filesize BIGINT,
+    PRIMARY KEY (track_id),
+    FOREIGN KEY(job_id) REFERENCES job (job_id)
+)
+"""
+
+# A cut-down config table: it holds ARM's API keys, and must never reach a
+# manifest.
+CONFIG = """
+CREATE TABLE config (
+    CONFIG_ID INTEGER NOT NULL,
+    job_id INTEGER,
+    OMDB_API_KEY VARCHAR(256),
+    PO_USER_KEY VARCHAR(64),
+    PRIMARY KEY (CONFIG_ID),
+    FOREIGN KEY(job_id) REFERENCES job (job_id)
+)
+"""
+
+SECRET = "not-a-real-omdb-key-0123456789"
+
+
+def job(job_id: int, **overrides) -> dict:
+    """A DVD movie job as ARM leaves it on success."""
+    row = {
+        "job_id": job_id,
+        "arm_version": "2.24.4",
+        "crc_id": "1a2b3c4d5e6f7081",
+        "logfile": f"SAMPLE_MOVIE_{job_id}.log",
+        "start_time": "2026-10-21 19:49:49.973701",
+        "stop_time": "2026-10-21 21:02:13.204518",
+        "job_length": "1:12:23",
+        "status": "success",
+        "stage": "176107498997",
+        "no_of_titles": 2,
+        "title": "Sample-Movie",
+        "title_auto": "Sample-Movie",
+        "title_manual": None,
+        "year": "1965",
+        "year_auto": "1965",
+        "year_manual": None,
+        "video_type": "movie",
+        "video_type_auto": "movie",
+        "video_type_manual": None,
+        "imdb_id": "tt0000000",
+        "imdb_id_auto": "tt0000000",
+        "imdb_id_manual": None,
+        "poster_url": None,
+        "poster_url_auto": None,
+        "poster_url_manual": None,
+        "devpath": "/dev/sr0",
+        "mountpoint": "/mnt/dev/sr0",
+        "hasnicetitle": 1,
+        "errors": None,
+        "disctype": "dvd",
+        "label": "SAMPLE_MOVIE",
+        "path": "/root/video/completed/movies/Sample-Movie (1965)",
+        "ejected": 1,
+        "updated": 0,
+        "pid": 4242,
+        "pid_hash": 8061347162311430543,
+        "is_iso": 0,
+        "manual_start": 0,
+        "manual_mode": 0,
+    }
+    return row | overrides
+
+
+def track(track_id: int, job_id: int, **overrides) -> dict:
+    """A HandBrake track row, transcoded."""
+    row = {
+        "track_id": track_id,
+        "job_id": job_id,
+        "track_number": "1",
+        "length": 6372,
+        "aspect_ratio": "16:9",
+        "fps": 23.976,
+        "main_feature": 1,
+        "basename": "SAMPLE_MOVIE",
+        "filename": "title_1.mkv",
+        "orig_filename": None,
+        "new_filename": None,
+        "ripped": 1,
+        "status": "success",
+        "error": None,
+        "source": "HandBrake",
+        "process": 1,
+        "chapters": 24,
+        "filesize": 4718592000,
+    }
+    return row | overrides
+
+
+def create(path: Path) -> Path:
+    with sqlite3.connect(path) as con:
+        con.execute(JOB)
+        con.execute(TRACK)
+        con.execute(CONFIG)
+    con.close()
+    return path
+
+
+def insert(path: Path, table: str, row: dict) -> None:
+    columns = ", ".join(row)
+    marks = ", ".join("?" for _ in row)
+    with sqlite3.connect(path) as con:
+        con.execute(
+            f"INSERT INTO {table} ({columns}) VALUES ({marks})", list(row.values())
+        )
+    con.close()
+
+
+def execute(path: Path, sql: str, *params) -> None:
+    with sqlite3.connect(path) as con:
+        con.execute(sql, params)
+    con.close()
