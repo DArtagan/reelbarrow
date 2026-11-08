@@ -1,11 +1,11 @@
 """A SQLite database shaped like ARM 2.24.4's, for the exporter's tests.
 
-The DDL is what SQLAlchemy emits on SQLite for `arm/models/job.py` and
-`arm/models/track.py` at tag 2.24.4, with the declared types SQLite keeps:
-`String(n)` as VARCHAR(n), `DateTime` as DATETIME, `Boolean` as BOOLEAN,
-`BigInteger` as BIGINT. Rows are synthetic; a real arm.db is never committed.
-Values are stored as SQLAlchemy stores them: booleans 0/1, datetimes as text
-with a space before the time.
+The `job` and `track` tables have the columns, order and declared types of a
+deployed ARM 2.24.4 database, which ARM's migrations built: they differ from
+`arm/models/job.py` in putting `path` and `stage` after `pid_hash`, as bare
+VARCHAR. Values are stored as SQLAlchemy stores them, as on that database:
+booleans 0/1, datetimes as text with a space before the time. Rows are
+synthetic; a real arm.db is never committed.
 """
 
 import sqlite3
@@ -21,7 +21,6 @@ CREATE TABLE job (
     stop_time DATETIME,
     job_length VARCHAR(12),
     status VARCHAR(32),
-    stage VARCHAR(63),
     no_of_titles INTEGER,
     title VARCHAR(256),
     title_auto VARCHAR(256),
@@ -44,11 +43,12 @@ CREATE TABLE job (
     errors TEXT,
     disctype VARCHAR(20),
     label VARCHAR(256),
-    path VARCHAR(256),
     ejected BOOLEAN,
     updated BOOLEAN,
     pid INTEGER,
     pid_hash INTEGER,
+    path VARCHAR,
+    stage VARCHAR,
     is_iso BOOLEAN,
     manual_start BOOLEAN,
     manual_mode BOOLEAN,
@@ -108,7 +108,6 @@ def job(job_id: int, **overrides) -> dict:
         "stop_time": "2026-10-21 21:02:13.204518",
         "job_length": "1:12:23",
         "status": "success",
-        "stage": "176107498997",
         "no_of_titles": 2,
         "title": "Sample-Movie",
         "title_auto": "Sample-Movie",
@@ -131,11 +130,12 @@ def job(job_id: int, **overrides) -> dict:
         "errors": None,
         "disctype": "dvd",
         "label": "SAMPLE_MOVIE",
-        "path": "/root/video/completed/movies/Sample-Movie (1965)",
         "ejected": 1,
         "updated": 0,
         "pid": 4242,
         "pid_hash": 8061347162311430543,
+        "path": "/root/video/completed/movies/Sample-Movie (1965)",
+        "stage": "176107498997",
         "is_iso": 0,
         "manual_start": 0,
         "manual_mode": 0,
