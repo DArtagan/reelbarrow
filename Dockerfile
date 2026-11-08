@@ -3,7 +3,7 @@ FROM ghcr.io/astral-sh/uv:0.13 AS uv
 FROM docker.io/library/python:3.13-slim
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ffmpeg libchromaprint-tools \
+  && apt-get install -y --no-install-recommends ffmpeg libchromaprint-tools lsdvd \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=uv /uv /usr/local/bin/uv
