@@ -719,8 +719,8 @@ transcode is done. A title the deployment's ARM chose not to transcode (the
 stamp's `duplicates`) keeps `ripped` true and an empty `filename`: job 83's
 skipped play-all, track 7, reads so. A title has a transcode when its
 `filename` is set. The deployment may later clear `ripped` on a skipped title;
-reading `filename` holds either way. How it is built is
-[`todos/arm-manifest-export.md`](../todos/arm-manifest-export.md).
+reading `filename` holds either way. The manifest's shape, and how to run the
+exporter, are in [exporter.md](exporter.md).
 
 A file on the share rather than an HTTP call because it is durable: if the
 service is down, nothing is lost, and the manifest outlives ARM's own job-log
