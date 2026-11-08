@@ -73,7 +73,8 @@ deploys nothing until the release pull request is merged.
 
 reelbarrow runs on a Kubernetes cluster deployed by Flux from a separate GitOps
 repository, called **the deployment repository** throughout this one. It holds
-reelbarrow's manifests and secrets, ARM's manifest hook and the alert rules, and
+reelbarrow's manifests and secrets, the exporter's sidecar in ARM's pod and the
+alert rules, and
 has its own spec for that half and its own rules for changing it. A spec here
 that needs a deployment change says what has to change, not how that repository
 is laid out. Where it is checked out is in `CLAUDE.local.md`, which is not
