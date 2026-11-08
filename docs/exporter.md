@@ -90,8 +90,16 @@ The exporter needs two mounts:
   rule allows outside the executor, and only inside `--out`.
 
 The process must be able to read `arm.db` and to create, write and rename files
-in the manifest directory. Manifests are created mode 0666 less the umask, so a
-service running as another user can read them on a filesystem that keeps modes.
+in the manifest directory, which must exist before the first pass. Manifests are
+created mode 0666 less the umask, so a service running as another user can read
+them on a filesystem that keeps modes. A CIFS mount doesn't: the client checks
+every access against the owner and modes in its mount options, so the exporter
+must run as the mount's `uid`, or the mount must name the exporter's.
+
+In the deployment this was built for, ARM runs as root and its database is
+`0:0`, mode 0644, in a directory open to all, so any uid can read it. The share
+is mounted `uid=0,gid=0,file_mode=0755,dir_mode=0755` in ARM's pod, so a
+sidecar on that volume writes the manifest directory only as uid 0.
 
 ### Journal mode
 
@@ -105,5 +113,5 @@ writable database directory, even with the connection read-only:
   connection must roll back. A read-only connection gets an error instead, and
   the exporter retries each pass until ARM's next write recovers it.
 
-Not yet checked on the deployed database: its `PRAGMA journal_mode`, and so
-whether the database volume can be mounted read-only.
+The deployed database reads `PRAGMA journal_mode` `delete`, a rollback journal,
+so its volume can be mounted read-only.
