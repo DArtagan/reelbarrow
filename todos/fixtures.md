@@ -15,10 +15,10 @@ jobs that form the acceptance test.
 
 ## Inputs
 
-- **ARM manifests for jobs 1–41.** These are exported once from ARM's database,
-  by the export mode of [arm-manifest-hook](arm-manifest-hook.md), into
-  `import/automatic-ripping-machine/manifests/`. If they are not there yet, that
-  step comes first.
+- **ARM manifests for jobs 1–41.** The first pass of
+  [arm-manifest-export](arm-manifest-export.md)'s exporter writes them, with
+  every other job's, into `import/automatic-ripping-machine/manifests/`. If they
+  are not there yet, that step comes first.
 - **The share, read through the reelbarrow pod.** Do not stream media through
   `kubectl exec`: it ran at 17.6 MB/s (E25) and truncated two fingerprints
   (E30). Run the analysis inside the pod, which mounts the share directly, and

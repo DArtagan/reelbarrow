@@ -14,6 +14,9 @@ the deployment's rule for every workload:
 - A successful ARM job neither filed nor awaiting review after 24 h.
 - A review untouched for 7 days.
 - The service's own liveness.
+- The manifest exporter's liveness: the time in its `exporter.json`
+  ([arm-manifest-export](arm-manifest-export.md)). Without it, a dead exporter
+  reads as no discs, and the first alert can't fire.
 
 ## Scope
 

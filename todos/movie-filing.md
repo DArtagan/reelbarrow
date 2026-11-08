@@ -13,7 +13,10 @@
 - **The executor**: the single choke point for every write, rename and delete
   under the video root, which refuses all of them while `dry_run` is true. Add the
   test that no other module writes there (see *Rules that protect the library*
-  in `AGENTS.md`).
+  in `AGENTS.md`). The one exception is the manifest exporter
+  ([arm-manifest-export](arm-manifest-export.md)): a separate process that
+  never mounts the library and writes only inside its own `--out`. The test
+  allows that module's writes there and nowhere else.
 - **Order**: renames on the same filesystem, then sidecars, then leftover
   deletion, then the ledger entry. Then a Plex partial scan of the touched folder
   (`/library/sections/{id}/refresh?path=…`), because Plex's own change detection

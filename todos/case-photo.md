@@ -18,9 +18,10 @@ other evidence.
 
 ## Scope
 
-- Triggered by the manifest [arm-manifest-hook](arm-manifest-hook.md) writes at
-  "Found disc", before the rip starts. That spec's last check proves the
-  timing.
+- Triggered by the job's first manifest, which
+  [arm-manifest-export](arm-manifest-export.md)'s exporter writes within one
+  interval of "Found disc", before the rip starts. That spec's last check proves
+  the timing.
 - A page that is a camera button and nothing else. The photo is stored with the
   job.
 - Vision extraction through the same model interface as

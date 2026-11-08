@@ -225,14 +225,16 @@ except what the raw folder's stamp carries (below).
   names follow neither cleanly. Nothing links a MakeMKV row to a HandBrake one,
   and their lengths for one title differ by seconds. Pairing has to be done by
   content, unless the raw folder's stamp maps the titles (below).
-- **There is no completion hook.** ARM calls `BASH_SCRIPT` with `$1=title
-  $2=body` on every notification (`ripper/utils.py:88`), and
-  `arm-audio-handoff.sh` already uses it by matching the message text. The
-  video side can do the same. `BASH_SCRIPT` is single-valued, so a dispatcher
-  has to call both handoffs. `job.pid` is `os.getpid()` of the ripper
-  (`models/job.py:218`), and the hook runs as `/usr/bin/env bash <script>`, so
-  the hook's `$PPID` should equal `job.pid` and select the row exactly. **Read
-  from source, not exercised.**
+- **There is no completion hook, and no notification sees a job's end.** ARM
+  calls `BASH_SCRIPT` with `$1=title $2=body` on every notification
+  (`ripper/utils.py:88`), synchronously, logging and ignoring its exit status,
+  and `arm-audio-handoff.sh` uses it by matching the message text. But ARM sets
+  a job's final status after its last notification: `success` in `main.py`'s
+  `else:`, after `main()` and its closing `notify_exit()` have returned, and
+  `fail` after the fatal-error notification. A job abandoned from the UI is
+  never notified. So a hook that reads the database never sees `success` or
+  `fail`, which is why the manifest is exported by polling (*The ARM
+  manifest*). **Read from 2.24.4's source, not exercised.**
 - **Pushover is wired** (`PO_USER_KEY`/`PO_APP_KEY`), so the brother already
   receives ARM's messages on his phone.
 
@@ -686,23 +688,30 @@ I-picture times libbluray finds a mark by, so it needs no video read (E36).
   └──┬──────────────▲───────────────────────┬────────────────┘
      │ reads/moves  │ manifests             │ partial scan
      ▼              │                       ▼
-  video share   ARM hook (BASH_SCRIPT     Plex API
-  (import/ and   dispatcher) writes
-   library)      manifests/job-<id>.json
+  video share   exporter, a sidecar      Plex API
+  (import/ and  in ARM's pod: arm.db
+   library)     → manifests/job-<id>.json
 ```
 
 ### The ARM manifest
 
-How reelbarrow learns of ARM's jobs, and so a script that ships with
-reelbarrow and runs inside ARM's container, set as ARM's `BASH_SCRIPT`. A site
-that already runs another hook calls both from a dispatcher of its own. On each
-notification the script looks up the job by `$PPID` = `job.pid` and writes
-`manifests/job-<id>.json` under ARM's video mount, which is
-`import/automatic-ripping-machine/manifests/` on the share: the job row (title,
-year, IMDb ID, video type, label, disc type, `crc_id`, status, paths) and its
-track rows. The first write comes at "Found disc" (so the service can ask for a
-case photo while the disc is in the drive), and each later notification rewrites
-it with the job's current status.
+How reelbarrow learns of ARM's jobs. `reelbarrow export-manifests`, shipped in
+reelbarrow's image and run beside ARM (a sidecar in ARM's pod), reads ARM's
+database read-only every 30 seconds and writes `manifests/job-<id>.json` for
+every job, into `import/automatic-ripping-machine/manifests/` on the share: under
+`"schema": 1`, every column of the job row and of its track rows, as ARM holds
+them. A pass rewrites a manifest only when its job has changed. A job's row
+exists before ARM's "Found disc" notification, so its manifest appears within
+one interval of it, while the disc is still in the drive (the case photo
+depends on that), and the last rewrite carries the status ARM ends the job
+with. No notification hook can see that status (*What ARM knows*).
+
+Only `success` and `fail` are final. `active` also means between stages, and a
+job whose ripper died reads as unfinished until ARM's next job marks it `fail`.
+Intake reads every other status as "not yet". `path` is the completed directory
+as ARM's container sees it, under `/root/video/`, which is
+`import/automatic-ripping-machine/` on the share. Datetimes are as ARM stores
+them: ISO 8601, ARM's local time, no zone.
 
 A track row's `ripped` is not "transcoded". ARM sets it when it registers a
 title longer than `MINLENGTH`, before any transcode, and sets it again once the
@@ -711,15 +720,17 @@ stamp's `duplicates`) keeps `ripped` true and an empty `filename`: job 83's
 skipped play-all, track 7, reads so. A title has a transcode when its
 `filename` is set. The deployment may later clear `ripped` on a skipped title;
 reading `filename` holds either way. How it is built is
-[`todos/arm-manifest-hook.md`](../todos/arm-manifest-hook.md).
+[`todos/arm-manifest-export.md`](../todos/arm-manifest-export.md).
 
 A file on the share rather than an HTTP call because it is durable: if the
 service is down, nothing is lost, and the manifest outlives ARM's own job-log
-retention. The service finds new manifests by scanning on an interval. A
-notifying HTTP ping can be added for latency if the interval proves too slow.
+retention, and a manifest stays when ARM's UI deletes its job. The service finds
+new manifests by scanning on an interval. If that proves too slow, ARM's
+`JSON_URL` notification could trigger an early pass. It carries no job id, so
+it can only say "look now".
 
-For the existing jobs, the same script exports manifests once from ARM's
-database.
+Jobs from before the exporter need nothing special: its first pass writes a
+manifest for every job in the database.
 
 The manifest describes the job, and the raw folder's stamp says which raw folder
 is the job's. The database can't, so the manifest doesn't try. Intake joins the
@@ -1167,7 +1178,7 @@ All read-only against the cluster and the share. Artefacts in
 | E12 | 10-03 | streams and chapters of the Rescuers pair | different length, crop, chapters, subtitle coverage |
 | E13 | 10-03 | frames at 0:45 and 73:20 of the Rescuers pair | misread as a localised version — see E19 |
 | E14 | 10-03 | survey of `unidentified/` and `raw/` | 154/180 empty; 101 non-empty raw, 2.14 TB |
-| E15 | 10-03 | ARM notification and audio-handoff code | `BASH_SCRIPT` is the only hook; `$PPID` = `job.pid` from source |
+| E15 | 10-03 | ARM notification and audio-handoff code | `BASH_SCRIPT` is the only hook; `$PPID` = `job.pid` from source. That a hook can't see a job's end is E37 |
 | E16 | 10-03 | Plex GUIDs and poster sources | 91/96 online-matched, posters from the agent |
 | E17 | 10-03 | Jellyfin naming docs; TMDB season page | `[tmdbid-…]` naming; TMDB missing 11/13 overviews |
 | E18 | 10-04 | `zfs list` on the Proxmox host | `rpool/storage/media`: 96 snapshots, hourly current, back to 2021 |
@@ -1189,6 +1200,7 @@ All read-only against the cluster and the share. Artefacts in
 | E34 | 10-28 | ffprobe of jobs 78, 79, 80 and 83's 21 transcodes against their playlists; job 79's job log; every Blu-ray job log's title-to-playlist lines | transcodes run 1.0 s shorter to 0.05 s longer than their playlist, chapters within 0.67 s; 17 of 21 unambiguous by length; job 79's variants share their clips and nearest length mispaired `title_76`; 14 of 19 Blu-ray jobs still have their logs, jobs 5–9's are gone |
 | E35 | 10-28 | job 79's playlists, clips and job log; HandBrake 1.11.2's `bd.c` and `reader.c`; keyframes at each playlist's last mark; thumbnails of transcode and clip frames | the near-identical playlists differ only by clips of black silence; HandBrake drops a chapter starting within 1.5 s of the end and stops the encode at the keyframe before it; that prediction is within −0.084 to +0.048 s on all 22 transcodes, and separates the variants by ≥ 1.4 s |
 | E36 | 10-28 | the `.clpi` EP maps of jobs 78, 79, 80 and 83 through `bluray.clips`, against ffprobe's keyframes and the 22 transcodes | every keyframe is an entry point, 2–5 ms early as the map's 5.7 ms steps store it; `Playlist.handbrake_duration` from playlists and EP maps alone is within −0.079 to +0.048 s of all 22, and each of job 79's variants is nearest its own playlist of 92, the next 1.4 s or more away |
+| E37 | 11-08 | ARM 2.24.4's `main.py`, `arm_ripper.py`, `utils.py`, `ProcessHandler.py`, `models/job.py` and the UI's JSON API, from GitHub | the final status is set after the last notification, and an abandoned job is never notified; the hook runs synchronously and its exit status is ignored; the UI's JSON API lists finished jobs only when authenticated, as strings and without tracks; `JSON_URL` carries no job id |
 
 ---
 
