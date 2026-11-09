@@ -101,9 +101,8 @@ be filed by [first-filing](first-filing.md), so the plans of its failed jobs
 
 ## Needs
 
-Manifests for jobs 1–6, which [arm-manifest-export](arm-manifest-export.md)'s
-sidecar skips until it maps ARM's older `/root/media` paths. Jobs 2, 3 and 5
-are rows of the fixtures table.
+A manifest on the share for every job in the fixtures table, from
+[arm-manifest-export](arm-manifest-export.md).
 
 ## Done when
 

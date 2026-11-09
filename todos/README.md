@@ -21,7 +21,7 @@ Specs are referred to by name, not number, so finishing one renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 1 | [arm-manifest-export](arm-manifest-export.md) | The exporter, running as a sidecar: jobs 1–6 still to export, then proven on a real disc | a real disc, for its last check |
+| 1 | [arm-manifest-export](arm-manifest-export.md) | The exporter that copies ARM's database out as job manifests, run as a sidecar | a real disc, for its last check |
 | 2 | [single-manifest-plan](single-manifest-plan.md) | One manifest, *The Hallelujah Trail*, planned and gated, executing nothing; `reelbarrow analyse` and the first fixture | — |
 | 3 | [executor](executor.md) | The executor and the ledger: that plan carried out on a test tree, and refused by dry run on the share | single-manifest-plan |
 | 4 | [first-filing](first-filing.md) | *The Hallelujah Trail* filed for real by one deliberate run, its preconditions proven, then dry run back on | executor |
