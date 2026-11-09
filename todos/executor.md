@@ -39,10 +39,9 @@ code that does it is built while there is one plan to carry out.
   from the file, such as the raw copy's backup checks.
 - **The ledger**, in SQLite under `REELBARROW_DATA_DIR`, keyed by the
   manifest's `source` and `id` (*The manifest*).
-- **`reelbarrow file <manifest>`** plans the manifest and hands the plan to the
-  executor, if the gate says automatic. Unlike `reelbarrow plan`, it takes one
-  manifest and has no default: the command that writes to the library never
-  reaches past the manifest it was given.
+- **`reelbarrow file [path]`** plans as `reelbarrow plan [path]` does, taking
+  the same path, and hands each automatic plan to the executor. Review and
+  hold plans are printed and left alone.
 
 ## Secrets
 

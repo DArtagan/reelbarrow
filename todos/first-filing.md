@@ -34,12 +34,16 @@ for the run can file nothing else.
 - **Plex's token** added to reelbarrow's secret in the deployment repository.
 - **Job 18's plan is still automatic** and unchanged from the one
   [executor](executor.md) carried out in dry run.
+- **Job 18's is the only automatic plan.** `reelbarrow plan` with no path, over
+  every manifest, gates every other one review or hold. `reelbarrow file`
+  defaults to every manifest, as `plan` does, so this is what keeps a run that
+  omitted the path from filing anything else.
 
 ## The run, in the deployment repository
 
 1. Set `REELBARROW_DRY_RUN` to `"false"` and drop `readOnly` from the video
    mount, in one commit.
-2. Run `reelbarrow file` on job 18's manifest in the pod.
+2. Run `reelbarrow file` in the pod, given job 18's manifest.
 3. Put both back, in one commit. Dry run stays on until
    [automatic-filing](automatic-filing.md).
 
