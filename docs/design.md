@@ -895,6 +895,40 @@ The pipeline, per ARM job (and later per backlog folder):
    change detection cannot be relied on over a CIFS mount.
 8. **Notify.** Pushover to the brother: filed, or review needed, with a link.
 
+**Plans, their basis, and the inbox** (Will, 2026-11-09). A plan is what steps
+1–6 make of one manifest: every operation with its reasons, and the gate's
+outcome. It records its **basis**, the state it was made from: the manifest's
+content, and the size and modification time of every file it reads and of
+every library path it writes, renames onto or deletes, absent ones included.
+The media's content isn't hashed for it: a video MD5 over tens of gigabytes is
+analysis, cached against the same size and time. Plans wait in the **inbox**,
+the service's record of plans not yet executed:
+
+- In dry run every plan stays there, which is the data the dry run collects.
+- Otherwise an automatic plan goes straight to the executor, and a review or
+  hold plan waits for the review UI. The UI is never a confirmation step for
+  what the gate passed (*Confidence*).
+- The executor compares the basis with the share immediately before a plan's
+  first operation. If anything differs it executes nothing, and the manifest is
+  replanned and its new plan goes back into the inbox. Once a unit is filed, a
+  change to its manifest goes to review instead (*The manifest*).
+
+**Any order** (Will, 2026-11-09): *"the rules should ensure that manifests can
+be processable in any order, with the library eventually being filled with the
+best results."* A plan is made from one manifest and the library as it stands,
+so this holds only if:
+
+- **The library records where each file came from**: source, job and disc
+  identity, in `disc.json` and the ledger, so a later manifest's plan compares
+  itself with what is filed.
+- **Every choice between copies is a fixed order, not arrival order.** Best
+  copy rule 1 keeps the earliest successful job's copy, not the first filed.
+- **Nothing is deleted that a manifest not yet planned could prefer.** A copy
+  is a leftover only once what supersedes it is in the library, or is in the
+  same plan.
+- **An outcome that needs another manifest is hold**, and is replanned when
+  that manifest arrives, as Around the World's disc 2 will.
+
 ### The review UI
 
 One page per job, usable on a phone: what ARM thought, the proposed plan in plain

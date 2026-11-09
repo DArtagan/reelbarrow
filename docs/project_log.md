@@ -9,3 +9,5 @@ reused.
 | release-pipeline | 2026-10-19 | #1, #2, #3 |
 | analysis | 2026-10-20 | #5 |
 | fixtures | 2026-11-09 | none: folded into dry-run-planner |
+| dry-run-planner | 2026-11-09 | none: split into single-manifest-plan, manifest-loop and plan-inbox |
+| movie-filing | 2026-11-09 | none: split into executor, first-filing and automatic-filing |

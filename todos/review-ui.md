@@ -16,12 +16,18 @@ going to read documentation.
 
 ## Scope
 
+- The review and hold plans in the inbox ([plan-inbox](plan-inbox.md)), the
+  last of the steps in [README](README.md). Automatic plans never wait here
+  (*Plans, their basis, and the inbox* in the design).
 - One page per job: what ARM thought; the plan in plain language; and, for each
   uncertain item, the evidence that made it uncertain (a frame grab, a transcript
   excerpt, a runtime comparison).
 - Actions: accept; correct (search TMDB, pick an episode, label an edition); or
   "not sure, leave for Will". A correction replans the job and goes back
   through the gate. It does not bypass the gate.
+- An accepted plan goes to the executor, which checks its basis first. If the
+  share changed after the plan was made, nothing is executed: the manifest is
+  replanned and its new plan goes back into the inbox, to be reviewed again.
 - Pushover: "filed" or "review needed", with a link. ARM's Pushover keys are
   in the deployment repository, with ARM's other keys. A separate app token
   keeps reelbarrow's messages distinguishable.
@@ -37,3 +43,5 @@ going to read documentation.
   him how it went, and write down what confused him.
 - A correction made on the page produces a replanned job that the gate then
   passes or holds by its ordinary rules.
+- A plan accepted after its basis changed was replanned into the inbox, not
+  executed.

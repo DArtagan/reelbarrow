@@ -11,22 +11,29 @@ name the sections they depend on rather than restating them.
 
 ## In order
 
-The design's fixtures table (*What is waiting*) is the acceptance test for every
-spec here except case-photo. Dry run stays on until movie-filing, the first that
-changes the share. Specs are referred to by name, not number, so finishing one
-renumbers nothing.
+The order is Will's (2026-11-09): the smallest loop that runs end to end first,
+then wider. One manifest planned, then filed, then every manifest, then the
+service and its inbox, then the review UI, each *"building up from very simple
+cases toward progressively harder ones"*. The design's fixtures table (*What is
+waiting*) is the acceptance test, each spec taking the rows it names. Dry run
+stays on, except for first-filing's one deliberate run, until automatic-filing.
+Specs are referred to by name, not number, so finishing one renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 1 | [arm-manifest-export](arm-manifest-export.md) | The exporter that copies ARM's database out as job manifests, run as a sidecar | a real disc, for its last check |
-| 2 | [dry-run-planner](dry-run-planner.md) | Intake → analyse → classify → identify films → plan → gate, recorded and shown, executing nothing; each case's fixture captured from the share with its rule | arm-manifest-export |
-| 3 | [movie-filing](movie-filing.md) | The executor: the four unambiguous films filed for real, Plex refreshed, leftovers deleted | dry-run-planner |
-| 4 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | movie-filing |
-| 5 | [review-ui](review-ui.md) | Review page and Pushover: accept, correct, defer | dry-run-planner |
-| 6 | [editions](editions.md) | Prove the editions naming in Plex, Jellyfin and Kodi before using it | — |
-| 7 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | movie-filing, review-ui, editions |
-| 8 | [episode-matching](episode-matching.md) | Inspect harness, reference text, the LLM matcher; Tweety season 1 | movie-filing, review-ui |
-| 9 | [case-photo](case-photo.md) | Photo at insert time, read by a vision model, used as evidence | arm-manifest-export, review-ui, episode-matching |
+| 1 | [arm-manifest-export](arm-manifest-export.md) | The exporter, running as a sidecar: jobs 1–6 still to export, then proven on a real disc | a real disc, for its last check |
+| 2 | [single-manifest-plan](single-manifest-plan.md) | One manifest, *The Hallelujah Trail*, planned and gated, executing nothing; `reelbarrow analyse` and the first fixture | — |
+| 3 | [executor](executor.md) | The executor and the ledger: that plan carried out on a test tree, and refused by dry run on the share | single-manifest-plan |
+| 4 | [first-filing](first-filing.md) | *The Hallelujah Trail* filed for real by one deliberate run, its preconditions proven, then dry run back on | executor |
+| 5 | [manifest-loop](manifest-loop.md) | Every manifest planned, simplest case first, in any order: the whole fixtures table | executor, arm-manifest-export |
+| 6 | [plan-inbox](plan-inbox.md) | The service: a plan and its basis per manifest in the inbox, replanned when the basis changes, listed in the web UI | manifest-loop |
+| 7 | [automatic-filing](automatic-filing.md) | Dry run off: the service files what the gate passes, the table's other three films | plan-inbox, first-filing |
+| 8 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | automatic-filing |
+| 9 | [review-ui](review-ui.md) | Review page and Pushover for the inbox's review and hold plans: accept, correct, defer | automatic-filing |
+| 10 | [editions](editions.md) | Prove the editions naming in Plex, Jellyfin and Kodi before using it | — |
+| 11 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | automatic-filing, review-ui, editions |
+| 12 | [episode-matching](episode-matching.md) | Inspect harness, reference text, the LLM matcher; Tweety season 1 | automatic-filing, review-ui |
+| 13 | [case-photo](case-photo.md) | Photo at insert time, read by a vision model, used as evidence | arm-manifest-export, review-ui, episode-matching |
 
 editions needs nothing else and can run whenever there is a free session.
 

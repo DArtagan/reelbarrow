@@ -2,13 +2,12 @@
 
 ## Opening prompt
 
-> `reelbarrow arm-export-manifests` and the deployment's raw-copy record are built
-> and tested; what remains is deploying them and proving them on the cluster
-> and a real disc. Read `todos/arm-manifest-export.md`, then *The manifest* and
-> *The raw copy's record* in `docs/design.md`, and `docs/exporter.md`. The
-> deployment half is in the deployment repository's
-> `todos/video-library-ingest.md`. Check which reelbarrow release is deployed,
-> and whether ARM's patch and the migration have gone in, before anything else.
+> `reelbarrow arm-export-manifests` runs as a sidecar in ARM's pod, and ARM's
+> raw-copy patch and its migration are in. What remains is exporting jobs 1–6,
+> and proving the exporter on a real disc. Read `todos/arm-manifest-export.md`,
+> then *The manifest* and *The raw copy's record* in `docs/design.md`, and
+> `docs/exporter.md`. The deployment half is in the deployment repository's
+> `todos/video-library-ingest.md`.
 
 ## What is done (2026-11-08)
 
@@ -45,6 +44,25 @@
   name and rebuild `job` with `batch_alter_table`, so the patch's table
   survives an upgrade and declares no foreign key; ARM moves every transcode
   through `utils.move_files`.
+
+## Deployed (2026-11-09)
+
+Read on the cluster, 2026-11-09:
+
+- **reelbarrow `0.3.0`** ships the command; its image's revision label is the
+  `v0.3.0` tag's commit.
+- **ARM's patch**: the pod restarted at 08:21 UTC, and `arm.log` reads
+  `applied raw-copy-code to /opt/arm/arm/ripper/utils.py` at 08:21:38.
+- **The migration** wrote its rows: `reelbarrow_raw_copy` holds 32, jobs 7, 8,
+  23, 25, 27 and 76–103 except 81, as its dry run said. No job has run since
+  103.
+- **The sidecar** writes `manifest-arm-<job>-<stage>.json` for 98 of the 103
+  jobs into `import/automatic-ripping-machine/manifests/`, and `exporter.json`
+  was current. It skips jobs 1, 2, 3, 5 and 6 every pass, logging
+  `completed folder '/root/media/completed/…' is outside /root/video`: those
+  jobs ran when ARM's container mounted the share's folder at `/root/media`,
+  and `--arm-path` takes one mapping. Not checked: that `/root/media` was the
+  same folder of the share.
 
 ## Decisions, so they aren't relitigated
 
@@ -110,18 +128,12 @@
 
 Each step that changes the cluster or the share is confirmed with Will first.
 
-1. **Release reelbarrow**: merge this pull request, then its release pull
-   request, so the image has `arm-export-manifests`.
-2. **Deploy ARM's patch** (the deployment's pull request). It changes ARM's
-   pod, and the `Recreate` strategy kills any job running: merge it while ARM
-   is idle, then check in the container, not the ConfigMap, that
-   `arm-source-patches.py` logged `applied raw-copy-code`.
-3. **Run the migration** in ARM's pod, dry run first, then `--write`. It is a
-   write to ARM's live database, adding rows to a table no ARM code reads;
-   check the dry run's count and passed-over list again, as jobs will have run
-   since 2026-11-08.
-4. **Add the sidecar** in ARM's pod, from the first release with the command.
-   What it needs is in the deployment's spec.
+1. **Export jobs 1–6.** Check what `/root/media` was in ARM's container, then
+   let `--arm-path` be given more than once, one per ARM path, and add
+   `/root/media`'s mapping to the sidecar. Jobs 2, 3 and 5 are rows of the
+   design's fixtures table, which [manifest-loop](manifest-loop.md) plans.
+2. **The real disc and the rename check**, under *Not yet checked* and *Done
+   when*.
 
 ## Not yet checked
 
