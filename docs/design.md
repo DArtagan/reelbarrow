@@ -271,9 +271,12 @@ folder keeps the name the job had when its rip started, while a title corrected
 later renames only the completed folder, so nothing on the share ties the two
 by name. The deployment patches ARM to record those facts as the job runs, in
 ARM's own database, in a table of the patch's, `reelbarrow_raw_copy`, one JSON
-document a job. The deployment repository's ARM documentation defines the
-document. The exporter carries it out in the job's manifest as `raw` and
-`titles` (*The manifest*). A site without the patch exports no `raw`, and
+document a job. The document is the manifest's `raw` and `titles` already, in
+ARM's container's paths, each title also holding `handbrake_title`, the
+number HandBrake and ARM's moves know it by and the patch's key for it. The
+exporter translates the paths, drops that number, and checks the rest against
+the model; it is the one contract, and the deployment repository's ARM
+documentation describes how the patch keeps it. A site without the patch exports no `raw`, and
 its raw folders are paired by structure and fingerprint. **Not yet deployed;
 see [arm-manifest-export](../todos/arm-manifest-export.md).**
 
@@ -317,8 +320,9 @@ What a manifest's raw-copy fields mean:
   feature sits above `extras/`, the rest inside it. That placement is ARM's
   guess, from HandBrake's main-feature flag or the largest file, and is often
   wrong on a bonus disc; the feature is decided here. Earlier jobs renamed it
-  `<Title (Year)>.mkv`, and its transcode is not recorded: it is the one file
-  above `extras/` of no title's.
+  `<Title (Year)>.mkv`; which title that was is ARM's own record, the one
+  HandBrake track it marked `main_feature`, and the record names that file
+  its transcode (jobs 25, 27, 78 and 79).
 - **A title with no transcode** says why in its `reason`:
   `played_by_kept_titles` for a title ARM chose not to transcode because titles
   it kept already play it, compared by what each plays from the disc (a Blu-ray
@@ -779,11 +783,11 @@ why each field is as it is; the schema says exactly what it may hold.
   share that holds `import/` and the libraries, which filing already requires
   to be one filesystem; it uses `/`, has no leading `/`, no `.` or `..`, and is
   the name exactly as on the share. It is never a fragment to join with
-  another field. No process's mounts appear in it: reelbarrow knows where its
-  own mount of the share's root is, `REELBARROW_VIDEO_ROOT`, and the exporter
-  is told one folder as ARM and reelbarrow each see it (`--arm-path
-  /root/video=/video/import/automatic-ripping-machine`), from which it writes
-  ARM's paths relative to the share. A path outside that folder fails the
+  another field. No process's mounts appear in it, and each process knows only
+  its own: reelbarrow where it mounts the share's root,
+  `REELBARROW_VIDEO_ROOT`, and the exporter where ARM mounts one folder of it
+  (`--arm-path /root/video=import/automatic-ripping-machine`, ARM's path and
+  the folder's path on the share). A path outside that folder fails the
   manifest rather than becoming a plausible wrong one, and intake refuses one
   that resolves outside the video root.
 - **A claim is `{"value", "reason"}`**, the reason from a closed vocabulary,

@@ -75,13 +75,27 @@
 - **From the review of pull request #12** (2026-11-09): absent means not
   recorded and null means none, kept; the backup's two checks stated
   separately, `raw.check`, not a `complete` with a null in it; JSON Schema,
-  generated from pydantic models; `--arm-path ARM=REELBARROW`, *"a clear
-  mapping"*, rather than a container path and a share path; ARM's times taken
-  as UTC unless told otherwise; `wholes` folded into `titles`, one reason,
-  `played_by` where structure doesn't say what plays a title (*"A+"*). Will,
-  on `wholes`: *"It feels like something is being duplicated between `titles`
-  and `wholes`"*: the reason, `kept` and the list each held which titles
-  another plays.
+  generated from pydantic models; ARM's times taken as UTC unless told
+  otherwise; `wholes` folded into `titles`, one reason, `played_by` where
+  structure doesn't say what plays a title (*"A+"*). Will, on `wholes`: *"It
+  feels like something is being duplicated between `titles` and `wholes`"*:
+  the reason, `kept` and the list each held which titles another plays.
+- **`--arm-path ARM=SHARE`**, ARM's path and the folder's path on the share. A
+  wrong turn worth not repeating: asked for *"a clear mapping
+  `/path/in/arm=/path/in/reelbarrow`"*, it was built with reelbarrow's path on
+  the right, which made the exporter take the service's
+  `REELBARROW_VIDEO_ROOT` off it. Will: *"If feels like these concepts are
+  beginning to collide."* They did: the sidecar had to keep a setting it
+  doesn't own equal to the service's. With the share's path on the right each
+  process knows only its own mount.
+- **The raw-copy table holds the manifest's shape** (2026-11-09), asked *"is
+  this the best form for that?"* of the stamp's vocabulary it had kept. The
+  exporter translates ARM's paths and drops `handbrake_title`, the patch's own
+  key, and nothing else; the stamp's vocabulary lives only in the one-off
+  migration.
+- **A feature ARM renamed is recorded from ARM's `main_feature` row**
+  (2026-11-09), when one track has it and the folder holds one other `.mkv`:
+  jobs 25, 27, 78 and 79.
 - **Each transcode's final path recorded by the patch** as ARM moves it (*"go
   with your option #1, recording the path"*), not found by listing folders.
 - **After filing the manifest is out of date, and stays so**: *"maybe that's

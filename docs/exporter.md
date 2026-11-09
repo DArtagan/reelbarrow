@@ -8,51 +8,47 @@ page is how to run it.
 
 ```bash
 reelbarrow arm-export-manifests --db /root/db/arm.db --out /manifests \
-  --arm-path /root/video=/video/import/automatic-ripping-machine
+  --arm-path /root/video=import/automatic-ripping-machine
 ```
 
 | option | default | |
 |---|---|---|
 | `--db` | required | ARM's `arm.db` |
-| `--arm-path` | required | `ARM=REELBARROW`: one folder, as ARM's container mounts it and as reelbarrow does |
+| `--arm-path` | required | `ARM=SHARE`: one folder, as ARM's container mounts it and as its path on the share |
 | `--arm-timezone` | `Etc/UTC` | the IANA zone ARM's container runs in, whose local time ARM stores |
 | `--out` | `REELBARROW_MANIFEST_DIR` | the manifest directory, `import/automatic-ripping-machine/manifests/` on the share |
 | `--interval` | 30 | seconds from the start of one pass to the start of the next |
 | `--timeout` | 5 | seconds a pass waits on ARM's write lock before giving up until the next |
 | `--once` | | one pass; exits 1 if it couldn't read the database or write the manifests |
 
+It runs from reelbarrow's image, so exporter and reader are always the same
+version. In Kubernetes it is a sidecar in ARM's pod, the only place ARM's
+database volume can be mounted beside ARM.
+
 ### `--arm-path`
 
 ARM records every path as its own container sees it, and the exporter itself
 never sees those files, so it has to be told where they are on the share. In
-the deployment this was built for, ARM's pod mounts only one folder of the
-share, `import/automatic-ripping-machine`, at `/root/video`, while reelbarrow
-mounts the whole share at `/video`. So one folder is `/root/video` to ARM and
-`/video/import/automatic-ripping-machine` to reelbarrow, which is what the
-option says:
+the deployment this was built for, ARM's pod mounts one folder of the share,
+`import/automatic-ripping-machine`, at `/root/video`, which is what the option
+says, ARM's path on the left and the folder's path on the share on the right:
 
 ```
---arm-path /root/video=/video/import/automatic-ripping-machine
+--arm-path /root/video=import/automatic-ripping-machine
 ```
 
 ARM's `/root/video/completed/movies/X` then goes into the manifest as
-`import/automatic-ripping-machine/completed/movies/X`: the right-hand side with
-reelbarrow's video root, `REELBARROW_VIDEO_ROOT`, taken off, so that it is a
-path from the share's root that no mount appears in. The service, reading it,
-puts its own video root back. The right-hand side must be inside that video
-root, and the exporter runs from reelbarrow's image, so it has the service's
-default, `/video`; a deployment that changes one changes both. It has no
-default itself, because no value is right everywhere, and a wrong one makes
-plausible paths rather than failing.
+`import/automatic-ripping-machine/completed/movies/X`, a path from the share's
+root that no mount appears in. The service, reading it, puts its own mount of
+the share's root in front, `REELBARROW_VIDEO_ROOT`, which the exporter never
+needs: each knows only the mount it has. The option has no default, because
+no value is right everywhere, and a wrong one makes plausible paths rather
+than failing.
 
 ### `--arm-timezone`
 
 ARM stores its local time without a zone, and its image runs in `Etc/UTC`
 unless its `TZ` is set. A deployment that sets ARM's `TZ` passes the same here.
-
-It runs from reelbarrow's image, so exporter and reader are always the same
-version. In Kubernetes it is a sidecar in ARM's pod, the only place ARM's
-database volume can be mounted beside ARM.
 
 ## What a pass does
 
