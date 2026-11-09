@@ -11,11 +11,10 @@
 
 ## Why one film, by hand
 
-Real filing used to wait for the planner to cover every case. One film filed
-by a single deliberate run, with nothing else able to file, proves the write
-path on the share and in Plex as early as there is a plan worth filing. The
-service doesn't plan anything yet, so turning dry run off for the run can file
-nothing else.
+One film filed by a single deliberate run, with nothing else able to file,
+proves the write path on the share and in Plex as soon as there is a plan
+worth filing. The service doesn't plan anything yet, so turning dry run off
+for the run can file nothing else.
 
 ## Preconditions, each checked rather than assumed
 

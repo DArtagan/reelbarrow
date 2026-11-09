@@ -901,8 +901,20 @@ outcome. It records its **basis**, the state it was made from: the manifest's
 content, and the size and modification time of every file it reads and of
 every library path it writes, renames onto or deletes, absent ones included.
 The media's content isn't hashed for it: a video MD5 over tens of gigabytes is
-analysis, cached against the same size and time. Plans wait in the **inbox**,
-the service's record of plans not yet executed:
+analysis, cached against the same size and time.
+
+The gate gives a plan one of three outcomes:
+
+- **Automatic**: every item meets its bar in *Confidence*, and the plan files
+  without a person.
+- **Review**: a person can decide it now, from the evidence the review page
+  shows: a disc case's label, a runtime, a transcript.
+- **Hold**: no one can decide it yet, because what it needs hasn't been ripped:
+  Around the World's disc 2 (case 4). A held plan is replanned whenever a new
+  manifest arrives, as well as when its basis changes, and Will can still
+  decide it by hand.
+
+Plans wait in the **inbox**, the service's record of plans not yet executed:
 
 - In dry run every plan stays there, which is the data the dry run collects.
 - Otherwise an automatic plan goes straight to the executor, and a review or
@@ -919,7 +931,9 @@ best results."* A plan compares what its manifest brings with what the library
 holds, and keeps the better. If the rules that prefer one file over another
 are clear, the order manifests arrive in can't change where the library ends:
 a file deleted lost to one that stays, or to one that later loses to a better
-one. The rules are clear when:
+one. A manifest whose every copy loses to what is filed plans only deletions:
+the re-rips of a disc already filed clean themselves up. The rules are clear
+when:
 
 - **Each file has one place it competes for**: its work, cut and disc, decided
   by the identity rows of *Confidence*. Two files either compete for one place,

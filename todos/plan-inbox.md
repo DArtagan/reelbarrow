@@ -39,7 +39,7 @@ plans from.
 ## Done when
 
 - The deployed pod, in dry run, holds a plan in its inbox for every manifest
-  on the share, and their gates match `reelbarrow plan --all`'s.
+  on the share, and their gates match `reelbarrow plan`'s.
 - A manifest the exporter rewrites, from a real disc insert, is replanned
   within one interval, and nothing else is.
 - A second scan with nothing changed reads no media: measured by the analysis

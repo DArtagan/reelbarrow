@@ -21,9 +21,9 @@ be filed by [first-filing](first-filing.md), so the plans of its failed jobs
 
 ## Scope
 
-- **`reelbarrow plan --all`** plans every manifest in the manifest directory
-  and prints each plan's gate. It records nothing; the inbox is
-  [plan-inbox](plan-inbox.md).
+- **`reelbarrow plan`**, given no path, plans every manifest in
+  `REELBARROW_MANIFEST_DIR` ([single-manifest-plan](single-manifest-plan.md)).
+  It records nothing; the inbox is [plan-inbox](plan-inbox.md).
 - **The cases, simplest first**, each with its fixture captured as
   [single-manifest-plan](single-manifest-plan.md)'s *Fixtures, case by case*
   says, its row as a failing test, then the rule:
@@ -111,7 +111,7 @@ A manifest on the share for every job in the fixtures table, from
   when it was captured.
 - A layer-1 test plans and carries out the table's manifests on a synthetic
   tree in several orders, shuffled, and every order ends in the same library.
-- `reelbarrow plan --all` in the deployed pod has planned every manifest on
+- `reelbarrow plan` in the deployed pod has planned every manifest on
   the share, and a row-by-row comparison with the table matches. Where it does
   not, either the code or the table is corrected, with the evidence written
   into the design.

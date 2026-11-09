@@ -15,8 +15,7 @@
 The second of the steps in [README](README.md): one manifest, its outputs
 handled. Writing to the share is where the most is unknown (the CIFS mount's
 permissions, Plex's refresh and watched state, the ledger's backup), so the
-code that does it is built while there is one plan to carry out, not after the
-planner covers every case.
+code that does it is built while there is one plan to carry out.
 
 ## Scope
 
@@ -41,7 +40,9 @@ planner covers every case.
 - **The ledger**, in SQLite under `REELBARROW_DATA_DIR`, keyed by the
   manifest's `source` and `id` (*The manifest*).
 - **`reelbarrow file <manifest>`** plans the manifest and hands the plan to the
-  executor, if the gate says automatic.
+  executor, if the gate says automatic. Unlike `reelbarrow plan`, it takes one
+  manifest and has no default: the command that writes to the library never
+  reaches past the manifest it was given.
 
 ## Secrets
 

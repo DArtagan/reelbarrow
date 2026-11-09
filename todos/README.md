@@ -34,6 +34,8 @@ Specs are referred to by name, not number, so finishing one renumbers nothing.
 | 11 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | automatic-filing, review-ui, editions |
 | 12 | [episode-matching](episode-matching.md) | Inspect harness, reference text, the LLM matcher; Tweety season 1 | automatic-filing, review-ui |
 | 13 | [case-photo](case-photo.md) | Photo at insert time, read by a vision model, used as evidence | arm-manifest-export, review-ui, episode-matching |
+| 14 | [library-conformance](library-conformance.md) | The existing library, filed by hand years ago, brought to today's conventions | hard-movie-cases, editions |
+| 15 | [superseded-sources](superseded-sources.md) | Sources with no manifest that the library already holds better, deleted | hard-movie-cases |
 
 editions needs nothing else and can run whenever there is a free session.
 
@@ -41,7 +43,9 @@ editions needs nothing else and can run whenever there is a free session.
 
 The `unidentified/` and `raw/` backlog is Will's stated next project; see *The
 backlog, roughly* and *Future work* in the design. It gets a spec once
-hard-movie-cases has proven the pipeline on hard cases.
+hard-movie-cases has proven the pipeline on hard cases. superseded-sources
+clears what of it the library already holds better, so the backlog is what
+remains.
 
 ## Writing a spec
 

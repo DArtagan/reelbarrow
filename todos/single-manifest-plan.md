@@ -10,22 +10,8 @@
 > (layer 1) in `docs/design.md`. Everything in this session is read-only on
 > the share.
 
-## Why this shape (decided 2026-11-09)
-
-The planner was one spec, `dry-run-planner`, covering every case in the
-fixtures table before anything was filed, with the executor after it. Will
-proposed building the smallest loop that runs end to end first and widening
-it: one manifest planned, then filed, then every manifest, then the service and
-its inbox, then the review UI, *"building up from very simple cases toward
-progressively harder ones"*. This spec is the first of those steps. The order
-is in [README](README.md).
-
-Each case's fixture is captured with the rule that reads it, not ahead of it
-(Will agreed, 2026-11-09: *"I agree."*). A capture made before its rules has
-to guess at what they need and at the loader's shape. The manifest's fields
-were chosen the same way, each traced to a rule that reads it; Will,
-2026-11-08: *"An interface that includes everything is both fragile and
-wasteful."*
+The first of the steps in [README](README.md): one manifest, its inputs
+processed and its outputs proposed.
 
 ## Why job 18
 
@@ -40,10 +26,11 @@ manifests, which [manifest-loop](manifest-loop.md) plans.
 Steps 1–6 for this one case, each built only as far as job 18 needs it, and
 each in the form the harder cases will extend rather than replace.
 
-- **`reelbarrow analyse <path> --out <dir>`** comes first. It runs the
-  analysis layer over a job's folders in the pod and writes what it measured.
-  Its output is the fixtures' form, so the planner reads the same thing from a
-  fixture as from the share.
+- **`reelbarrow analyse <manifest>`** comes first. It measures the files the
+  manifest names, in the pod, and prints what it measured as one JSON document.
+  It identifies nothing and plans nothing, and writes no files, so it presumes
+  no layout. Its output is the fixtures' form, so the planner reads the same
+  thing from a fixture as from the share.
 - **Intake** reads a manifest and finds the job's completed and raw folders by
   the paths it records (*The manifest*), checking they are there, never by
   matching names.
@@ -56,14 +43,22 @@ each in the form the harder cases will extend rather than replace.
   is; [executor](executor.md) writes it.
 - **Gate**: automatic, review or hold, per *Confidence*. A plan is all or
   nothing.
-- **`reelbarrow plan <manifest>`** prints the plan and its gate. It records
-  nothing; the inbox is [plan-inbox](plan-inbox.md).
+- **`reelbarrow plan [path]`** prints each plan and its gate. A manifest file
+  plans that manifest alone; a folder plans every manifest in it; with no path,
+  every manifest in `REELBARROW_MANIFEST_DIR`. It records nothing; the inbox
+  is [plan-inbox](plan-inbox.md).
 
 ## Fixtures, case by case
 
 How every case's fixture is captured, here and in the specs after this one.
 When this spec is done, this section moves into *Testing*, layer 1, in the
 design.
+
+Each case's fixture is captured with the rule that reads it, never ahead of
+it (Will, 2026-11-09). A capture made before its rules has to guess at what
+they need and at the loader's shape. The manifest's fields were chosen the
+same way, each traced to a rule that reads it; Will, 2026-11-08: *"An
+interface that includes everything is both fragile and wasteful."*
 
 - **Capture what a rule reads, no more.** The candidates are ffprobe JSON,
   video MD5s, fingerprints, Blu-ray hashes, a DVD image's
@@ -76,9 +71,9 @@ design.
   did.
 - **Check each capture against a fresh listing** from the pod: its file count
   and durations. That catches a truncated capture.
-- **Named for the case, under `tests/fixtures/<case>/`** (*Testing*, layer 1),
-  with a loader that presents a job to the planner as intake would see it on
-  the share. A job's manifest is the one already frozen in
+- **Named for the case, under `tests/fixtures/<case>/`** (*Testing*, layer 1):
+  the manifest and `reelbarrow analyse`'s document of it, with a loader that
+  presents a job to the planner as intake would see it on the share. A job's manifest is the one already frozen in
   `tests/fixtures/manifests/`, where there is one, not a second copy.
 - **No Whisper transcripts.** Whether they are committed is settled in
   [episode-matching](episode-matching.md), the first spec that reads them.
