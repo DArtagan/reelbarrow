@@ -8,13 +8,14 @@ page is how to run it.
 
 ```bash
 reelbarrow arm-export-manifests --db /root/db/arm.db --out /manifests \
-  --arm-path /root/video=import/automatic-ripping-machine
+  --arm-path /root/video=import/automatic-ripping-machine \
+  --arm-path /root/media=import/automatic-ripping-machine
 ```
 
 | option | default | |
 |---|---|---|
 | `--db` | required | ARM's `arm.db` |
-| `--arm-path` | required | `ARM=SHARE`: one folder, as ARM's container mounts it and as its path on the share |
+| `--arm-path` | required | `ARM=SHARE`: a folder, as ARM's container mounts it and as its path on the share; once for each folder ARM's jobs recorded paths in |
 | `--arm-timezone` | `Etc/UTC` | the IANA zone ARM's container runs in, whose local time ARM stores |
 | `--out` | `REELBARROW_MANIFEST_DIR` | the manifest directory, `import/automatic-ripping-machine/manifests/` on the share |
 | `--interval` | 30 | seconds from the start of one pass to the start of the next |
@@ -44,6 +45,13 @@ the share's root in front, `REELBARROW_VIDEO_ROOT`, which the exporter never
 needs: each knows only the mount it has. The option has no default, because
 no value is right everywhere, and a wrong one makes plausible paths rather
 than failing.
+
+Give it once for every folder ARM's jobs recorded paths in, not only the
+mount ARM has now: a job keeps the paths it had when it ran. In that
+deployment ARM mounted the same folder at `/root/media` until 2026-04-20, so
+jobs 1–6 recorded `/root/media/…`, and both are given. A path is mapped by
+the most specific folder holding it; one in none skips its job, named in
+`exporter.json`.
 
 ### `--arm-timezone`
 

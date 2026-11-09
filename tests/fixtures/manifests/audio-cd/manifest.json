@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "13-178777165324",
+  "state": "succeeded",
+  "start_time": "2026-08-26T19:14:21.579794Z",
+  "finish_time": "2026-08-26T19:37:56.960067Z",
+  "errors": null,
+  "disc": {
+    "type": "music",
+    "label": null,
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "Mànran The Test",
+      "reason": "lookup"
+    },
+    "year": {
+      "value": "2013",
+      "reason": "lookup"
+    },
+    "imdb_id": {
+      "value": null,
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": null,
+      "reason": "lookup"
+    }
+  },
+  "completed": null
+}

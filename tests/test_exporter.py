@@ -16,9 +16,15 @@ import arm_db
 import pytest
 
 from reelbarrow import cli, exporter
-from reelbarrow.exporter import ArmPath, Exporter, SerialiseError, build, connect
+from reelbarrow.exporter import ArmPaths, Exporter, SerialiseError, build, connect
 
-ROOT = ArmPath.parse("/root/video=import/automatic-ripping-machine")
+# The deployment's: ARM's share was /root/media until 2026-04-20.
+ROOT = ArmPaths.parse(
+    [
+        "/root/video=import/automatic-ripping-machine",
+        "/root/media=import/automatic-ripping-machine",
+    ]
+)
 UTC = ZoneInfo("Etc/UTC")
 NAME = "manifest-arm-{}-176107498997.json"
 
@@ -339,7 +345,7 @@ def test_a_raw_copy_it_cannot_read_fails_the_job(change):
 
 
 def test_arm_path_maps_arms_folder_to_the_share():
-    path = ArmPath.parse("/root/video/=import/arm/")
+    (path,) = ArmPaths.parse(["/root/video/=import/arm/"]).paths
     assert (path.arm, path.share) == ("/root/video", "import/arm")
     for value in (
         "/root/video",
@@ -349,7 +355,42 @@ def test_arm_path_maps_arms_folder_to_the_share():
         "/root/video=",
     ):
         with pytest.raises(ValueError):
-            ArmPath.parse(value)
+            ArmPaths.parse([value])
+
+
+def test_a_job_from_before_arms_mount_moved_is_found_on_the_share():
+    # Job 3's own path: the same folder of the share, mounted elsewhere then.
+    built = one({"job_id": 3, "path": "/root/media/completed/movies/Le Mans (1971)"})
+    assert built["completed"]["folder"]["path"] == (
+        "import/automatic-ripping-machine/completed/movies/Le Mans (1971)"
+    )
+
+
+def test_the_most_specific_folder_maps_a_path():
+    paths = ArmPaths.parse(["/root=elsewhere", "/root/video=import/arm"])
+    assert paths.ref("/root/video/raw/X", "raw") == {"path": "import/arm/raw/X"}
+    assert paths.ref("/root/db/arm.db", "db") == {"path": "elsewhere/db/arm.db"}
+
+
+def test_arm_paths_are_each_given_once():
+    for values in ([], ["/root/video=a", "/root/video/=b"]):
+        with pytest.raises(ValueError):
+            ArmPaths.parse(values)
+
+
+def test_a_path_in_no_folder_names_them_all():
+    with pytest.raises(SerialiseError, match="/root/video, /root/media"):
+        one({"job_id": 1, "path": "/srv/completed/X"})
+
+
+def test_only_a_dvd_has_a_crc64():
+    # For an audio CD, ARM's crc_id is MusicBrainz's disc id; a Blu-ray has none.
+    musicbrainz = "5587751f-590b-4cbb-a338-10f9b6760a96"
+    crc64 = one({"job_id": 1})["disc"]["crc64"]
+    assert crc64 == "1a2b3c4d5e6f7081"
+    for disctype, crc_id in (("music", musicbrainz), ("bluray", None), ("data", "x")):
+        built = one({"job_id": 1, "disctype": disctype, "crc_id": crc_id})
+        assert built["disc"]["crc64"] is None, disctype
 
 
 # --- what a pass does -------------------------------------------------------
@@ -651,6 +692,8 @@ def test_the_command(db, out, monkeypatch, capsys):
         str(out),
         "--arm-path",
         "/root/video=import/automatic-ripping-machine",
+        "--arm-path",
+        "/root/media=import/automatic-ripping-machine",
         "--once",
     ]
     monkeypatch.setattr(sys, "argv", argv)

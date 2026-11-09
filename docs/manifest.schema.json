@@ -103,7 +103,7 @@
             }
           ],
           "default": null,
-          "description": "A DVD's pydvdid CRC64; null for a Blu-ray.",
+          "description": "A DVD's pydvdid CRC64; null for any other disc.",
           "title": "Crc64"
         }
       },

@@ -109,16 +109,46 @@ class ArmPath:
             raise ValueError(f"{share!r} is not a path on the share") from error
         return cls(posixpath.normpath(arm), share)
 
+    def relative(self, normal: str) -> str | None:
+        """The path below this folder, or None if it isn't in it."""
+        relative = posixpath.relpath(normal, self.arm)
+        if relative == ".." or relative.startswith("../"):
+            return None
+        return relative
+
+
+@dataclass(frozen=True, slots=True)
+class ArmPaths:
+    """Every folder ARM has recorded paths in, each with its path on the share.
+
+    More than one because ARM's mounts move while its old jobs keep the paths
+    they had: this deployment's share was `/root/media` before 2026-04-20.
+    """
+
+    paths: tuple[ArmPath, ...]
+
+    @classmethod
+    def parse(cls, values: list[str]) -> "ArmPaths":
+        paths = tuple(ArmPath.parse(value) for value in values)
+        arms = [path.arm for path in paths]
+        if not paths or len(set(arms)) != len(arms):
+            raise ValueError(f"{values!r}: one ARM path or more, each once")
+        return cls(paths)
+
     def ref(self, path: str, what: str) -> dict:
-        """ARM's path as a share reference. A path outside the folder mapped
-        fails, rather than becoming a plausible wrong one."""
+        """ARM's path as a share reference, by the most specific folder that
+        holds it. A path in none fails, rather than becoming a plausible wrong
+        one."""
         normal = posixpath.normpath(path)
         if normal != path.rstrip("/") or not posixpath.isabs(normal):
             raise SerialiseError(f"{what} {path!r} is not a plain absolute path")
-        relative = posixpath.relpath(normal, self.arm)
-        if relative == ".." or relative.startswith("../"):
-            raise SerialiseError(f"{what} {path!r} is outside {self.arm}")
-        share = self.share if relative == "." else f"{self.share}/{relative}"
+        holding = [p for p in self.paths if p.relative(normal) is not None]
+        if not holding:
+            folders = ", ".join(p.arm for p in self.paths)
+            raise SerialiseError(f"{what} {path!r} is outside {folders}")
+        mapped = max(holding, key=lambda p: len(p.arm))
+        relative = mapped.relative(normal)
+        share = mapped.share if relative == "." else f"{mapped.share}/{relative}"
         try:
             return ShareRef(path=share).model_dump()
         except ValidationError as error:
@@ -218,7 +248,7 @@ def _identity(job: dict) -> dict:
 TITLE_FIELDS = ("disc_title", "playlist", "reason", "played_by", "interleaved", "parts")
 
 
-def _title(entry: dict, root: ArmPath) -> dict:
+def _title(entry: dict, root: ArmPaths) -> dict:
     title = {name: entry[name] for name in TITLE_FIELDS if name in entry}
     if entry.get("extracted"):
         title["extracted"] = root.ref(entry["extracted"], "extracted title")
@@ -228,7 +258,7 @@ def _title(entry: dict, root: ArmPath) -> dict:
     return title
 
 
-def _raw(document: dict, root: ArmPath) -> dict:
+def _raw(document: dict, root: ArmPaths) -> dict:
     """The raw copy's record as `raw` and `titles`. The record is in their
     shape already, so this only translates ARM's paths; the model checks the
     rest."""
@@ -258,7 +288,7 @@ def job_id(job: dict) -> str:
     return f"{job['job_id']}-{job['stage']}"
 
 
-def build(job: dict, document: str | None, root: ArmPath, zone: ZoneInfo) -> dict:
+def build(job: dict, document: str | None, root: ArmPaths, zone: ZoneInfo) -> dict:
     """The manifest of one job, validated against the model. Raises
     SerialiseError for one it can't carry."""
     out = {
@@ -272,7 +302,9 @@ def build(job: dict, document: str | None, root: ArmPath, zone: ZoneInfo) -> dic
         "disc": {
             "type": _text(job["disctype"]),
             "label": _text(job["label"]),
-            "crc64": _text(job["crc_id"]),
+            # ARM's crc_id is pydvdid's CRC64 only for a DVD; for an audio CD
+            # it holds MusicBrainz's disc id.
+            "crc64": _text(job["crc_id"]) if job["disctype"] == "dvd" else None,
         },
         "identity": _identity(job),
         "completed": None
@@ -331,7 +363,7 @@ def remove_stale_temporaries(out: Path) -> None:
 class Exporter:
     db: Path
     out: Path
-    root: ArmPath
+    root: ArmPaths
     zone: ZoneInfo
     timeout: float = 5.0
     # Manifests whose job's row has gone, logged once each.

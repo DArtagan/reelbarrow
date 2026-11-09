@@ -1,0 +1,28 @@
+{
+  "job": {
+    "job_id": 13,
+    "stage": "178777165324",
+    "status": "success",
+    "start_time": "2026-08-26 19:14:21.579794",
+    "stop_time": "2026-08-26 19:37:56.960067",
+    "errors": null,
+    "disctype": "music",
+    "label": null,
+    "crc_id": "5587751f-590b-4cbb-a338-10f9b6760a96",
+    "path": null,
+    "hasnicetitle": 1,
+    "title": "Mànran The Test",
+    "title_auto": "Mànran The Test",
+    "title_manual": null,
+    "year": "2013",
+    "year_auto": "2013",
+    "year_manual": null,
+    "imdb_id": null,
+    "imdb_id_auto": null,
+    "imdb_id_manual": null,
+    "video_type": "Music",
+    "video_type_auto": null,
+    "video_type_manual": null
+  },
+  "raw_copy": null
+}

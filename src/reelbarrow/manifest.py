@@ -150,7 +150,7 @@ class Disc(Model):
     type: str | None = None
     label: str | None = None
     crc64: Annotated[str, Field(pattern=r"^[0-9a-f]{16}$")] | None = Field(
-        default=None, description="A DVD's pydvdid CRC64; null for a Blu-ray."
+        default=None, description="A DVD's pydvdid CRC64; null for any other disc."
     )
 
 

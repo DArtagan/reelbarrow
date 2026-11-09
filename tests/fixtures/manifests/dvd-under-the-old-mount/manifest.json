@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "3-177654944116",
+  "state": "succeeded",
+  "start_time": "2026-04-18T21:57:21.449897Z",
+  "finish_time": "2026-04-18T23:43:02.253242Z",
+  "errors": null,
+  "disc": {
+    "type": "dvd",
+    "label": "LEMANS",
+    "crc64": "d9a43894ee1dbac3"
+  },
+  "identity": {
+    "title": {
+      "value": "Le Mans",
+      "reason": "set_by_person"
+    },
+    "year": {
+      "value": "1971",
+      "reason": "set_by_person"
+    },
+    "imdb_id": {
+      "value": "tt0067334",
+      "reason": "set_by_person"
+    },
+    "kind": {
+      "value": "movie",
+      "reason": "set_by_person"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/movies/Le Mans (1971)"
+    }
+  }
+}

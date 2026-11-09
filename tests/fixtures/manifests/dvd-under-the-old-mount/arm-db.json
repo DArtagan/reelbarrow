@@ -1,0 +1,28 @@
+{
+  "job": {
+    "job_id": 3,
+    "stage": "177654944116",
+    "status": "success",
+    "start_time": "2026-04-18 21:57:21.449897",
+    "stop_time": "2026-04-18 23:43:02.253242",
+    "errors": null,
+    "disctype": "dvd",
+    "label": "LEMANS",
+    "crc_id": "d9a43894ee1dbac3",
+    "path": "/root/media/completed/movies/Le Mans (1971)",
+    "hasnicetitle": 1,
+    "title": "Le Mans",
+    "title_auto": "Project-Lemans--The-Race-to-the-Race",
+    "title_manual": "Le Mans",
+    "year": "1971",
+    "year_auto": "2007",
+    "year_manual": "1971",
+    "imdb_id": "tt0067334",
+    "imdb_id_auto": "tt1179062",
+    "imdb_id_manual": "tt0067334",
+    "video_type": "movie",
+    "video_type_auto": "movie",
+    "video_type_manual": "movie"
+  },
+  "raw_copy": null
+}
