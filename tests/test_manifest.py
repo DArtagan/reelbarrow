@@ -50,7 +50,10 @@ With no raw copy recorded:
 - `dvd-before-the-record`: a DVD ripped before the record, *The Hallelujah
   Trail*'s successful job
 - `dvd-failed-rip`: one of its failed jobs
+- `dvd-under-the-old-mount`: a DVD ripped while ARM mounted the share at
+  `/root/media`, *Le Mans*'s successful job
 - `not-identified`: a disc ARM couldn't identify
+- `audio-cd`: a music CD, whose `crc_id` is MusicBrainz's disc id
 """
 
 import json
@@ -63,12 +66,18 @@ import pytest
 from pydantic import ValidationError
 
 from reelbarrow import manifest
-from reelbarrow.exporter import ArmPath, Exporter
+from reelbarrow.exporter import ArmPaths, Exporter
 from reelbarrow.manifest import Manifest, ShareRef
 
 CASES_DIR = Path(__file__).parent / "fixtures" / "manifests"
 CASES = sorted(p.name for p in CASES_DIR.iterdir() if p.is_dir())
-ROOT = ArmPath.parse("/root/video=import/automatic-ripping-machine")
+# The deployment's: ARM's share was /root/media until 2026-04-20.
+ROOT = ArmPaths.parse(
+    [
+        "/root/video=import/automatic-ripping-machine",
+        "/root/media=import/automatic-ripping-machine",
+    ]
+)
 # Where ARM's container sees the share in the deployment these came from.
 SHARE = "import/automatic-ripping-machine"
 
@@ -156,6 +165,8 @@ def test_every_path_is_a_share_reference_in_arms_slice(built):
                 yield from refs(inner)
 
     found = list(refs(built))
+    if built["completed"] is None and "raw" not in built:
+        pytest.skip("no folder recorded")
     assert found
     for ref in found:
         assert set(ref) == {"path"}
@@ -187,13 +198,18 @@ def test_an_identity_arm_copied_by_label_says_so():
         assert identity["imdb_id"]["value"] is None
 
 
-def test_a_dvd_has_a_crc64_and_a_blu_ray_none(built):
+def test_only_a_dvd_has_a_crc64(built):
     disc = built["disc"]
     if disc["type"] == "dvd":
         assert disc["crc64"] is not None
     else:
-        assert disc["type"] == "bluray"
+        assert disc["type"] in ("bluray", "music")
         assert disc["crc64"] is None
+
+
+def test_a_job_from_before_arms_mount_moved_is_on_the_share():
+    folder = load("dvd-under-the-old-mount")["completed"]["folder"]["path"]
+    assert folder == f"{SHARE}/completed/movies/Le Mans (1971)"
 
 
 def test_each_check_says_what_it_found(case, built):

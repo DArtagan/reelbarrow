@@ -21,9 +21,11 @@ def main() -> None:
     export.add_argument(
         "--arm-path",
         required=True,
+        action="append",
         metavar="ARM=SHARE",
-        help="one folder as ARM's container mounts it and as its path on the "
-        "share, e.g. /root/video=import/automatic-ripping-machine",
+        help="a folder as ARM's container mounts it and as its path on the "
+        "share, e.g. /root/video=import/automatic-ripping-machine; again for "
+        "each folder ARM's older jobs recorded paths in",
     )
     export.add_argument(
         "--arm-timezone",
@@ -58,11 +60,11 @@ def main() -> None:
         from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
         from reelbarrow.config import Settings
-        from reelbarrow.exporter import ArmPath, Exporter
+        from reelbarrow.exporter import ArmPaths, Exporter
 
         settings = Settings()
         try:
-            root = ArmPath.parse(args.arm_path)
+            root = ArmPaths.parse(args.arm_path)
             zone = ZoneInfo(args.arm_timezone)
         except (ValueError, ZoneInfoNotFoundError) as error:
             parser.error(str(error))

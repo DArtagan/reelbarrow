@@ -785,11 +785,12 @@ why each field is as it is; the schema says exactly what it may hold.
   the name exactly as on the share. It is never a fragment to join with
   another field. No process's mounts appear in it, and each process knows only
   its own: reelbarrow where it mounts the share's root,
-  `REELBARROW_VIDEO_ROOT`, and the exporter where ARM mounts one folder of it
+  `REELBARROW_VIDEO_ROOT`, and the exporter where ARM mounts its folder of it
   (`--arm-path /root/video=import/automatic-ripping-machine`, ARM's path and
-  the folder's path on the share). A path outside that folder fails the
-  manifest rather than becoming a plausible wrong one, and intake refuses one
-  that resolves outside the video root.
+  the folder's path on the share), given again for each place ARM has mounted
+  it, since a job keeps the paths it ran with. A path outside those folders
+  fails the manifest rather than becoming a plausible wrong one, and intake
+  refuses one that resolves outside the video root.
 - **A claim is `{"value", "reason"}`**, the reason from a closed vocabulary,
   since the gate branches on it. For `identity`'s fields: `set_by_person`
   (corrected in the producer's UI), `lookup` (a database matched the disc),
