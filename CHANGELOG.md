@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.1](https://github.com/DArtagan/reelbarrow/compare/v0.3.0...v0.3.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **exporter:** export the jobs the sidecar's first pass skipped ([#14](https://github.com/DArtagan/reelbarrow/issues/14)) ([2897b40](https://github.com/DArtagan/reelbarrow/commit/2897b40bfd5834afd720b17fe4d92f568184e0a6))
+
+
+### Documentation
+
+* **todos:** fold the fixtures capture into dry-run-planner ([da2c90e](https://github.com/DArtagan/reelbarrow/commit/da2c90ed71ea97fb171f6a0a47ccf8c9fb5282af))
+
 ## [0.3.0](https://github.com/DArtagan/reelbarrow/compare/v0.2.0...v0.3.0) (2026-11-09)
 
 
