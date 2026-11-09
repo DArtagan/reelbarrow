@@ -46,6 +46,12 @@ Prototypes from the design sessions (transcripts, synopses, prompts, the scorer)
 are in `captures/design/tweety/` in Will's checkout. They are gitignored and
 not on GitHub. The Whisper model, `ggml-base.en`, is a public download.
 
+**Settle whether transcripts are committed.** They are layer 2's frozen inputs
+(*Testing*), and they are text excerpts of copyrighted programmes in a public
+repository. Decide whether they are committed whole, trimmed, or kept out of
+git and fetched for evaluations only, and record the reason here. This is the
+first spec that reads them.
+
 ## Secrets
 
 The Anthropic API key, with a spend cap set in the Console, goes into
