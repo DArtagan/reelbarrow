@@ -30,7 +30,7 @@
    0.75–0.85.
 5. **Play-alls and duplicates.** Per *Confidence*: drop both play-all
    transcodes, keep their raw, and treat job 33 as job 22's duplicate. A job
-   whose stamp carries `duplicates` has no play-all transcode to drop, and its
+   whose manifest has `wholes` has no play-all transcode to drop, and its
    `wholes` give each episode's start in the play-all, which splits a series
    ARM filed as a movie.
 6. **The Inspect harness** (layer 2): datasets of whole decisions; reelbarrow's

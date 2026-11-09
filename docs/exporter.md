@@ -1,21 +1,31 @@
 # The manifest exporter
 
-`reelbarrow export-manifests` copies ARM's database out as one manifest per job,
-which is how the service learns of ARM's jobs. Why it polls the database rather
-than hooking ARM's notifications, and what intake may read from a manifest, are
-in *The ARM manifest* in the [design](design.md). This page is how to run it.
+`reelbarrow export-manifests` copies ARM's jobs out of its database as
+manifests, which is how the service learns of them. What a manifest says, and
+why the exporter polls ARM's database rather than hooking its notifications,
+are *The manifest* and *The raw copy's record* in the [design](design.md). This
+page is how to run it.
 
 ```bash
-reelbarrow export-manifests --db /root/db/arm.db --out /manifests
+reelbarrow export-manifests --db /root/db/arm.db --out /manifests \
+  --arm-root /root/video=import/automatic-ripping-machine --arm-timezone Etc/UTC
 ```
 
 | option | default | |
 |---|---|---|
 | `--db` | required | ARM's `arm.db` |
+| `--arm-root` | required | `CONTAINER=SHARE`: where ARM's container sees its slice of the share, and that slice's path from the share's root |
+| `--arm-timezone` | required | the IANA zone ARM's container runs in, whose local time ARM stores |
 | `--out` | `REELBARROW_MANIFEST_DIR` | the manifest directory, `import/automatic-ripping-machine/manifests/` on the share |
 | `--interval` | 30 | seconds from the start of one pass to the start of the next |
 | `--timeout` | 5 | seconds a pass waits on ARM's write lock before giving up until the next |
 | `--once` | | one pass; exits 1 if it couldn't read the database or write the manifests |
+
+`--arm-root` and `--arm-timezone` have no defaults because no value is right
+everywhere, and a wrong one makes plausible paths and times rather than
+failing. ARM's image runs in `Etc/UTC` unless its `TZ` is set. The paths ARM
+records are its container's, so `--arm-root` maps ARM's mount, not the
+exporter's; the exporter itself never sees those files.
 
 It runs from reelbarrow's image, so exporter and reader are always the same
 version. In Kubernetes it is a sidecar in ARM's pod, the only place ARM's
@@ -24,60 +34,48 @@ database volume can be mounted beside ARM.
 ## What a pass does
 
 1. Opens the database with `mode=ro`, so SQLite refuses every write through the
-   connection, and reads every `job` and `track` row in one read transaction.
-   The `config` table, which holds ARM's API keys, is never read.
-2. Builds each job's manifest and writes `job-<id>.json` only if it differs from
-   the file there, by writing a hidden temporary file in the same directory and
-   renaming it over the old one. A reader sees the old file or the new one,
-   whole, and an unchanged job's file keeps its modification time.
+   connection, and reads in one read transaction the `job` columns it needs and
+   the deployment's `reelbarrow_raw_copy` table, if there is one. The `track`
+   and `config` tables are never read; `config` holds ARM's API keys.
+2. Builds each job's manifest and writes `manifest-arm-<job_id>-<stage>.json`
+   only if it differs from the file there, by writing a hidden temporary file in
+   the same directory and renaming it over the old one. A reader sees the old
+   file or the new one, whole, and an unchanged job's file keeps its
+   modification time.
 3. Writes `exporter.json` last, the same way.
 
 It never creates the manifest directory or the database: a missing mount fails
 loudly rather than filling the container's own filesystem. It never deletes a
 manifest. When a job's row disappears, deleted from ARM's UI, its manifest stays
-and the exporter logs it once.
+and the exporter logs it once. A recreated database starts its job ids again
+from 1, but not its stages, so its manifests are new files.
 
 A pass that can't read the database (locked past `--timeout`, missing,
-unreadable) or can't write to the share logs the error, writes nothing, and the
-next pass tries again. A row holding a value JSON can't carry faithfully, such
-as a boolean column holding 7, skips that job, not the pass, and is named in
-`exporter.json`.
+unreadable, or lacking a `job` column the exporter reads, say after an ARM
+upgrade) or can't write to the share logs the error, writes nothing, and the
+next pass tries again. A job it can't carry faithfully skips that job, not the
+pass, and is named in `exporter.json`: a time that doesn't parse, a raw-copy
+record it doesn't understand, or a path outside `--arm-root`.
 
-## The manifest
+Without the deployment's patch there is no `reelbarrow_raw_copy`, and each
+manifest has no `raw`, `titles` or `wholes`: not recorded, which intake reads
+as unknown.
 
-```json
-{
-  "schema": 1,
-  "job": {"job_id": 7, "status": "success", "start_time": "2026-10-21T19:49:49.973701", "…": "…"},
-  "tracks": [{"track_id": 31, "job_id": 7, "filename": "title_1.mkv", "ripped": true, "…": "…"}]
-}
-```
-
-`job` holds every column of the job row and `tracks` every column of its track
-rows, in `track_id` order, under the names ARM gives them. Columns are not
-picked, so one ARM adds in a migration appears without a change here. The rows
-are nested rather than spread at the top level so that no column can collide
-with `schema`. Values keep ARM's meaning, typed by the column's declared type:
-a `BOOLEAN` is `true` or `false` rather than SQLite's 0 or 1, and a `DATETIME`
-is ISO 8601 without a zone, ARM's local time, exactly as stored. A null stays
-null. [`tests/fixtures/manifests/dvd-movie.json`](../tests/fixtures/manifests/dvd-movie.json)
-is a whole one, and a change to the shape changes it.
-
-`schema` follows the stamp's rule (*The raw folder's stamp* in the design): a
-field added leaves it at 1, and once reelbarrow's reader is deployed a field
-removed or changed in meaning raises it.
+[`tests/fixtures/manifests/`](../tests/fixtures/manifests/) holds real jobs
+exported, each named for its case.
 
 ## Liveness: `exporter.json`
 
 ```json
-{"passed_at": "2026-11-08T21:30:00.123456+00:00", "version": "0.2.0", "jobs": 87, "skipped_jobs": []}
+{"passed_at": "2026-11-08T21:30:00.123456+00:00", "version": "0.2.0", "jobs": 103, "skipped_jobs": []}
 ```
 
 `passed_at` is the end of the last pass that read the database and wrote every
 manifest that changed, in UTC. A pass that failed doesn't rewrite it, so a
 `passed_at` older than two intervals means the exporter is stopped or failing,
-which the service can't otherwise tell from no discs. `skipped_jobs` lists the
-jobs the pass couldn't serialise. Intake reads only `job-*.json`.
+which the service can't otherwise tell from no discs. `skipped_jobs` lists, by
+ARM's job id, the jobs the pass couldn't export. Intake reads only
+`manifest-*.json`.
 
 ## Mounts and permissions
 
@@ -104,8 +102,8 @@ sidecar on that volume writes the manifest directory only as uid 0.
 ### Journal mode
 
 `mode=ro` reads a rollback-journal database, SQLite's default, from a read-only
-mount. ARM 2.24.4's source sets no journal mode. Two cases need a
-writable database directory, even with the connection read-only:
+mount. ARM 2.24.4's source sets no journal mode. Two cases need a writable
+database directory, even with the connection read-only:
 
 - **WAL mode**, where a reader uses the `-wal` and `-shm` files beside the
   database, and must be able to create them when ARM has none open.
