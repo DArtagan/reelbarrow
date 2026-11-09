@@ -1,31 +1,54 @@
 # The manifest exporter
 
-`reelbarrow export-manifests` copies ARM's jobs out of its database as
+`reelbarrow arm-export-manifests` copies ARM's jobs out of its database as
 manifests, which is how the service learns of them. What a manifest says, and
 why the exporter polls ARM's database rather than hooking its notifications,
 are *The manifest* and *The raw copy's record* in the [design](design.md). This
 page is how to run it.
 
 ```bash
-reelbarrow export-manifests --db /root/db/arm.db --out /manifests \
-  --arm-root /root/video=import/automatic-ripping-machine --arm-timezone Etc/UTC
+reelbarrow arm-export-manifests --db /root/db/arm.db --out /manifests \
+  --arm-path /root/video=/video/import/automatic-ripping-machine
 ```
 
 | option | default | |
 |---|---|---|
 | `--db` | required | ARM's `arm.db` |
-| `--arm-root` | required | `CONTAINER=SHARE`: where ARM's container sees its slice of the share, and that slice's path from the share's root |
-| `--arm-timezone` | required | the IANA zone ARM's container runs in, whose local time ARM stores |
+| `--arm-path` | required | `ARM=REELBARROW`: one folder, as ARM's container mounts it and as reelbarrow does |
+| `--arm-timezone` | `Etc/UTC` | the IANA zone ARM's container runs in, whose local time ARM stores |
 | `--out` | `REELBARROW_MANIFEST_DIR` | the manifest directory, `import/automatic-ripping-machine/manifests/` on the share |
 | `--interval` | 30 | seconds from the start of one pass to the start of the next |
 | `--timeout` | 5 | seconds a pass waits on ARM's write lock before giving up until the next |
 | `--once` | | one pass; exits 1 if it couldn't read the database or write the manifests |
 
-`--arm-root` and `--arm-timezone` have no defaults because no value is right
-everywhere, and a wrong one makes plausible paths and times rather than
-failing. ARM's image runs in `Etc/UTC` unless its `TZ` is set. The paths ARM
-records are its container's, so `--arm-root` maps ARM's mount, not the
-exporter's; the exporter itself never sees those files.
+### `--arm-path`
+
+ARM records every path as its own container sees it, and the exporter itself
+never sees those files, so it has to be told where they are on the share. In
+the deployment this was built for, ARM's pod mounts only one folder of the
+share, `import/automatic-ripping-machine`, at `/root/video`, while reelbarrow
+mounts the whole share at `/video`. So one folder is `/root/video` to ARM and
+`/video/import/automatic-ripping-machine` to reelbarrow, which is what the
+option says:
+
+```
+--arm-path /root/video=/video/import/automatic-ripping-machine
+```
+
+ARM's `/root/video/completed/movies/X` then goes into the manifest as
+`import/automatic-ripping-machine/completed/movies/X`: the right-hand side with
+reelbarrow's video root, `REELBARROW_VIDEO_ROOT`, taken off, so that it is a
+path from the share's root that no mount appears in. The service, reading it,
+puts its own video root back. The right-hand side must be inside that video
+root, and the exporter runs from reelbarrow's image, so it has the service's
+default, `/video`; a deployment that changes one changes both. It has no
+default itself, because no value is right everywhere, and a wrong one makes
+plausible paths rather than failing.
+
+### `--arm-timezone`
+
+ARM stores its local time without a zone, and its image runs in `Etc/UTC`
+unless its `TZ` is set. A deployment that sets ARM's `TZ` passes the same here.
 
 It runs from reelbarrow's image, so exporter and reader are always the same
 version. In Kubernetes it is a sidecar in ARM's pod, the only place ARM's
@@ -55,10 +78,11 @@ unreadable, or lacking a `job` column the exporter reads, say after an ARM
 upgrade) or can't write to the share logs the error, writes nothing, and the
 next pass tries again. A job it can't carry faithfully skips that job, not the
 pass, and is named in `exporter.json`: a time that doesn't parse, a raw-copy
-record it doesn't understand, or a path outside `--arm-root`.
+record it doesn't understand, a path outside `--arm-path`, or a manifest the
+model refuses, one that would contradict itself.
 
 Without the deployment's patch there is no `reelbarrow_raw_copy`, and each
-manifest has no `raw`, `titles` or `wholes`: not recorded, which intake reads
+manifest has no `raw` or `titles`: not recorded, which intake reads
 as unknown.
 
 [`tests/fixtures/manifests/`](../tests/fixtures/manifests/) holds real jobs

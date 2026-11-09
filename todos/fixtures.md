@@ -36,9 +36,10 @@ manifest, which carries the raw copy's record where there is one. Store them und
 *Testing*, layer 1, in the design says, in a layout the planner can load as if
 it were the share.
 
-Twenty manifests are frozen already in `tests/fixtures/manifests/`, each named
-for its case, real jobs exported from their rows and raw-copy records
-(`tests/fixtures/arm/`), with the contract test that holds them: among them
+Twenty-one manifests are frozen already in `tests/fixtures/manifests/`, a
+folder per case holding a real job's row and raw-copy record (`arm-db.json`)
+and the manifest exported from them, with the contract test that holds them:
+among them
 *The Rescuers* job 27, *The Polar Express* job 25 and *The Hallelujah Trail*
 jobs 15 and 18 of the fixtures table, and job 87, the *Robin Hood* bonus DVD's
 re-rip. A job's own fixture copies its manifest from there rather than

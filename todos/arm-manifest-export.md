@@ -2,7 +2,7 @@
 
 ## Opening prompt
 
-> `reelbarrow export-manifests` and the deployment's raw-copy record are built
+> `reelbarrow arm-export-manifests` and the deployment's raw-copy record are built
 > and tested; what remains is deploying them and proving them on the cluster
 > and a real disc. Read `todos/arm-manifest-export.md`, then *The manifest* and
 > *The raw copy's record* in `docs/design.md`, and `docs/exporter.md`. The
@@ -13,10 +13,11 @@
 ## What is done (2026-11-08)
 
 - **The manifest**, reelbarrow's own record of a unit of work (*The manifest*):
-  `src/reelbarrow/manifest.py` holds its schema, file name, share reference
-  and vocabularies. Twenty real jobs exported are its fixtures,
-  `tests/fixtures/manifests/`, from their rows and raw-copy records in
-  `tests/fixtures/arm/`, with `tests/test_manifest.py` holding the design's
+  `src/reelbarrow/manifest.py` holds it as pydantic models, which validate
+  every manifest written and generate `docs/manifest.schema.json`. Twenty-one
+  real jobs exported are its fixtures, one folder per case in
+  `tests/fixtures/manifests/`, ARM's rows and raw-copy records beside the
+  manifests made of them, with `tests/test_manifest.py` holding the design's
   rules against them.
 - **The exporter**, `src/reelbarrow/exporter.py`, ARM's adapter to it, tested
   in `tests/test_exporter.py` against a database shaped like the deployed one
@@ -27,7 +28,8 @@
   `reelbarrow_raw_copy` in ARM's database instead of `arm-job.json`, including
   each transcode's final path as ARM moves it; and
   `tools/arm-stamps/raw_copies.py` moves the existing stamps into that table
-  once.
+  once. The patch's tests run against real SQLAlchemy 2.0, in a uv
+  environment that repository gained for them.
 - **Read from the deployed ARM, read-only, 2026-11-08**: `PRAGMA journal_mode`
   is `delete`; SQLite 3.37.2; `arm.db` is `0:0` 0644 in a 0777 directory; the
   share is CIFS in ARM's pod with `uid=0,gid=0,file_mode=0755,dir_mode=0755`;
@@ -35,7 +37,10 @@
   and SQLAlchemy 2.0.19 give the patch `db.text`. 103 jobs, every one with a
   `stage`, all distinct, each matching its stamp's. The migration's dry run
   would write 32 rows (jobs 7, 8, 23, 25, 27 and 76–103) and passed over none;
-  its transcode paths were checked against five jobs' completed folders.
+  its transcode paths were checked against five jobs' completed folders, and
+  321 of its 329 skipped titles name the title kept for them, the other 8
+  being play-alls whose parts say. ARM's `job_dupe_check` copied job 5's
+  corrected identity onto jobs 23 and 27 by label (and onto 61).
 - **Read from ARM 2.24.4's source**: its migrations touch only the tables they
   name and rebuild `job` with `batch_alter_table`, so the patch's table
   survives an upgrade and declares no foreign key; ARM moves every transcode
@@ -65,7 +70,18 @@
   standardization & encapsulation of these fields"*; a share reference,
   relative to the share's root, so no process's mounts appear in a manifest.
 - **Names**: `start_time` and `finish_time`; `reason` for why a claim holds or a
-  title has no transcode; `completed.folder.path` mirroring `raw.folder.path`.
+  title has no transcode; `completed.folder.path` mirroring `raw.folder.path`;
+  `mkv-titles`; the command `arm-export-manifests`.
+- **From the review of pull request #12** (2026-11-09): absent means not
+  recorded and null means none, kept; the backup's two checks stated
+  separately, `raw.check`, not a `complete` with a null in it; JSON Schema,
+  generated from pydantic models; `--arm-path ARM=REELBARROW`, *"a clear
+  mapping"*, rather than a container path and a share path; ARM's times taken
+  as UTC unless told otherwise; `wholes` folded into `titles`, one reason,
+  `played_by` where structure doesn't say what plays a title (*"A+"*). Will,
+  on `wholes`: *"It feels like something is being duplicated between `titles`
+  and `wholes`"*: the reason, `kept` and the list each held which titles
+  another plays.
 - **Each transcode's final path recorded by the patch** as ARM moves it (*"go
   with your option #1, recording the path"*), not found by listing folders.
 - **After filing the manifest is out of date, and stays so**: *"maybe that's
@@ -78,7 +94,7 @@
 Each step that changes the cluster or the share is confirmed with Will first.
 
 1. **Release reelbarrow**: merge this pull request, then its release pull
-   request, so the image has `export-manifests`.
+   request, so the image has `arm-export-manifests`.
 2. **Deploy ARM's patch** (the deployment's pull request). It changes ARM's
    pod, and the `Recreate` strategy kills any job running: merge it while ARM
    is idle, then check in the container, not the ConfigMap, that
@@ -99,7 +115,7 @@ Each step that changes the cluster or the share is confirmed with Will first.
   reader would then briefly see no file, never a partial one. Measure it with
   the sidecar's first rewrite of a manifest while something reads it.
 - **The patch's writes through ARM's session**, on a real job: the record
-  appears at the start of the rip, `complete` after the backup's check, and
+  appears at the start of the rip, `check` after the backup's checks, and
   each transcode's path as it moves.
 
 ## Done when
@@ -109,9 +125,9 @@ Each step that changes the cluster or the share is confirmed with Will first.
   table gives. The failed ones (15–17, 30, 31, 40, 41) read `failed`. Jobs 7,
   8, 23, 25, 27 and 76 on have a `raw`, and its `folder` is on the share.
 - On a real disc insert, its manifest appears within one interval of "Found
-  disc", before the rip finishes, with `raw.complete` `not_checked`. It is
+  disc", before the rip finishes, with both of `raw.check` `not_run`. It is
   rewritten as the job moves, and ends at `succeeded` (or `failed`) with
-  `finish_time` set and `raw.complete` checked. Each transcode it lists is at
+  `finish_time` set and both checks run. Each transcode it lists is at
   its path on the share. Its id's job number matches ARM's UI.
 - `exporter.json` on the share is never older than two intervals while the
   sidecar runs.

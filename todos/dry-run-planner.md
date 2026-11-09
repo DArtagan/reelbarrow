@@ -63,7 +63,8 @@ manifest changes.
   case, a whole kept and its parts skipped, is job 87, the *Robin Hood* bonus
   DVD's re-rip: it transcoded disc title 1's documentary and the two
   featurettes, and skipped titles 2–4.
-- **Where the manifest has no `wholes`, the planner decides wholes and
+- **Where the manifest's titles weren't compared (no `raw.titles_compared`),
+  the planner decides wholes and
   parts itself, by the deployment's rule** (Will, 2026-10-28; *Confidence*, which
   of a whole and its parts is kept). Port the decision from
   `_arm_duplicates` in the deployment's ARM patches, its thresholds and its
@@ -71,8 +72,8 @@ manifest changes.
   with its tests as the model. The measurements are already here:
   `analysis.segments` over `bluray.playlists` and `dvd.structure`'s cells
   (*Title identity* 4), checked against job 83's recorded result. The cases,
-  one per path: job 80 (Blu-ray, before `wholes`, its play-all
-  transcoded) and job 76 (a DVD image whose record predates `wholes`; disc
+  one per path: job 80 (Blu-ray, before titles were compared, its play-all
+  transcoded) and job 76 (a DVD image whose record predates comparing; disc
   title 1 plays titles 4–9) by structure; *Robin Hood* job 36 and Tweety by
   fingerprint, since only MKVs survive. Job 36 has to keep `E1`'s transcode and
   drop those of `E2`–`E4`, which is what job 87 recorded for the same disc.
