@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "84-179306029568",
+  "state": "succeeded",
+  "start_time": "2026-10-27T00:18:15.720212+00:00",
+  "finish_time": "2026-10-27T12:10:23.590345+00:00",
+  "errors": null,
+  "disc": {
+    "type": "bluray",
+    "label": "DOWNTON_ABBEY_2_D1",
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "Downton-Abbey",
+      "reason": "lookup"
+    },
+    "year": {
+      "value": "2010–2015",
+      "reason": "lookup"
+    },
+    "imdb_id": {
+      "value": "tt1606375",
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": "series",
+      "reason": "lookup"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)_179306029568"
+    }
+  },
+  "raw": {
+    "form": "bluray-backup",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/Downton-Abbey_179306029568"
+    },
+    "complete": {
+      "value": true,
+      "reason": "sizes_and_hashes"
+    },
+    "problems": []
+  },
+  "titles": [
+    {
+      "playlist": "00001.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)_179306029568/title_2.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00002.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)_179306029568/title_3.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00003.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)_179306029568/title_4.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00006.mpls",
+      "transcode": null,
+      "reason": "parts_kept"
+    }
+  ],
+  "wholes": [
+    {
+      "playlist": "00006.mpls",
+      "kept": "parts",
+      "interleaved": false,
+      "parts": [
+        {
+          "playlist": "00001.mpls",
+          "start": 0.0
+        },
+        {
+          "playlist": "00002.mpls",
+          "start": 4149.979
+        },
+        {
+          "playlist": "00003.mpls",
+          "start": 7467.835
+        }
+      ]
+    }
+  ]
+}

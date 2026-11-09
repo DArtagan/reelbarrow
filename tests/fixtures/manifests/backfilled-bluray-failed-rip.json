@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "23-178848428496",
+  "state": "failed",
+  "start_time": "2026-09-04T01:11:25.069512+00:00",
+  "finish_time": null,
+  "errors": null,
+  "disc": {
+    "type": "bluray",
+    "label": "RESCUERS_35TH_ANNIVERSARY",
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "The Rescuers",
+      "reason": "lookup"
+    },
+    "year": {
+      "value": "1977",
+      "reason": "lookup"
+    },
+    "imdb_id": {
+      "value": null,
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": "movie",
+      "reason": "lookup"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/movies/The Rescuers (1977)_178848428496"
+    }
+  },
+  "raw": {
+    "form": "bluray-backup",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/The Rescuers_178848428496"
+    },
+    "complete": {
+      "value": null,
+      "reason": "sizes"
+    },
+    "problems": []
+  },
+  "titles": [
+    {
+      "playlist": "00251.mpls"
+    },
+    {
+      "playlist": "00252.mpls"
+    }
+  ]
+}

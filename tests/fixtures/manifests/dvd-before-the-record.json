@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "18-178824223068",
+  "state": "succeeded",
+  "start_time": "2026-09-01T05:57:10.709135+00:00",
+  "finish_time": "2026-09-01T09:13:52.399223+00:00",
+  "errors": null,
+  "disc": {
+    "type": "dvd",
+    "label": "HALLELUJAH_TRAIL",
+    "crc64": "c664091933fa7782"
+  },
+  "identity": {
+    "title": {
+      "value": "The-Hallelujah-Trail",
+      "reason": "lookup"
+    },
+    "year": {
+      "value": "1965",
+      "reason": "lookup"
+    },
+    "imdb_id": {
+      "value": "tt0059250",
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": "movie",
+      "reason": "lookup"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/movies/The-Hallelujah-Trail (1965)_178824223068"
+    }
+  }
+}

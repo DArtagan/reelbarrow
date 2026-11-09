@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "78-179271627780",
+  "state": "succeeded",
+  "start_time": "2026-10-23T00:44:37.859782+00:00",
+  "finish_time": "2026-10-23T10:26:55.216008+00:00",
+  "errors": null,
+  "disc": {
+    "type": "bluray",
+    "label": "DOWNTON_ABBEY_A_NEW_ERA",
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "Downton-Abbey--A-New-Era",
+      "reason": "lookup"
+    },
+    "year": {
+      "value": "2022",
+      "reason": "lookup"
+    },
+    "imdb_id": {
+      "value": "tt11703710",
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": "movie",
+      "reason": "lookup"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey--A-New-Era (2022)"
+    }
+  },
+  "raw": {
+    "form": "bluray-backup",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/Downton-Abbey--A-New-Era"
+    },
+    "complete": {
+      "value": true,
+      "reason": "sizes_and_hashes"
+    },
+    "problems": []
+  },
+  "titles": [
+    {
+      "playlist": "00612.mpls"
+    },
+    {
+      "playlist": "01391.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey--A-New-Era (2022)/extras/title_112.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "01393.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey--A-New-Era (2022)/extras/title_114.mkv"
+      },
+      "reason": null
+    }
+  ]
+}

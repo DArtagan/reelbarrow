@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "85-179310743101",
+  "state": "succeeded",
+  "start_time": "2026-10-27T13:23:51.119167+00:00",
+  "finish_time": "2026-10-28T03:01:26.567379+00:00",
+  "errors": null,
+  "disc": {
+    "type": "bluray",
+    "label": "DOWNTON_ABBEY_SEASON_2_D2",
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "Downton-Abbey-Season-4-Promo",
+      "reason": "lookup"
+    },
+    "year": {
+      "value": "2013",
+      "reason": "lookup"
+    },
+    "imdb_id": {
+      "value": "tt2708164",
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": "movie",
+      "reason": "lookup"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey-Season-4-Promo (2013)"
+    }
+  },
+  "raw": {
+    "form": "bluray-backup",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/Downton-Abbey-Season-4-Promo"
+    },
+    "complete": {
+      "value": true,
+      "reason": "sizes_and_hashes"
+    },
+    "problems": []
+  },
+  "titles": [
+    {
+      "playlist": "00001.mpls",
+      "transcode": null,
+      "reason": "whole_kept"
+    },
+    {
+      "playlist": "00002.mpls",
+      "transcode": null,
+      "reason": "whole_kept"
+    },
+    {
+      "playlist": "00003.mpls",
+      "transcode": null,
+      "reason": "whole_kept"
+    },
+    {
+      "playlist": "00004.mpls",
+      "transcode": null,
+      "reason": "whole_kept"
+    },
+    {
+      "playlist": "00006.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey-Season-4-Promo (2013)/title_6.mkv"
+      },
+      "reason": null
+    }
+  ],
+  "wholes": [
+    {
+      "playlist": "00006.mpls",
+      "kept": "whole",
+      "interleaved": false,
+      "parts": [
+        {
+          "playlist": "00001.mpls",
+          "start": 0.0
+        },
+        {
+          "playlist": "00002.mpls",
+          "start": 3262.676
+        },
+        {
+          "playlist": "00003.mpls",
+          "start": 6590.0
+        },
+        {
+          "playlist": "00004.mpls",
+          "start": 9922.538
+        }
+      ]
+    }
+  ]
+}

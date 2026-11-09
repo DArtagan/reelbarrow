@@ -5,9 +5,11 @@ deployed ARM 2.24.4 database, which ARM's migrations built: they differ from
 `arm/models/job.py` in putting `path` and `stage` after `pid_hash`, as bare
 VARCHAR. Values are stored as SQLAlchemy stores them, as on that database:
 booleans 0/1, datetimes as text with a space before the time. Rows are
-synthetic; a real arm.db is never committed.
+synthetic; a real arm.db is never committed. `reelbarrow_raw_copy` is the
+deployment's patch's table (*The raw copy's record*).
 """
 
+import json
 import sqlite3
 from pathlib import Path
 
@@ -168,13 +170,50 @@ def track(track_id: int, job_id: int, **overrides) -> dict:
     return row | overrides
 
 
-def create(path: Path) -> Path:
+# The deployment's raw-copy record, as its patch creates it.
+RAW_COPY = """
+CREATE TABLE reelbarrow_raw_copy (job_id INTEGER PRIMARY KEY, document TEXT NOT NULL)
+"""
+
+
+def create(path: Path, *, raw_copy: bool = True) -> Path:
     with sqlite3.connect(path) as con:
         con.execute(JOB)
         con.execute(TRACK)
         con.execute(CONFIG)
+        if raw_copy:
+            con.execute(RAW_COPY)
     con.close()
     return path
+
+
+def raw_copy(job_id: int, **overrides) -> dict:
+    """A DVD image's record, as the patch leaves it once the job has filed its
+    transcodes: two titles, the second not saved."""
+    folder = "/root/video/raw/SAMPLE_MOVIE"
+    completed = "/root/video/completed/movies/Sample-Movie (1965)"
+    document = {
+        "schema": 1,
+        "folder": folder,
+        "form": "dvd-image",
+        "complete": {"value": True, "reason": "sizes_and_hashes"},
+        "problems": [],
+        "title_map": [
+            {
+                "disc_title": 1,
+                "mkv": f"{folder}/titles/SAMPLE-B1_t00.mkv",
+                "handbrake_title": 1,
+            },
+            {
+                "disc_title": 3,
+                "mkv": f"{folder}/titles/SAMPLE-C1_t01.mkv",
+                "handbrake_title": None,
+            },
+        ],
+        "image": f"{folder}/SAMPLE_MOVIE.iso",
+        "transcodes": {"1": f"{completed}/title_1.mkv"},
+    }
+    return {"job_id": job_id, "document": json.dumps(document | overrides)}
 
 
 def insert(path: Path, table: str, row: dict) -> None:

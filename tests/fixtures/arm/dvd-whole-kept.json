@@ -1,0 +1,119 @@
+{
+  "job": {
+    "job_id": 87,
+    "stage": "179323748073",
+    "status": "success",
+    "start_time": "2026-10-29 01:31:20.799631",
+    "stop_time": "2026-10-29 02:44:18.917235",
+    "errors": null,
+    "disctype": "dvd",
+    "label": "ROBIN_HOOD",
+    "crc_id": "d3c5ce89aef40f61",
+    "path": "/root/video/completed/movies/Robin Hood (2010)",
+    "hasnicetitle": 1,
+    "title": "Robin Hood",
+    "title_auto": "Robin-Hood",
+    "title_manual": "Robin Hood",
+    "year": "2010",
+    "year_auto": "2010",
+    "year_manual": "2010",
+    "imdb_id": "tt0955308",
+    "imdb_id_auto": "tt0955308",
+    "imdb_id_manual": "tt0955308",
+    "video_type": "movie",
+    "video_type_auto": "movie",
+    "video_type_manual": "movie"
+  },
+  "raw_copy": {
+    "schema": 1,
+    "folder": "/root/video/raw/Robin Hood",
+    "form": "dvd-image",
+    "complete": {
+      "value": true,
+      "reason": "sizes_and_hashes"
+    },
+    "problems": [],
+    "title_map": [
+      {
+        "disc_title": 1,
+        "mkv": "/root/video/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E1_t00.mkv",
+        "handbrake_title": 3
+      },
+      {
+        "disc_title": 2,
+        "mkv": "/root/video/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E2_t01.mkv",
+        "handbrake_title": 4
+      },
+      {
+        "disc_title": 3,
+        "mkv": "/root/video/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E3_t02.mkv",
+        "handbrake_title": 5
+      },
+      {
+        "disc_title": 4,
+        "mkv": "/root/video/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E4_t03.mkv",
+        "handbrake_title": 6
+      },
+      {
+        "disc_title": 5,
+        "mkv": "/root/video/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-B3_t04.mkv",
+        "handbrake_title": 1
+      },
+      {
+        "disc_title": 17,
+        "mkv": "/root/video/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-D1_t05.mkv",
+        "handbrake_title": 2
+      }
+    ],
+    "image": "/root/video/raw/Robin Hood/Robin Hood.iso",
+    "duplicates": {
+      "skipped": [
+        {
+          "handbrake_title": 4,
+          "disc_title": 2,
+          "reason": "is played whole by title 3"
+        },
+        {
+          "handbrake_title": 5,
+          "disc_title": 3,
+          "reason": "is played whole by title 3"
+        },
+        {
+          "handbrake_title": 6,
+          "disc_title": 4,
+          "reason": "is played whole by title 3"
+        }
+      ],
+      "wholes": [
+        {
+          "handbrake_title": 3,
+          "disc_title": 1,
+          "kept": "whole",
+          "interleaved": false,
+          "parts": [
+            {
+              "handbrake_title": 4,
+              "disc_title": 2,
+              "start": 0.0
+            },
+            {
+              "handbrake_title": 5,
+              "disc_title": 3,
+              "start": 1086.118
+            },
+            {
+              "handbrake_title": 6,
+              "disc_title": 4,
+              "start": 2854.385
+            }
+          ]
+        }
+      ]
+    },
+    "transcodes": {
+      "3": "/root/video/completed/movies/Robin Hood (2010)/title_3.mkv",
+      "1": "/root/video/completed/movies/Robin Hood (2010)/extras/title_1.mkv",
+      "2": "/root/video/completed/movies/Robin Hood (2010)/extras/title_2.mkv"
+    }
+  }
+}

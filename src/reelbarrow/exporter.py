@@ -1,20 +1,24 @@
-"""ARM's database, copied out as one manifest per job.
+"""ARM's jobs, copied out of its database as manifests.
 
 `reelbarrow export-manifests` runs beside ARM, reads its SQLite database
-read-only on an interval, and writes `job-<id>.json` for every job into the
-manifest directory, which the service scans. *The ARM manifest* in the design
-says why it polls rather than hooks a notification: ARM sets a job's final
-status after its last notification, so only a reader that comes back later sees
-it.
+read-only on an interval, and writes a manifest for every job into the
+manifest directory, which the service scans. *The manifest* in the design says
+why it polls rather than hooks a notification: ARM sets a job's final status
+after its last notification, so only a reader that comes back later sees it.
 
-This module writes inside the output directory and nowhere else. It never
-mounts the library; the executor's write rule allows it this one directory.
+This is the one place that knows ARM's schema. It reads the `job` row and the
+deployment's raw-copy record (*The raw copy's record*), and translates both
+into the manifest's vocabulary: ARM's statuses, its container's paths, its
+local times and HandBrake's title numbers go no further.
+
+It writes inside the output directory and nowhere else. It never mounts the
+library; the executor's write rule allows it this one directory.
 """
 
 import json
 import logging
-import math
 import os
+import posixpath
 import sqlite3
 import time
 import uuid
@@ -23,21 +27,102 @@ from datetime import UTC, datetime
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
+
+from reelbarrow import manifest
+from reelbarrow.manifest import (
+    CompleteReason,
+    IdentityReason,
+    RawForm,
+    ShareRef,
+    ShareRefError,
+    State,
+    TitleReason,
+)
 
 log = logging.getLogger(__name__)
 
-# Raised when a field is removed or changes meaning, once reelbarrow's reader is
-# deployed; a field added leaves it alone (the stamp's rule, in the design).
-SCHEMA = 1
+SOURCE = "arm"
 LIVENESS = "exporter.json"
-# Hidden, and not matching job-*.json, so a scanner never picks up a file that
-# is still being written.
+# Hidden, and not matching the manifests' glob, so a scanner never picks up a
+# file that is still being written.
 TEMP_PREFIX = ".reelbarrow-"
 TEMP_SUFFIX = ".tmp"
 
+RAW_COPY_TABLE = "reelbarrow_raw_copy"
+RAW_COPY_SCHEMA = 1
+IDENTITY = {
+    "title": "title",
+    "year": "year",
+    "imdb_id": "imdb_id",
+    "kind": "video_type",
+}
+# The `job` columns read. One missing stops every pass: a manifest silently
+# short of a field would read downstream as a fact not recorded.
+COLUMNS = (
+    "job_id",
+    "stage",
+    "status",
+    "start_time",
+    "stop_time",
+    "errors",
+    "disctype",
+    "label",
+    "crc_id",
+    "path",
+    "hasnicetitle",
+    *(
+        f"{column}{suffix}"
+        for column in IDENTITY.values()
+        for suffix in ("", "_auto", "_manual")
+    ),
+)
+# What ARM writes where it has no value.
+NO_VALUE = {None, "", "None"}
+KINDS = {"movie", "series"}
+FINAL = {"success": State.SUCCEEDED, "fail": State.FAILED}
+
 
 class SerialiseError(ValueError):
-    """A value in a row that the manifest cannot carry faithfully."""
+    """A job the manifest cannot carry faithfully."""
+
+
+class SchemaError(RuntimeError):
+    """ARM's database lacks what the exporter reads."""
+
+
+@dataclass(frozen=True, slots=True)
+class ArmRoot:
+    """Where ARM's container sees its slice of the share: `container`, an
+    absolute path in ARM's container, is `share`, a path from the share's root.
+    """
+
+    container: str
+    share: str
+
+    @classmethod
+    def parse(cls, value: str) -> "ArmRoot":
+        container, sep, share = value.partition("=")
+        if not sep or not posixpath.isabs(container):
+            raise ValueError(f"{value!r} is not CONTAINER=SHARE, CONTAINER absolute")
+        ShareRef(share)
+        return cls(posixpath.normpath(container), share)
+
+    def ref(self, path: str, what: str) -> ShareRef:
+        """ARM's path as a share reference. A path outside ARM's slice of the
+        share fails, rather than becoming a plausible wrong one."""
+        normal = posixpath.normpath(path)
+        if normal != path.rstrip("/") or not posixpath.isabs(normal):
+            raise SerialiseError(f"{what} {path!r} is not a plain absolute path")
+        relative = posixpath.relpath(normal, self.container)
+        if relative == ".." or relative.startswith("../"):
+            raise SerialiseError(f"{what} {path!r} is outside {self.container}")
+        try:
+            return ShareRef(
+                self.share if relative == "." else f"{self.share}/{relative}"
+            )
+        except ShareRefError as error:
+            raise SerialiseError(f"{what}: {error}") from error
 
 
 def connect(db: Path, timeout: float) -> sqlite3.Connection:
@@ -53,88 +138,195 @@ def connect(db: Path, timeout: float) -> sqlite3.Connection:
     return sqlite3.connect(uri, uri=True, timeout=timeout, autocommit=True)
 
 
-def _value(declared: str, value: Any, column: str) -> Any:
-    """A column's value as JSON carries it, by the type SQLite declared for it.
-
-    SQLAlchemy keeps booleans as 0/1 and datetimes as text with a space; they go
-    out as true/false and ISO 8601. A datetime keeps the zone it was stored in,
-    none for ARM, which stores its local time: converting it here would put the
-    exporter's zone on ARM's clock.
-    """
-    if value is None:
-        return None
-    kind = declared.upper()
-    if kind == "BOOLEAN":
-        if value in (0, 1):
-            return bool(value)
-        raise SerialiseError(f"{column}: {value!r} is not a boolean")
-    if kind in ("DATETIME", "TIMESTAMP"):
-        try:
-            return datetime.fromisoformat(value).isoformat()
-        except (TypeError, ValueError) as error:
-            raise SerialiseError(f"{column}: {value!r} is not a datetime") from error
-    if isinstance(value, bytes):
-        raise SerialiseError(f"{column}: a blob")
-    if isinstance(value, float) and not math.isfinite(value):
-        # JSON has no NaN or infinity; json.dumps would write invalid JSON.
-        raise SerialiseError(f"{column}: {value}")
-    return value
-
-
-@dataclass(frozen=True, slots=True)
-class Table:
-    """A table's rows as ARM holds them, beside each column's declared type."""
-
-    types: dict[str, str]
-    rows: list[dict[str, Any]]
-
-    def convert(self, row: dict[str, Any]) -> dict[str, Any]:
-        return {
-            name: _value(self.types.get(name, ""), value, name)
-            for name, value in row.items()
-        }
-
-
-def _table(con: sqlite3.Connection, name: str, order: str) -> Table:
-    """Every column of every row, in the table's own column order. Columns are
-    not picked: ARM's migrations add them, and choosing now would guess at what
-    a later spec needs."""
-    types = {
-        column: kind
-        for _, column, kind, *_ in con.execute(f"PRAGMA table_info({name})")
-    }
-    cursor = con.execute(f"SELECT * FROM {name} ORDER BY {order}")
-    names = [d[0] for d in cursor.description]
-    return Table(types, [dict(zip(names, row, strict=True)) for row in cursor])
-
-
-def read(con: sqlite3.Connection) -> tuple[Table, Table]:
-    """The job and track tables, from one read transaction, so a manifest never
-    mixes two states of a job. Never the config table: it holds ARM's API
-    keys."""
+def read(con: sqlite3.Connection) -> tuple[list[dict], dict[int, str]]:
+    """Every job and every raw-copy document, from one read transaction, so a
+    manifest never mixes two states of a job. Never the config table: it holds
+    ARM's API keys."""
     con.execute("BEGIN")
     try:
-        return _table(con, "job", "job_id"), _table(con, "track", "job_id, track_id")
+        present = {row[1] for row in con.execute("PRAGMA table_info(job)")}
+        missing = [column for column in COLUMNS if column not in present]
+        if missing:
+            raise SchemaError(f"ARM's job table has no {', '.join(missing)}")
+        cursor = con.execute(f"SELECT {', '.join(COLUMNS)} FROM job ORDER BY job_id")
+        jobs = [dict(zip(COLUMNS, row, strict=True)) for row in cursor]
+        tables = {row[0] for row in con.execute("SELECT name FROM sqlite_master")}
+        documents = (
+            dict(con.execute(f"SELECT job_id, document FROM {RAW_COPY_TABLE}"))
+            if RAW_COPY_TABLE in tables
+            else {}
+        )
     finally:
         con.execute("ROLLBACK")
+    return jobs, documents
 
 
-def manifest(
-    jobs: Table, job: dict[str, Any], tracks: Table, rows: list[dict[str, Any]]
-) -> dict[str, Any]:
-    """The manifest of one job and its track rows. Raises SerialiseError for a
-    value it can't carry."""
+def _text(value: Any) -> str | None:
+    return None if value in NO_VALUE else str(value)
+
+
+def _time(value: Any, zone: ZoneInfo, column: str) -> str | None:
+    """ARM's naive local time, in UTC with its offset."""
+    if value is None:
+        return None
+    try:
+        local = datetime.fromisoformat(value)
+    except (TypeError, ValueError) as error:
+        raise SerialiseError(f"{column}: {value!r} is not a datetime") from error
+    if local.tzinfo is not None:
+        raise SerialiseError(f"{column}: {value!r} has a zone ARM never writes")
+    return local.replace(tzinfo=zone).astimezone(UTC).isoformat()
+
+
+def _identity(job: dict) -> dict:
+    """Each field with who supplied it.
+
+    ARM's UI writes a `_manual` column for each field its form sets; the series
+    route sets `year` without `year_manual`. So a field also counts as set by a
+    person when the job has a manual title and the field differs from what
+    ARM's own lookup found.
+    """
+    corrected = _text(job["title_manual"]) is not None
+    identity = {}
+    for name, column in IDENTITY.items():
+        value = _text(job[column])
+        if name == "kind" and value not in KINDS:
+            value = None
+        if _text(job[f"{column}_manual"]) is not None or (
+            corrected and value is not None and value != _text(job[f"{column}_auto"])
+        ):
+            reason = IdentityReason.SET_BY_PERSON
+        elif job["hasnicetitle"]:
+            reason = IdentityReason.LOOKUP
+        else:
+            reason = IdentityReason.NOT_IDENTIFIED
+        identity[name] = {"value": value, "reason": reason}
+    return identity
+
+
+def _skip_reasons(duplicates: dict) -> dict[int, TitleReason]:
+    """HandBrake's number for each title ARM didn't transcode, and why."""
+    accounted = {}
+    for whole in duplicates.get("wholes", []):
+        if whole["kept"] == "parts":
+            accounted[whole["handbrake_title"]] = TitleReason.PARTS_KEPT
+        elif whole["kept"] == "whole":
+            for part in whole["parts"]:
+                accounted[part["handbrake_title"]] = TitleReason.WHOLE_KEPT
     return {
-        "schema": SCHEMA,
-        "job": jobs.convert(job),
-        "tracks": [tracks.convert(row) for row in rows],
+        skipped["handbrake_title"]: accounted.get(
+            skipped["handbrake_title"], TitleReason.SAME_AS_ANOTHER
+        )
+        for skipped in duplicates.get("skipped", [])
     }
+
+
+def _key(entry: dict) -> dict:
+    """A title by the disc's own number for it."""
+    for key in ("disc_title", "playlist"):
+        if entry.get(key) is not None:
+            return {key: entry[key]}
+    raise SerialiseError(f"a title with no disc_title or playlist: {entry!r}")
+
+
+def _raw(document: dict, root: ArmRoot) -> dict:
+    """The raw copy's record as `raw`, `titles` and `wholes`."""
+    if document.get("schema") != RAW_COPY_SCHEMA:
+        raise SerialiseError(f"raw copy schema {document.get('schema')!r}")
+    complete = document["complete"]
+    raw = {
+        "form": RawForm(document["form"]),
+        "folder": root.ref(document["folder"], "raw folder").to_json(),
+    }
+    if document.get("image"):
+        raw["image"] = root.ref(document["image"], "image").to_json()
+    raw["complete"] = {
+        "value": complete["value"],
+        "reason": CompleteReason(complete["reason"]),
+    }
+    raw["problems"] = list(document.get("problems", []))
+    out = {"raw": raw}
+
+    title_map = document.get("title_map")
+    if title_map is None:
+        return out
+    duplicates = document.get("duplicates")
+    skipped = _skip_reasons(duplicates) if duplicates is not None else {}
+    transcodes = document.get("transcodes", {})
+    titles = []
+    for entry in title_map:
+        number = entry["handbrake_title"]
+        title = _key(entry)
+        if entry.get("mkv") and number is not None:
+            title["extracted"] = root.ref(entry["mkv"], "extracted title").to_json()
+        if number is None:
+            title |= {"transcode": None, "reason": TitleReason.NOT_EXTRACTED}
+        elif number in skipped:
+            title |= {"transcode": None, "reason": skipped[number]}
+        elif str(number) in transcodes:
+            path = root.ref(transcodes[str(number)], "transcode")
+            title |= {"transcode": path.to_json(), "reason": None}
+        # Otherwise its transcode isn't recorded, yet or at all.
+        titles.append(title)
+    out["titles"] = titles
+    if duplicates is not None:
+        out["wholes"] = [
+            {
+                **_key(whole),
+                "kept": whole["kept"],
+                "interleaved": whole["interleaved"],
+                "parts": [
+                    {**_key(part), "start": part["start"]} for part in whole["parts"]
+                ],
+            }
+            for whole in duplicates.get("wholes", [])
+        ]
+    return out
+
+
+def job_id(job: dict) -> str:
+    """The manifest's id: a job id alone restarts with a recreated database,
+    and the stage it was ripped at doesn't repeat."""
+    if _text(job["stage"]) is None:
+        raise SerialiseError("no stage")
+    return f"{job['job_id']}-{job['stage']}"
+
+
+def build(job: dict, document: str | None, root: ArmRoot, zone: ZoneInfo) -> dict:
+    """The manifest of one job. Raises SerialiseError for one it can't carry."""
+    out = {
+        "schema": manifest.SCHEMA,
+        "source": SOURCE,
+        "id": job_id(job),
+        "state": FINAL.get(job["status"], State.RUNNING),
+        "start_time": _time(job["start_time"], zone, "start_time"),
+        "finish_time": _time(job["stop_time"], zone, "stop_time"),
+        "errors": _text(job["errors"]),
+        "disc": {
+            "type": _text(job["disctype"]),
+            "label": _text(job["label"]),
+            "crc64": _text(job["crc_id"]),
+        },
+        "identity": _identity(job),
+        "completed": None
+        if _text(job["path"]) is None
+        else {"folder": root.ref(job["path"], "completed folder").to_json()},
+    }
+    if document is not None:
+        try:
+            out |= _raw(json.loads(document), root)
+        except SerialiseError:
+            raise
+        except (KeyError, TypeError, ValueError) as error:
+            # A document of the right schema in the wrong shape.
+            raise SerialiseError(f"raw copy: {error!r}") from error
+    return out
 
 
 def encode(document: dict[str, Any]) -> bytes:
-    return (
-        json.dumps(document, indent=2, ensure_ascii=False, allow_nan=False) + "\n"
-    ).encode()
+    # No NaN or infinity: JSON has neither, and json.dumps would write them.
+    text = json.dumps(document, indent=2, ensure_ascii=False, allow_nan=False)
+    return (text + "\n").encode()
 
 
 def write_atomically(out: Path, name: str, content: bytes) -> None:
@@ -169,9 +361,11 @@ def remove_stale_temporaries(out: Path) -> None:
 class Exporter:
     db: Path
     out: Path
+    root: ArmRoot
+    zone: ZoneInfo
     timeout: float = 5.0
-    # Jobs whose row has gone while their manifest stays, logged once each.
-    _gone: set[int] = field(default_factory=set)
+    # Manifests whose job's row has gone, logged once each.
+    _gone: set[str] = field(default_factory=set)
 
     def run_pass(self) -> bool:
         """One pass: read the database, write the manifests that changed, then
@@ -186,15 +380,14 @@ class Exporter:
         try:
             con = connect(self.db, self.timeout)
             try:
-                jobs, tracks = read(con)
+                jobs, documents = read(con)
             finally:
                 con.close()
-        except sqlite3.Error as error:
+        except (sqlite3.Error, SchemaError) as error:
             log.error("cannot read ARM's database %s: %s", self.db, error)
             return False
-
         try:
-            self._export(jobs, tracks)
+            self._export(jobs, documents)
         except OSError as error:
             # The share, not the database. Liveness isn't written either, so a
             # share that stays unwritable reads as a stopped exporter.
@@ -202,25 +395,22 @@ class Exporter:
             return False
         return True
 
-    def _export(self, jobs: Table, tracks: Table) -> None:
-        by_job: dict[int, list[dict]] = {}
-        for track in tracks.rows:
-            by_job.setdefault(track["job_id"], []).append(track)
-
-        written, skipped = 0, []
-        for job in jobs.rows:
-            job_id = job["job_id"]
+    def _export(self, jobs: list[dict], documents: dict[int, str]) -> None:
+        written, skipped, present = 0, [], set()
+        for job in jobs:
             try:
-                content = encode(manifest(jobs, job, tracks, by_job.get(job_id, [])))
+                built = build(job, documents.get(job["job_id"]), self.root, self.zone)
             except SerialiseError as error:
-                log.error("job %s skipped: %s", job_id, error)
-                skipped.append(job_id)
+                log.error("job %s skipped: %s", job["job_id"], error)
+                skipped.append(job["job_id"])
                 continue
-            if self._write_if_changed(f"job-{job_id}.json", content):
-                log.info("job %s: wrote manifest, status %s", job_id, job["status"])
+            present.add(built["id"])
+            name = manifest.filename(SOURCE, built["id"])
+            if self._write_if_changed(name, encode(built)):
+                log.info("job %s: wrote manifest, %s", job["job_id"], built["state"])
                 written += 1
 
-        self._note_gone({job["job_id"] for job in jobs.rows})
+        self._note_gone(present)
         # Last, so its time is that of a pass that read the database and wrote
         # every manifest that changed.
         write_atomically(
@@ -230,12 +420,12 @@ class Exporter:
                 {
                     "passed_at": datetime.now(UTC).isoformat(),
                     "version": version("reelbarrow"),
-                    "jobs": len(jobs.rows),
+                    "jobs": len(jobs),
                     "skipped_jobs": skipped,
                 }
             ),
         )
-        log.debug("pass: %d jobs, %d written", len(jobs.rows), written)
+        log.debug("pass: %d jobs, %d written", len(jobs), written)
 
     def _write_if_changed(self, name: str, content: bytes) -> bool:
         """An unchanged job leaves its file, and its modification time, alone,
@@ -248,17 +438,16 @@ class Exporter:
         write_atomically(self.out, name, content)
         return True
 
-    def _note_gone(self, present: set[int]) -> None:
+    def _note_gone(self, present: set[str]) -> None:
         """A manifest outlives its row, deleted from ARM's UI or otherwise, and
         is never deleted here. Its row's absence is logged once."""
-        on_disk = set()
-        for path in self.out.glob("job-*.json"):
-            try:
-                on_disk.add(int(path.stem.removeprefix("job-")))
-            except ValueError:
-                continue
-        for job_id in sorted(on_disk - present - self._gone):
-            log.warning("job %s: row gone from ARM's database; manifest kept", job_id)
+        prefix = manifest.filename(SOURCE, "")[: -len(".json")]
+        on_disk = {
+            path.name[len(prefix) : -len(".json")]
+            for path in self.out.glob(f"{prefix}*.json")
+        }
+        for id in sorted(on_disk - present - self._gone):
+            log.warning("job %s: row gone from ARM's database; manifest kept", id)
         self._gone = (self._gone | on_disk) - present
 
     def run(self, interval: float) -> None:

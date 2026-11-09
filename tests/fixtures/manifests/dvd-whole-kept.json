@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "87-179323748073",
+  "state": "succeeded",
+  "start_time": "2026-10-29T01:31:20.799631+00:00",
+  "finish_time": "2026-10-29T02:44:18.917235+00:00",
+  "errors": null,
+  "disc": {
+    "type": "dvd",
+    "label": "ROBIN_HOOD",
+    "crc64": "d3c5ce89aef40f61"
+  },
+  "identity": {
+    "title": {
+      "value": "Robin Hood",
+      "reason": "set_by_person"
+    },
+    "year": {
+      "value": "2010",
+      "reason": "set_by_person"
+    },
+    "imdb_id": {
+      "value": "tt0955308",
+      "reason": "set_by_person"
+    },
+    "kind": {
+      "value": "movie",
+      "reason": "set_by_person"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/movies/Robin Hood (2010)"
+    }
+  },
+  "raw": {
+    "form": "dvd-image",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/Robin Hood"
+    },
+    "image": {
+      "path": "import/automatic-ripping-machine/raw/Robin Hood/Robin Hood.iso"
+    },
+    "complete": {
+      "value": true,
+      "reason": "sizes_and_hashes"
+    },
+    "problems": []
+  },
+  "titles": [
+    {
+      "disc_title": 1,
+      "extracted": {
+        "path": "import/automatic-ripping-machine/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E1_t00.mkv"
+      },
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Robin Hood (2010)/title_3.mkv"
+      },
+      "reason": null
+    },
+    {
+      "disc_title": 2,
+      "extracted": {
+        "path": "import/automatic-ripping-machine/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E2_t01.mkv"
+      },
+      "transcode": null,
+      "reason": "whole_kept"
+    },
+    {
+      "disc_title": 3,
+      "extracted": {
+        "path": "import/automatic-ripping-machine/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E3_t02.mkv"
+      },
+      "transcode": null,
+      "reason": "whole_kept"
+    },
+    {
+      "disc_title": 4,
+      "extracted": {
+        "path": "import/automatic-ripping-machine/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E4_t03.mkv"
+      },
+      "transcode": null,
+      "reason": "whole_kept"
+    },
+    {
+      "disc_title": 5,
+      "extracted": {
+        "path": "import/automatic-ripping-machine/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-B3_t04.mkv"
+      },
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Robin Hood (2010)/extras/title_1.mkv"
+      },
+      "reason": null
+    },
+    {
+      "disc_title": 17,
+      "extracted": {
+        "path": "import/automatic-ripping-machine/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-D1_t05.mkv"
+      },
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Robin Hood (2010)/extras/title_2.mkv"
+      },
+      "reason": null
+    }
+  ],
+  "wholes": [
+    {
+      "disc_title": 1,
+      "kept": "whole",
+      "interleaved": false,
+      "parts": [
+        {
+          "disc_title": 2,
+          "start": 0.0
+        },
+        {
+          "disc_title": 3,
+          "start": 1086.118
+        },
+        {
+          "disc_title": 4,
+          "start": 2854.385
+        }
+      ]
+    }
+  ]
+}

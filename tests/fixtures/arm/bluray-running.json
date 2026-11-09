@@ -1,0 +1,38 @@
+{
+  "job": {
+    "job_id": 103,
+    "stage": "179417475679",
+    "status": "ripping",
+    "start_time": "2026-11-08 21:52:36.805910",
+    "stop_time": null,
+    "errors": null,
+    "disctype": "bluray",
+    "label": "DOWNTON_ABBEY_SEASON_6_D1",
+    "crc_id": null,
+    "path": "/root/video/completed/tv/Downton Abbey (2010-2015)_179417475679",
+    "hasnicetitle": 1,
+    "title": "Downton Abbey",
+    "title_auto": "The-Manners-of-Downton-Abbey",
+    "title_manual": "Downton Abbey",
+    "year": "2010–2015",
+    "year_auto": "2015",
+    "year_manual": "2010–2015",
+    "imdb_id": "tt1606375",
+    "imdb_id_auto": "tt5109000",
+    "imdb_id_manual": "tt1606375",
+    "video_type": "series",
+    "video_type_auto": "movie",
+    "video_type_manual": "series"
+  },
+  "raw_copy": {
+    "schema": 1,
+    "folder": "/root/video/raw/Downton Abbey_179417475679",
+    "form": "bluray-backup",
+    "complete": {
+      "value": null,
+      "reason": "not_checked"
+    },
+    "problems": [],
+    "title_map": null
+  }
+}

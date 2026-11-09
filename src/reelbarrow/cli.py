@@ -16,6 +16,20 @@ def main() -> None:
         help="copy ARM's database out as job manifests, on an interval",
     )
     export.add_argument("--db", type=Path, required=True, help="ARM's arm.db")
+    # Required, as no default is right everywhere and a wrong one makes
+    # plausible paths and times rather than failing.
+    export.add_argument(
+        "--arm-root",
+        required=True,
+        metavar="CONTAINER=SHARE",
+        help="where ARM's container sees its slice of the share, and that slice's "
+        "path from the share's root, e.g. /root/video=import/automatic-ripping-machine",
+    )
+    export.add_argument(
+        "--arm-timezone",
+        required=True,
+        help="the IANA time zone ARM's container runs in, e.g. Etc/UTC",
+    )
     export.add_argument(
         "--out",
         type=Path,
@@ -40,14 +54,23 @@ def main() -> None:
 
         uvicorn.run(create_app(), host=args.host, port=args.port)
     elif args.command == "export-manifests":
-        from reelbarrow.config import Settings
-        from reelbarrow.exporter import Exporter
+        from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+        from reelbarrow.config import Settings
+        from reelbarrow.exporter import ArmRoot, Exporter
+
+        try:
+            root = ArmRoot.parse(args.arm_root)
+            zone = ZoneInfo(args.arm_timezone)
+        except (ValueError, ZoneInfoNotFoundError) as error:
+            parser.error(str(error))
         logging.basicConfig(
             level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
         )
         out = args.out or Settings().manifest_dir
-        exporter = Exporter(db=args.db, out=out, timeout=args.timeout)
+        exporter = Exporter(
+            db=args.db, out=out, root=root, zone=zone, timeout=args.timeout
+        )
         if args.once:
             raise SystemExit(0 if exporter.run_pass() else 1)
         exporter.run(args.interval)

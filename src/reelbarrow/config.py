@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     # Root of the video share: holds both import/ and the movies/ and shows/
     # libraries, which must be one filesystem for filing to be a rename().
     video_root: Path = Path("/video")
-    # Where the exporter (`reelbarrow export-manifests`) writes ARM's job
-    # manifests, job-<id>.json.
+    # Where the exporter (`reelbarrow export-manifests`) writes ARM's
+    # manifests, one a job.
     manifest_dir: Path = Path("/video/import/automatic-ripping-machine/manifests")
     # Job state and the ledger.
     data_dir: Path = Path("/data")

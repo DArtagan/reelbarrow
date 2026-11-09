@@ -1,0 +1,94 @@
+{
+  "job": {
+    "job_id": 84,
+    "stage": "179306029568",
+    "status": "success",
+    "start_time": "2026-10-27 00:18:15.720212",
+    "stop_time": "2026-10-27 12:10:23.590345",
+    "errors": null,
+    "disctype": "bluray",
+    "label": "DOWNTON_ABBEY_2_D1",
+    "crc_id": null,
+    "path": "/root/video/completed/tv/Downton-Abbey (2010-2015)_179306029568",
+    "hasnicetitle": 1,
+    "title": "Downton-Abbey",
+    "title_auto": "Downton-Abbey",
+    "title_manual": null,
+    "year": "2010–2015",
+    "year_auto": "2010–2015",
+    "year_manual": null,
+    "imdb_id": "tt1606375",
+    "imdb_id_auto": "tt1606375",
+    "imdb_id_manual": null,
+    "video_type": "series",
+    "video_type_auto": "series",
+    "video_type_manual": null
+  },
+  "raw_copy": {
+    "schema": 1,
+    "folder": "/root/video/raw/Downton-Abbey_179306029568",
+    "form": "bluray-backup",
+    "complete": {
+      "value": true,
+      "reason": "sizes_and_hashes"
+    },
+    "problems": [],
+    "title_map": [
+      {
+        "playlist": "00001.mpls",
+        "handbrake_title": 2
+      },
+      {
+        "playlist": "00002.mpls",
+        "handbrake_title": 3
+      },
+      {
+        "playlist": "00003.mpls",
+        "handbrake_title": 4
+      },
+      {
+        "playlist": "00006.mpls",
+        "handbrake_title": 6
+      }
+    ],
+    "duplicates": {
+      "skipped": [
+        {
+          "handbrake_title": 6,
+          "playlist": "00006.mpls",
+          "reason": "plays titles 2, 3, 4 in turn"
+        }
+      ],
+      "wholes": [
+        {
+          "handbrake_title": 6,
+          "playlist": "00006.mpls",
+          "kept": "parts",
+          "interleaved": false,
+          "parts": [
+            {
+              "handbrake_title": 2,
+              "playlist": "00001.mpls",
+              "start": 0.0
+            },
+            {
+              "handbrake_title": 3,
+              "playlist": "00002.mpls",
+              "start": 4149.979
+            },
+            {
+              "handbrake_title": 4,
+              "playlist": "00003.mpls",
+              "start": 7467.835
+            }
+          ]
+        }
+      ]
+    },
+    "transcodes": {
+      "2": "/root/video/completed/tv/Downton-Abbey (2010-2015)_179306029568/title_2.mkv",
+      "3": "/root/video/completed/tv/Downton-Abbey (2010-2015)_179306029568/title_3.mkv",
+      "4": "/root/video/completed/tv/Downton-Abbey (2010-2015)_179306029568/title_4.mkv"
+    }
+  }
+}
