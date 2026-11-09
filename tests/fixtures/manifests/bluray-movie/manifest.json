@@ -47,7 +47,11 @@
   },
   "titles": [
     {
-      "playlist": "00612.mpls"
+      "playlist": "00612.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey--A-New-Era (2022)/Downton-Abbey--A-New-Era (2022).mkv"
+      },
+      "reason": null
     },
     {
       "playlist": "01391.mpls",

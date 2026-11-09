@@ -47,7 +47,11 @@
   },
   "titles": [
     {
-      "playlist": "00000.mpls"
+      "playlist": "00000.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/The-Polar-Express (2004)/The-Polar-Express (2004).mkv"
+      },
+      "reason": null
     },
     {
       "playlist": "00019.mpls",

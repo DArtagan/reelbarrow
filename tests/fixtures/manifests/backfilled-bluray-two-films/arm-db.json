@@ -33,33 +33,37 @@
       "hashes": "not_run"
     },
     "problems": [],
-    "title_map": [
+    "titles": [
       {
+        "handbrake_title": 43,
         "playlist": "00251.mpls",
-        "handbrake_title": 43
+        "transcode": "/root/video/completed/movies/The Rescuers (1977)_178961349896/extras/title_43.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 44,
         "playlist": "00252.mpls",
-        "handbrake_title": 44
+        "transcode": "/root/video/completed/movies/The Rescuers (1977)_178961349896/extras/title_44.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 46,
         "playlist": "00254.mpls",
-        "handbrake_title": 46
+        "transcode": "/root/video/completed/movies/The Rescuers (1977)_178961349896/extras/title_46.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 70,
         "playlist": "00800.mpls",
-        "handbrake_title": 70
+        "transcode": "/root/video/completed/movies/The Rescuers (1977)_178961349896/The Rescuers (1977).mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 71,
         "playlist": "00801.mpls",
-        "handbrake_title": 71
+        "transcode": "/root/video/completed/movies/The Rescuers (1977)_178961349896/extras/title_71.mkv",
+        "reason": null
       }
-    ],
-    "transcodes": {
-      "43": "/root/video/completed/movies/The Rescuers (1977)_178961349896/extras/title_43.mkv",
-      "44": "/root/video/completed/movies/The Rescuers (1977)_178961349896/extras/title_44.mkv",
-      "46": "/root/video/completed/movies/The Rescuers (1977)_178961349896/extras/title_46.mkv",
-      "71": "/root/video/completed/movies/The Rescuers (1977)_178961349896/extras/title_71.mkv"
-    }
+    ]
   }
 }

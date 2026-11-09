@@ -32,15 +32,7 @@ from zoneinfo import ZoneInfo
 from pydantic import ValidationError
 
 from reelbarrow import manifest
-from reelbarrow.manifest import (
-    CheckState,
-    IdentityReason,
-    Manifest,
-    RawForm,
-    ShareRef,
-    State,
-    TitleReason,
-)
+from reelbarrow.manifest import IdentityReason, Manifest, ShareRef, State
 
 log = logging.getLogger(__name__)
 
@@ -95,26 +87,26 @@ class SchemaError(RuntimeError):
 
 @dataclass(frozen=True, slots=True)
 class ArmPath:
-    """One folder as ARM's container and reelbarrow each see it: `arm`, ARM's
-    path, is `share`, that folder's path from the share's root, which is where
-    reelbarrow's own path to it puts it under its video root.
+    """One folder, as ARM's container mounts it and as its path on the share.
+
+    The share's path is what a manifest holds, so the exporter needs no one's
+    mount but ARM's, and reelbarrow's service needs only its own.
     """
 
     arm: str
     share: str
 
     @classmethod
-    def parse(cls, value: str, video_root: Path) -> "ArmPath":
-        """From `ARM=REELBARROW`, two absolute paths to one folder; the second
-        is under reelbarrow's video root."""
-        arm, sep, ours = value.partition("=")
-        if not sep or not posixpath.isabs(arm) or not posixpath.isabs(ours):
-            raise ValueError(f"{value!r} is not ARM=REELBARROW, both absolute")
-        root = posixpath.normpath(str(video_root))
-        share = posixpath.relpath(posixpath.normpath(ours), root)
-        if share == "." or share == ".." or share.startswith("../"):
-            raise ValueError(f"{ours} is not inside the video root {root}")
-        ShareRef(path=share)
+    def parse(cls, value: str) -> "ArmPath":
+        """From `ARM=SHARE`: ARM's absolute path, and the share's path."""
+        arm, sep, share = value.partition("=")
+        if not sep or not posixpath.isabs(arm):
+            raise ValueError(f"{value!r} is not ARM=SHARE, ARM's path absolute")
+        share = share.rstrip("/")
+        try:
+            ShareRef(path=share)
+        except ValidationError as error:
+            raise ValueError(f"{share!r} is not a path on the share") from error
         return cls(posixpath.normpath(arm), share)
 
     def ref(self, path: str, what: str) -> dict:
@@ -221,83 +213,40 @@ def _identity(job: dict) -> dict:
     return identity
 
 
-def _key(entry: dict) -> dict:
-    """A title by the disc's own number for it."""
-    for key in ("disc_title", "playlist"):
-        if entry.get(key) is not None:
-            return {key: entry[key]}
-    raise SerialiseError(f"a title with no disc_title or playlist: {entry!r}")
+# A title's fields the record holds as the manifest does. Its paths are ARM's,
+# translated, and its `handbrake_title` is the record's own key, dropped.
+TITLE_FIELDS = ("disc_title", "playlist", "reason", "played_by", "interleaved", "parts")
+
+
+def _title(entry: dict, root: ArmPath) -> dict:
+    title = {name: entry[name] for name in TITLE_FIELDS if name in entry}
+    if entry.get("extracted"):
+        title["extracted"] = root.ref(entry["extracted"], "extracted title")
+    if "transcode" in entry:
+        transcode = entry["transcode"]
+        title["transcode"] = transcode and root.ref(transcode, "transcode")
+    return title
 
 
 def _raw(document: dict, root: ArmPath) -> dict:
-    """The raw copy's record as `raw`, `titles` and `wholes`."""
+    """The raw copy's record as `raw` and `titles`. The record is in their
+    shape already, so this only translates ARM's paths; the model checks the
+    rest."""
     if document.get("schema") != RAW_COPY_SCHEMA:
         raise SerialiseError(f"raw copy schema {document.get('schema')!r}")
-    check = document["check"]
     raw = {
-        "form": RawForm(document["form"]),
+        "form": document["form"],
         "folder": root.ref(document["folder"], "raw folder"),
     }
     if document.get("image"):
         raw["image"] = root.ref(document["image"], "image")
-    raw["check"] = {
-        "sizes": CheckState(check["sizes"]),
-        "hashes": CheckState(check["hashes"]),
-    }
+    raw["check"] = document["check"]
     raw["problems"] = list(document.get("problems", []))
-    out = {"raw": raw}
-
-    title_map = document.get("title_map")
-    if title_map is None:
-        return out
-    keys = {
-        entry["handbrake_title"]: _key(entry)
-        for entry in title_map
-        if entry["handbrake_title"] is not None
-    }
-    duplicates = document.get("duplicates")
-    wholes, skipped = {}, {}
-    if duplicates is not None:
+    if document.get("titles_compared"):
         raw["titles_compared"] = True
-        wholes = {whole["handbrake_title"]: whole for whole in duplicates["wholes"]}
-        skipped = {entry["handbrake_title"]: entry for entry in duplicates["skipped"]}
-    # Whose part each title is, for the wholes that say what plays it.
-    part_of = {
-        part["handbrake_title"]: number
-        for number, whole in wholes.items()
-        for part in whole["parts"]
-    }
-    transcodes = document.get("transcodes", {})
-    titles = []
-    for entry in title_map:
-        number = entry["handbrake_title"]
-        title = _key(entry)
-        if entry.get("mkv") and number is not None:
-            title["extracted"] = root.ref(entry["mkv"], "extracted title")
-        if number is None:
-            title |= {"transcode": None, "reason": TitleReason.NOT_EXTRACTED}
-        elif number in skipped:
-            title |= {"transcode": None, "reason": TitleReason.PLAYED_BY_KEPT_TITLES}
-            played_by = skipped[number].get("played_by")
-            # A part of the whole that plays it says so already.
-            if played_by is not None and part_of.get(number) != played_by:
-                if played_by not in keys:
-                    raise SerialiseError(
-                        f"title {number} played by unmapped {played_by}"
-                    )
-                title["played_by"] = keys[played_by]
-        elif str(number) in transcodes:
-            path = root.ref(transcodes[str(number)], "transcode")
-            title |= {"transcode": path, "reason": None}
-        # Otherwise its transcode isn't recorded, yet or at all.
-        if number in wholes:
-            title["interleaved"] = wholes[number]["interleaved"]
-            title["parts"] = [
-                {**_key(part), "start": part["start"]}
-                for part in wholes[number]["parts"]
-            ]
-        titles.append(title)
-    out["titles"] = titles
+    out = {"raw": raw}
+    if document.get("titles") is not None:
+        out["titles"] = [_title(entry, root) for entry in document["titles"]]
     return out
 
 

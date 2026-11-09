@@ -28,7 +28,7 @@ Recorded as their jobs ran:
 - `bluray-whole-kept`: a Blu-ray whose whole was kept and every part skipped
 - `bluray-whole-kept-among-others`: the same, with titles beside the whole and
   its parts
-- `bluray-transcoding`: a Blu-ray mid-transcode, its episodes offered as
+- `bluray-shuffled`: a Blu-ray series disc whose episodes are offered as
   hundreds of shuffled playlists, one shuffle a play-all's
 - `bluray-backup-errored`: a Blu-ray whose backup failed before its checks ran
 
@@ -68,9 +68,7 @@ from reelbarrow.manifest import Manifest, ShareRef
 
 CASES_DIR = Path(__file__).parent / "fixtures" / "manifests"
 CASES = sorted(p.name for p in CASES_DIR.iterdir() if p.is_dir())
-ROOT = ArmPath.parse(
-    "/root/video=/video/import/automatic-ripping-machine", Path("/video")
-)
+ROOT = ArmPath.parse("/root/video=import/automatic-ripping-machine")
 # Where ARM's container sees the share in the deployment these came from.
 SHARE = "import/automatic-ripping-machine"
 
@@ -240,11 +238,16 @@ def test_featurette_variants_map_to_their_own_playlists():
     assert name(titles["01235.mpls"]["transcode"]) == "title_84.mkv"
 
 
-def test_a_feature_arm_renamed_is_not_recorded():
-    titles = load("bluray-movie")["titles"]
-    unrecorded = [t for t in titles if "transcode" not in t]
-    assert len(unrecorded) == 1
-    assert "reason" not in unrecorded[0]
+def test_a_feature_arm_renamed_is_recorded_from_arms_main_feature():
+    # Before the patch that keeps title_N.mkv, ARM named the feature for the
+    # film; its main-feature track says which title that was.
+    for case, film in (
+        ("bluray-movie", "Downton-Abbey--A-New-Era (2022).mkv"),
+        ("bluray-featurette-variants", "Downton-Abbey (2019).mkv"),
+    ):
+        titles = load(case)["titles"]
+        assert all("transcode" in t for t in titles), case
+        assert [name(t["transcode"]) for t in titles].count(film) == 1
 
 
 def test_a_series_play_all_is_skipped_and_its_episodes_placed():
@@ -272,7 +275,7 @@ def test_a_movie_discs_whole_is_kept_and_its_parts_placed_in_playback_seconds():
 
 
 def test_shuffles_name_the_title_they_repeat_through_a_chain():
-    titles = by_key(load("bluray-transcoding"))
+    titles = by_key(load("bluray-shuffled"))
     shuffles = [t for t in titles.values() if "played_by" in t]
     assert len(shuffles) == 297
     # One repeats a play-all, which its episodes play in turn.
@@ -295,9 +298,6 @@ def test_a_missing_field_reads_as_not_recorded():
         assert "titles_compared" not in built["raw"]
         assert all("parts" not in t for t in built.get("titles", []))
     assert "titles" not in load("backfilled-bluray-log-lost")
-    transcoding = load("bluray-transcoding")
-    assert transcoding["state"] == "running"
-    assert not any("transcode" in t and t["transcode"] for t in transcoding["titles"])
 
 
 # --- the model refuses a manifest that breaks the contract ------------------

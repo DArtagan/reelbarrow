@@ -47,7 +47,11 @@
   },
   "titles": [
     {
-      "playlist": "00800.mpls"
+      "playlist": "00800.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/Downton-Abbey (2019).mkv"
+      },
+      "reason": null
     },
     {
       "playlist": "01223.mpls",

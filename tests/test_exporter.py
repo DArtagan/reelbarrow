@@ -18,9 +18,7 @@ import pytest
 from reelbarrow import cli, exporter
 from reelbarrow.exporter import ArmPath, Exporter, SerialiseError, build, connect
 
-ROOT = ArmPath.parse(
-    "/root/video=/video/import/automatic-ripping-machine", Path("/video")
-)
+ROOT = ArmPath.parse("/root/video=import/automatic-ripping-machine")
 UTC = ZoneInfo("Etc/UTC")
 NAME = "manifest-arm-{}-176107498997.json"
 
@@ -240,103 +238,72 @@ def test_a_job_that_never_got_a_folder_has_none():
     assert one({"job_id": 1, "path": None})["completed"] is None
 
 
-def test_titles_are_absent_until_mapped_and_a_transcode_until_moved():
+def test_titles_are_absent_until_recorded_and_a_transcode_until_moved():
     record = json.loads(arm_db.raw_copy(1)["document"])
-    built = one({"job_id": 1}, json.dumps(record | {"title_map": None}))
-    assert "titles" not in built
-    built = one({"job_id": 1}, json.dumps(record | {"transcodes": {}}))
+    del record["titles"]
+    assert "titles" not in one({"job_id": 1}, json.dumps(record))
+    record = json.loads(arm_db.raw_copy(1)["document"])
+    del record["titles"][0]["transcode"], record["titles"][0]["reason"]
+    built = one({"job_id": 1}, json.dumps(record))
     assert "transcode" not in built["titles"][0]
     assert "reason" not in built["titles"][0]
 
 
-def blu_ray(skipped, wholes, transcoded):
-    """A Blu-ray's raw-copy record, title N on playlist 0000N.mpls."""
+def blu_ray():
+    """A Blu-ray series disc's record as the patch writes it, title N on
+    playlist 0000N.mpls: two episodes, their play-all, a shuffle of the first,
+    and the patch's own fields beside the manifest's."""
+    folder = "/root/video/completed/tv/Downton"
 
-    def title(n):
-        return {"handbrake_title": n, "playlist": f"0000{n}.mpls"}
+    def title(n, **fields):
+        return {"handbrake_title": n, "playlist": f"0000{n}.mpls", **fields}
 
-    return json.dumps(
-        {
-            "schema": 1,
-            "folder": "/root/video/raw/Downton",
-            "form": "bluray-backup",
-            "check": {"sizes": "passed", "hashes": "passed"},
-            "problems": [],
-            "title_map": [title(n) for n in range(1, 9)],
-            "duplicates": {
-                "skipped": [title(n) | extra for n, extra in skipped.items()],
-                "wholes": [
-                    title(n) | {"kept": kept, "interleaved": False,
-                                "parts": [title(p) | {"start": float(p)} for p in parts]}
-                    for n, (kept, parts) in wholes.items()
-                ],
-            },
-            "transcodes": {
-                str(n): f"/root/video/completed/tv/Downton/title_{n}.mkv"
-                for n in transcoded
-            },
-        }
-    )  # fmt: skip
+    return {
+        "schema": 1,
+        "folder": "/root/video/raw/Downton",
+        "form": "bluray-backup",
+        "check": {"sizes": "passed", "hashes": "passed"},
+        "problems": [],
+        "titles_compared": True,
+        "titles": [
+            title(1, transcode=f"{folder}/title_1.mkv", reason=None),
+            title(2, transcode=f"{folder}/title_2.mkv", reason=None),
+            title(3, transcode=None, reason="played_by_kept_titles",
+                  interleaved=False,
+                  parts=[{"playlist": "00001.mpls", "start": 0.0},
+                         {"playlist": "00002.mpls", "start": 2859.79}]),
+            title(4, transcode=None, reason="played_by_kept_titles",
+                  played_by={"playlist": "00001.mpls"}),
+        ],
+        "orders": [{"playlist": "00001.mpls", "mismatch": 0.0, "titles": 2,
+                    "runner_up": {"playlist": "00004.mpls", "mismatch": 3.1}}],
+    }  # fmt: skip
 
 
-def test_titles_say_what_plays_those_not_transcoded():
-    record = blu_ray(
-        skipped={
-            # Parts of 7, which was kept.
-            3: {"played_by": 7},
-            4: {"played_by": 7},
-            # A whole whose parts, 1 and 2, were kept.
-            6: {},
-            # A shuffle of 1, and a title inside 7 that isn't one of its parts.
-            5: {"played_by": 1},
-            8: {"played_by": 7},
-        },
-        wholes={6: ("parts", [1, 2]), 7: ("whole", [3, 4])},
-        transcoded=[1, 2, 7],
-    )
-    built = one({"job_id": 1, "disctype": "bluray"}, record)
-    titles = {t["playlist"]: t for t in built["titles"]}
+def test_the_records_titles_go_out_as_they_are_with_paths_on_the_share():
+    built = one({"job_id": 1, "disctype": "bluray"}, json.dumps(blu_ray()))
     assert built["raw"]["titles_compared"] is True
-    reasons = {key: t.get("reason") for key, t in titles.items()}
-    assert reasons == {
-        "00001.mpls": None,
-        "00002.mpls": None,
-        "00003.mpls": "played_by_kept_titles",
-        "00004.mpls": "played_by_kept_titles",
-        "00005.mpls": "played_by_kept_titles",
-        "00006.mpls": "played_by_kept_titles",
-        "00007.mpls": None,
-        "00008.mpls": "played_by_kept_titles",
+    first, _, play_all, shuffle = built["titles"]
+    assert first == {
+        "playlist": "00001.mpls",
+        "transcode": {
+            "path": "import/automatic-ripping-machine/completed/tv/Downton/title_1.mkv"
+        },
+        "reason": None,
     }
-    # Said once: by a whole's parts, or by played_by where nothing else does.
-    played_by = {k: t["played_by"] for k, t in titles.items() if "played_by" in t}
-    assert played_by == {
-        "00005.mpls": {"playlist": "00001.mpls"},
-        "00008.mpls": {"playlist": "00007.mpls"},
-    }
-    assert titles["00006.mpls"]["parts"] == [
-        {"playlist": "00001.mpls", "start": 1.0},
-        {"playlist": "00002.mpls", "start": 2.0},
-    ]
-    assert titles["00007.mpls"]["interleaved"] is False
-    assert '"kept"' not in json.dumps(built)
-    # HandBrake's numbering stays in the exporter.
+    assert play_all["parts"][1] == {"playlist": "00002.mpls", "start": 2859.79}
+    assert shuffle["played_by"] == {"playlist": "00001.mpls"}
+    # The record's own: HandBrake's numbering, and how shuffles were chosen.
     assert "handbrake_title" not in json.dumps(built)
+    assert "orders" not in built and "orders" not in built["raw"]
 
 
-def test_titles_not_compared_say_nothing_of_repeats():
-    record = json.loads(blu_ray({}, {}, transcoded=[1]))
-    del record["duplicates"]
-    built = one({"job_id": 1, "disctype": "bluray"}, json.dumps(record))
-    assert "titles_compared" not in built["raw"]
-    assert all("parts" not in t and t.get("reason") is None for t in built["titles"])
-
-
-def test_a_manifest_that_contradicts_itself_is_not_written():
+def test_a_record_that_contradicts_itself_is_not_exported():
     # Skipped, yet nothing that was kept plays it.
-    record = blu_ray(skipped={5: {}}, wholes={}, transcoded=[1])
+    record = blu_ray()
+    del record["titles"][3]["played_by"]
     with pytest.raises(SerialiseError, match="nothing says what plays"):
-        one({"job_id": 1, "disctype": "bluray"}, record)
+        one({"job_id": 1, "disctype": "bluray"}, json.dumps(record))
 
 
 @pytest.mark.parametrize(
@@ -361,7 +328,8 @@ def test_a_path_outside_arms_slice_fails_the_job(path):
         {"form": "floppy"},
         {"check": {"sizes": "fine", "hashes": "passed"}},
         {"check": {"sizes": "failed", "hashes": "passed"}},
-        {"title_map": [{"handbrake_title": 1}]},
+        {"titles": [{"handbrake_title": 1}]},
+        {"titles": [{"disc_title": 1, "transcode": "/root/elsewhere/title_1.mkv"}]},
     ],
 )
 def test_a_raw_copy_it_cannot_read_fails_the_job(change):
@@ -370,20 +338,18 @@ def test_a_raw_copy_it_cannot_read_fails_the_job(change):
         one({"job_id": 1}, json.dumps(record | change))
 
 
-def test_arm_path_maps_one_folder_both_ways():
-    video = Path("/video")
-    path = ArmPath.parse("/root/video/=/video/import/arm/", video)
+def test_arm_path_maps_arms_folder_to_the_share():
+    path = ArmPath.parse("/root/video/=import/arm/")
     assert (path.arm, path.share) == ("/root/video", "import/arm")
     for value in (
         "/root/video",
-        "root/video=/video/import",
-        "/root/video=import/arm",
-        "/root/video=/elsewhere/import",
-        "/root/video=/video",
-        "/root/video=/video/../import",
+        "root/video=import/arm",
+        "/root/video=/video/import/arm",
+        "/root/video=import/../arm",
+        "/root/video=",
     ):
         with pytest.raises(ValueError):
-            ArmPath.parse(value, video)
+            ArmPath.parse(value)
 
 
 # --- what a pass does -------------------------------------------------------
@@ -465,7 +431,12 @@ def test_a_status_change_rewrites_only_that_job(db, export, out):
 
 def test_a_raw_copy_change_rewrites_its_job(db, export, out):
     arm_db.insert(db, "job", arm_db.job(1))
-    arm_db.insert(db, "reelbarrow_raw_copy", arm_db.raw_copy(1, transcodes={}))
+    # Before ARM moved the transcode.
+    record = json.loads(arm_db.raw_copy(1)["document"])
+    del record["titles"][0]["transcode"], record["titles"][0]["reason"]
+    arm_db.insert(
+        db, "reelbarrow_raw_copy", {"job_id": 1, "document": json.dumps(record)}
+    )
     export.run_pass()
     assert "transcode" not in load(out, 1)["titles"][0]
     document = arm_db.raw_copy(1)["document"]
@@ -679,7 +650,7 @@ def test_the_command(db, out, monkeypatch, capsys):
         "--out",
         str(out),
         "--arm-path",
-        "/root/video=/video/import/automatic-ripping-machine",
+        "/root/video=import/automatic-ripping-machine",
         "--once",
     ]
     monkeypatch.setattr(sys, "argv", argv)

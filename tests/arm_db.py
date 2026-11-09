@@ -189,7 +189,7 @@ def create(path: Path, *, raw_copy: bool = True) -> Path:
 
 def raw_copy(job_id: int, **overrides) -> dict:
     """A DVD image's record, as the patch leaves it once the job has filed its
-    transcodes: two titles, the second not saved."""
+    transcodes: two titles, the second not saved. Titles weren't compared."""
     folder = "/root/video/raw/SAMPLE_MOVIE"
     completed = "/root/video/completed/movies/Sample-Movie (1965)"
     document = {
@@ -198,20 +198,22 @@ def raw_copy(job_id: int, **overrides) -> dict:
         "form": "dvd-image",
         "check": {"sizes": "passed", "hashes": "passed"},
         "problems": [],
-        "title_map": [
+        "image": f"{folder}/SAMPLE_MOVIE.iso",
+        "titles": [
             {
                 "disc_title": 1,
-                "mkv": f"{folder}/titles/SAMPLE-B1_t00.mkv",
                 "handbrake_title": 1,
+                "extracted": f"{folder}/titles/SAMPLE-B1_t00.mkv",
+                "transcode": f"{completed}/title_1.mkv",
+                "reason": None,
             },
             {
                 "disc_title": 3,
-                "mkv": f"{folder}/titles/SAMPLE-C1_t01.mkv",
                 "handbrake_title": None,
+                "transcode": None,
+                "reason": "not_extracted",
             },
         ],
-        "image": f"{folder}/SAMPLE_MOVIE.iso",
-        "transcodes": {"1": f"{completed}/title_1.mkv"},
     }
     return {"job_id": job_id, "document": json.dumps(document | overrides)}
 

@@ -33,34 +33,37 @@
       "hashes": "passed"
     },
     "problems": [],
-    "title_map": [
+    "titles": [
       {
+        "handbrake_title": 2,
         "playlist": "00001.mpls",
-        "handbrake_title": 2
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_2.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 3,
         "playlist": "00002.mpls",
-        "handbrake_title": 3
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_3.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 4,
         "playlist": "00003.mpls",
-        "handbrake_title": 4
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_4.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 5,
         "playlist": "00004.mpls",
-        "handbrake_title": 5
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_5.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 6,
         "playlist": "00006.mpls",
-        "handbrake_title": 6
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_6.mkv",
+        "reason": null
       }
-    ],
-    "transcodes": {
-      "2": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_2.mkv",
-      "3": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_3.mkv",
-      "4": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_4.mkv",
-      "5": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_5.mkv",
-      "6": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_6.mkv"
-    }
+    ]
   }
 }

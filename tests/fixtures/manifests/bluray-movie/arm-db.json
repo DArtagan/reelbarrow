@@ -33,23 +33,25 @@
       "hashes": "passed"
     },
     "problems": [],
-    "title_map": [
+    "titles": [
       {
+        "handbrake_title": 57,
         "playlist": "00612.mpls",
-        "handbrake_title": 57
+        "transcode": "/root/video/completed/movies/Downton-Abbey--A-New-Era (2022)/Downton-Abbey--A-New-Era (2022).mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 112,
         "playlist": "01391.mpls",
-        "handbrake_title": 112
+        "transcode": "/root/video/completed/movies/Downton-Abbey--A-New-Era (2022)/extras/title_112.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 114,
         "playlist": "01393.mpls",
-        "handbrake_title": 114
+        "transcode": "/root/video/completed/movies/Downton-Abbey--A-New-Era (2022)/extras/title_114.mkv",
+        "reason": null
       }
-    ],
-    "transcodes": {
-      "112": "/root/video/completed/movies/Downton-Abbey--A-New-Era (2022)/extras/title_112.mkv",
-      "114": "/root/video/completed/movies/Downton-Abbey--A-New-Era (2022)/extras/title_114.mkv"
-    }
+    ]
   }
 }

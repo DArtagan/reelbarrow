@@ -21,9 +21,9 @@ def main() -> None:
     export.add_argument(
         "--arm-path",
         required=True,
-        metavar="ARM=REELBARROW",
-        help="one folder as ARM's container and reelbarrow each mount it, e.g. "
-        "/root/video=/video/import/automatic-ripping-machine",
+        metavar="ARM=SHARE",
+        help="one folder as ARM's container mounts it and as its path on the "
+        "share, e.g. /root/video=import/automatic-ripping-machine",
     )
     export.add_argument(
         "--arm-timezone",
@@ -62,7 +62,7 @@ def main() -> None:
 
         settings = Settings()
         try:
-            root = ArmPath.parse(args.arm_path, settings.video_root)
+            root = ArmPath.parse(args.arm_path)
             zone = ZoneInfo(args.arm_timezone)
         except (ValueError, ZoneInfoNotFoundError) as error:
             parser.error(str(error))

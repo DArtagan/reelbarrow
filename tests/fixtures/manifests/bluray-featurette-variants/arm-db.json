@@ -33,53 +33,61 @@
       "hashes": "passed"
     },
     "problems": [],
-    "title_map": [
+    "titles": [
       {
+        "handbrake_title": 57,
         "playlist": "00800.mpls",
-        "handbrake_title": 57
+        "transcode": "/root/video/completed/movies/Downton-Abbey (2019)/Downton-Abbey (2019).mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 72,
         "playlist": "01223.mpls",
-        "handbrake_title": 72
+        "transcode": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_72.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 73,
         "playlist": "01224.mpls",
-        "handbrake_title": 73
+        "transcode": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_73.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 75,
         "playlist": "01226.mpls",
-        "handbrake_title": 75
+        "transcode": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_75.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 76,
         "playlist": "01227.mpls",
-        "handbrake_title": 76
+        "transcode": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_76.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 77,
         "playlist": "01228.mpls",
-        "handbrake_title": 77
+        "transcode": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_77.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 83,
         "playlist": "01234.mpls",
-        "handbrake_title": 83
+        "transcode": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_83.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 84,
         "playlist": "01235.mpls",
-        "handbrake_title": 84
+        "transcode": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_84.mkv",
+        "reason": null
       },
       {
+        "handbrake_title": 85,
         "playlist": "01236.mpls",
-        "handbrake_title": 85
+        "transcode": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_85.mkv",
+        "reason": null
       }
-    ],
-    "transcodes": {
-      "72": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_72.mkv",
-      "73": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_73.mkv",
-      "75": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_75.mkv",
-      "76": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_76.mkv",
-      "77": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_77.mkv",
-      "83": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_83.mkv",
-      "84": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_84.mkv",
-      "85": "/root/video/completed/movies/Downton-Abbey (2019)/extras/title_85.mkv"
-    }
+    ]
   }
 }

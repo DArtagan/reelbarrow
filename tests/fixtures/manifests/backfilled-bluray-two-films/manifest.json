@@ -68,7 +68,11 @@
       "reason": null
     },
     {
-      "playlist": "00800.mpls"
+      "playlist": "00800.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/The Rescuers (1977)_178961349896/The Rescuers (1977).mkv"
+      },
+      "reason": null
     },
     {
       "playlist": "00801.mpls",

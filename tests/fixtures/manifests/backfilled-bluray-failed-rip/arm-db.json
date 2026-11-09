@@ -33,14 +33,14 @@
       "hashes": "not_run"
     },
     "problems": [],
-    "title_map": [
+    "titles": [
       {
-        "playlist": "00251.mpls",
-        "handbrake_title": 43
+        "handbrake_title": 43,
+        "playlist": "00251.mpls"
       },
       {
-        "playlist": "00252.mpls",
-        "handbrake_title": 44
+        "handbrake_title": 44,
+        "playlist": "00252.mpls"
       }
     ]
   }
