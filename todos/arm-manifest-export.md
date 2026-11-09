@@ -87,6 +87,9 @@
 - **After filing the manifest is out of date, and stays so**: *"maybe that's
   fine and this file has done its job of getting us there."* The ledger and
   `disc.json` take over; a manifest that changes after filing goes to review.
+- **ARM's `job_dupe_check` stays unpatched** (2026-11-09). Offered patching
+  out its copying of an identity between jobs by label, Will: *"It can stay
+  as-is for now."* The manifest marks what it copies `copied_from_earlier_job`.
 - Approved as a whole: *"Yes, do all of the above: checks, design, and code."*
 
 ## What is left, in order
