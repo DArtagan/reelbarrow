@@ -2,13 +2,13 @@
 
 ## Opening prompt
 
-> `reelbarrow arm-export-manifests` and the deployment's raw-copy record are built
-> and tested; what remains is deploying them and proving them on the cluster
-> and a real disc. Read `todos/arm-manifest-export.md`, then *The manifest* and
+> `reelbarrow arm-export-manifests` and the deployment's raw-copy record are
+> built, deployed and running; what remains is proving them on the cluster and
+> a real disc. Read `todos/arm-manifest-export.md`, then *The manifest* and
 > *The raw copy's record* in `docs/design.md`, and `docs/exporter.md`. The
 > deployment half is in the deployment repository's
-> `todos/video-library-ingest.md`. Check which reelbarrow release is deployed,
-> and whether ARM's patch and the migration have gone in, before anything else.
+> `todos/video-library-ingest.md`. Check which reelbarrow release the sidecar
+> runs, and that the second `--arm-path` is in, before anything else.
 
 ## What is done (2026-11-08)
 
@@ -106,22 +106,37 @@
   as-is for now."* The manifest marks what it copies `copied_from_earlier_job`.
 - Approved as a whole: *"Yes, do all of the above: checks, design, and code."*
 
-## What is left, in order
+## Deployed (2026-11-09)
 
-Each step that changes the cluster or the share is confirmed with Will first.
+Each step confirmed with Will, with ARM idle:
 
-1. **Release reelbarrow**: merge this pull request, then its release pull
-   request, so the image has `arm-export-manifests`.
-2. **Deploy ARM's patch** (the deployment's pull request). It changes ARM's
-   pod, and the `Recreate` strategy kills any job running: merge it while ARM
-   is idle, then check in the container, not the ConfigMap, that
-   `arm-source-patches.py` logged `applied raw-copy-code`.
-3. **Run the migration** in ARM's pod, dry run first, then `--write`. It is a
-   write to ARM's live database, adding rows to a table no ARM code reads;
-   check the dry run's count and passed-over list again, as jobs will have run
-   since 2026-11-08.
-4. **Add the sidecar** in ARM's pod, from the first release with the command.
-   What it needs is in the deployment's spec.
+- **reelbarrow 0.3.0**, the first release with `arm-export-manifests`.
+- **ARM's patch**: its pod logged `applied raw-copy-code` with the other ten
+  edits, and the patched modules compile under its Python 3.10.
+- **The migration**: 32 rows, byte for byte its dry run; `integrity_check` ok.
+- **The sidecar** (deployment pull request #37). Its first deploy crash-looped:
+  the image's CMD is `reelbarrow serve` with no ENTRYPOINT, so `args` alone
+  replaced the command, and the pod wasn't Ready, taking ARM's web UI off its
+  Service, for about twenty minutes. Fixed with `command: [reelbarrow]`. A
+  server-side dry run can't catch that; running the image's command can.
+
+Its first pass wrote 96 of 103 manifests. The failed jobs read `failed`, and
+the 32 raw folders recorded are on the share. It skipped seven, which this
+branch fixes:
+
+- **Jobs 1–3, 5 and 6** recorded paths under `/root/media/`: ARM mounted the
+  same folder of the share there until 2026-04-20 (deployment commit
+  `ec63698`). `--arm-path` is now given once per folder, and the deployment
+  adds `/root/media=import/automatic-ripping-machine`.
+- **Jobs 12 and 13** are audio CDs, whose `crc_id` is MusicBrainz's disc id.
+  `crc64` is now a DVD's only.
+
+## What is left
+
+1. **Release** this branch's fix.
+2. **The deployment adds the second `--arm-path`**, from that release; merging
+   it rolls ARM's pod, so while ARM is idle.
+3. The checks below.
 
 ## Not yet checked
 
@@ -140,7 +155,8 @@ Each step that changes the cluster or the share is confirmed with Will first.
 - The sidecar's first pass writes a manifest for every job in ARM's database,
   and those in the design's fixtures table have the titles and CRC64s the
   table gives. The failed ones (15–17, 30, 31, 40, 41) read `failed`. Jobs 7,
-  8, 23, 25, 27 and 76 on have a `raw`, and its `folder` is on the share.
+  8, 23, 25, 27 and 76 on have a `raw`, and its `folder` is on the share, but
+  for 81, a Blu-ray killed before the stamp existed, which has none.
 - On a real disc insert, its manifest appears within one interval of "Found
   disc", before the rip finishes, with both of `raw.check` `not_run`. It is
   rewritten as the job moves, and ends at `succeeded` (or `failed`) with
