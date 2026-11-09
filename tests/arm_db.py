@@ -196,7 +196,7 @@ def raw_copy(job_id: int, **overrides) -> dict:
         "schema": 1,
         "folder": folder,
         "form": "dvd-image",
-        "complete": {"value": True, "reason": "sizes_and_hashes"},
+        "check": {"sizes": "passed", "hashes": "passed"},
         "problems": [],
         "title_map": [
             {

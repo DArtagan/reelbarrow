@@ -1,0 +1,120 @@
+{
+  "job": {
+    "job_id": 85,
+    "stage": "179310743101",
+    "status": "success",
+    "start_time": "2026-10-27 13:23:51.119167",
+    "stop_time": "2026-10-28 03:01:26.567379",
+    "errors": null,
+    "disctype": "bluray",
+    "label": "DOWNTON_ABBEY_SEASON_2_D2",
+    "crc_id": null,
+    "path": "/root/video/completed/movies/Downton-Abbey-Season-4-Promo (2013)",
+    "hasnicetitle": 1,
+    "title": "Downton-Abbey-Season-4-Promo",
+    "title_auto": "Downton-Abbey-Season-4-Promo",
+    "title_manual": null,
+    "year": "2013",
+    "year_auto": "2013",
+    "year_manual": null,
+    "imdb_id": "tt2708164",
+    "imdb_id_auto": "tt2708164",
+    "imdb_id_manual": null,
+    "video_type": "movie",
+    "video_type_auto": "movie",
+    "video_type_manual": null
+  },
+  "raw_copy": {
+    "schema": 1,
+    "folder": "/root/video/raw/Downton-Abbey-Season-4-Promo",
+    "form": "bluray-backup",
+    "check": {
+      "sizes": "passed",
+      "hashes": "passed"
+    },
+    "problems": [],
+    "title_map": [
+      {
+        "playlist": "00001.mpls",
+        "handbrake_title": 2
+      },
+      {
+        "playlist": "00002.mpls",
+        "handbrake_title": 3
+      },
+      {
+        "playlist": "00003.mpls",
+        "handbrake_title": 4
+      },
+      {
+        "playlist": "00004.mpls",
+        "handbrake_title": 5
+      },
+      {
+        "playlist": "00006.mpls",
+        "handbrake_title": 6
+      }
+    ],
+    "duplicates": {
+      "skipped": [
+        {
+          "handbrake_title": 2,
+          "playlist": "00001.mpls",
+          "reason": "is played whole by title 6",
+          "played_by": 6
+        },
+        {
+          "handbrake_title": 3,
+          "playlist": "00002.mpls",
+          "reason": "is played whole by title 6",
+          "played_by": 6
+        },
+        {
+          "handbrake_title": 4,
+          "playlist": "00003.mpls",
+          "reason": "is played whole by title 6",
+          "played_by": 6
+        },
+        {
+          "handbrake_title": 5,
+          "playlist": "00004.mpls",
+          "reason": "is played whole by title 6",
+          "played_by": 6
+        }
+      ],
+      "wholes": [
+        {
+          "handbrake_title": 6,
+          "playlist": "00006.mpls",
+          "kept": "whole",
+          "interleaved": false,
+          "parts": [
+            {
+              "handbrake_title": 2,
+              "playlist": "00001.mpls",
+              "start": 0.0
+            },
+            {
+              "handbrake_title": 3,
+              "playlist": "00002.mpls",
+              "start": 3262.676
+            },
+            {
+              "handbrake_title": 4,
+              "playlist": "00003.mpls",
+              "start": 6590.0
+            },
+            {
+              "handbrake_title": 5,
+              "playlist": "00004.mpls",
+              "start": 9922.538
+            }
+          ]
+        }
+      ]
+    },
+    "transcodes": {
+      "6": "/root/video/completed/movies/Downton-Abbey-Season-4-Promo (2013)/title_6.mkv"
+    }
+  }
+}

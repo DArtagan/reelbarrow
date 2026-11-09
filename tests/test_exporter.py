@@ -16,9 +16,11 @@ import arm_db
 import pytest
 
 from reelbarrow import cli, exporter
-from reelbarrow.exporter import ArmRoot, Exporter, SerialiseError, build, connect
+from reelbarrow.exporter import ArmPath, Exporter, SerialiseError, build, connect
 
-ROOT = ArmRoot.parse("/root/video=import/automatic-ripping-machine")
+ROOT = ArmPath.parse(
+    "/root/video=/video/import/automatic-ripping-machine", Path("/video")
+)
 UTC = ZoneInfo("Etc/UTC")
 NAME = "manifest-arm-{}-176107498997.json"
 
@@ -70,8 +72,8 @@ def test_a_job_and_its_raw_copy(db, export, out):
         "source": "arm",
         "id": "7-176107498997",
         "state": "succeeded",
-        "start_time": "2026-10-21T19:49:49.973701+00:00",
-        "finish_time": "2026-10-21T21:02:13.204518+00:00",
+        "start_time": "2026-10-21T19:49:49.973701Z",
+        "finish_time": "2026-10-21T21:02:13.204518Z",
         "errors": None,
         "disc": {"type": "dvd", "label": "SAMPLE_MOVIE", "crc64": "1a2b3c4d5e6f7081"},
         "identity": {
@@ -91,7 +93,7 @@ def test_a_job_and_its_raw_copy(db, export, out):
             "image": {
                 "path": "import/automatic-ripping-machine/raw/SAMPLE_MOVIE/SAMPLE_MOVIE.iso"
             },
-            "complete": {"value": True, "reason": "sizes_and_hashes"},
+            "check": {"sizes": "passed", "hashes": "passed"},
             "problems": [],
         },
         "titles": [
@@ -128,11 +130,14 @@ def test_only_success_and_fail_are_final():
 def test_times_are_utc_from_arms_zone():
     denver = ZoneInfo("America/Denver")
     built = one({"job_id": 1, "start_time": "2026-10-21 13:49:49.973701"}, zone=denver)
-    assert built["start_time"] == "2026-10-21T19:49:49.973701+00:00"
+    assert built["start_time"] == "2026-10-21T19:49:49.973701Z"
     # Across the change to standard time, a week later.
     built = one({"job_id": 1, "start_time": "2026-11-02 13:00:00"}, zone=denver)
-    assert built["start_time"] == "2026-11-02T20:00:00+00:00"
+    assert built["start_time"] == "2026-11-02T20:00:00Z"
     assert one({"job_id": 1, "stop_time": None})["finish_time"] is None
+    # ARM's image's own zone, unless told otherwise.
+    built = one({"job_id": 1, "start_time": "2026-10-21 13:49:49"})
+    assert built["start_time"] == "2026-10-21T13:49:49Z"
 
 
 def test_the_id_survives_a_recreated_database():
@@ -165,6 +170,31 @@ def test_who_identified_a_job():
     assert identity["year"]["reason"] == "set_by_person"
     # A person left the ID ARM found.
     assert identity["imdb_id"]["reason"] == "lookup"
+
+
+def test_an_identity_copied_from_an_earlier_job_says_so():
+    # ARM's job_dupe_check: one earlier successful job with the same label, a
+    # person's correction there, copied over this job's own lookup. It copies
+    # no IMDb ID.
+    identity = one(
+        {
+            "job_id": 27,
+            "title": "The Rescuers",
+            "title_auto": "The-Rescuers-35th-Anniversary-Edition",
+            "title_manual": None,
+            "year": "1977",
+            "year_auto": "2012",
+            "year_manual": None,
+            "imdb_id": None,
+            "imdb_id_auto": None,
+            "video_type": "movie",
+            "video_type_auto": None,
+        }
+    )["identity"]
+    assert identity["title"]["reason"] == "copied_from_earlier_job"
+    assert identity["year"]["reason"] == "copied_from_earlier_job"
+    assert identity["kind"]["reason"] == "copied_from_earlier_job"
+    assert identity["imdb_id"] == {"value": None, "reason": "lookup"}
 
 
 def test_a_year_set_by_arms_series_route_is_a_persons():
@@ -219,51 +249,94 @@ def test_titles_are_absent_until_mapped_and_a_transcode_until_moved():
     assert "reason" not in built["titles"][0]
 
 
-def test_titles_arm_skipped_say_why():
-    playlists = {n: f"0000{n}.mpls" for n in range(1, 8)}
+def blu_ray(skipped, wholes, transcoded):
+    """A Blu-ray's raw-copy record, title N on playlist 0000N.mpls."""
 
     def title(n):
-        return {"handbrake_title": n, "playlist": playlists[n]}
+        return {"handbrake_title": n, "playlist": f"0000{n}.mpls"}
 
-    record = {
-        "schema": 1,
-        "folder": "/root/video/raw/Downton",
-        "form": "bluray-backup",
-        "complete": {"value": True, "reason": "sizes_and_hashes"},
-        "problems": [],
-        "title_map": [title(n) for n in range(1, 8)],
-        "duplicates": {
-            "skipped": [title(n) for n in (3, 4, 5, 6)],
-            "wholes": [
-                {**title(6), "kept": "parts", "interleaved": False,
-                 "parts": [{**title(1), "start": 0.0}, {**title(2), "start": 60.5}]},
-                {**title(7), "kept": "whole", "interleaved": False,
-                 "parts": [{**title(3), "start": 0.0}, {**title(4), "start": 9.0}]},
-            ],
+    return json.dumps(
+        {
+            "schema": 1,
+            "folder": "/root/video/raw/Downton",
+            "form": "bluray-backup",
+            "check": {"sizes": "passed", "hashes": "passed"},
+            "problems": [],
+            "title_map": [title(n) for n in range(1, 9)],
+            "duplicates": {
+                "skipped": [title(n) | extra for n, extra in skipped.items()],
+                "wholes": [
+                    title(n) | {"kept": kept, "interleaved": False,
+                                "parts": [title(p) | {"start": float(p)} for p in parts]}
+                    for n, (kept, parts) in wholes.items()
+                ],
+            },
+            "transcodes": {
+                str(n): f"/root/video/completed/tv/Downton/title_{n}.mkv"
+                for n in transcoded
+            },
+        }
+    )  # fmt: skip
+
+
+def test_titles_say_what_plays_those_not_transcoded():
+    record = blu_ray(
+        skipped={
+            # Parts of 7, which was kept.
+            3: {"played_by": 7},
+            4: {"played_by": 7},
+            # A whole whose parts, 1 and 2, were kept.
+            6: {},
+            # A shuffle of 1, and a title inside 7 that isn't one of its parts.
+            5: {"played_by": 1},
+            8: {"played_by": 7},
         },
-    }  # fmt: skip
-    built = one({"job_id": 1, "disctype": "bluray"}, json.dumps(record))
-    reasons = {t["playlist"]: t.get("reason") for t in built["titles"]}
+        wholes={6: ("parts", [1, 2]), 7: ("whole", [3, 4])},
+        transcoded=[1, 2, 7],
+    )
+    built = one({"job_id": 1, "disctype": "bluray"}, record)
+    titles = {t["playlist"]: t for t in built["titles"]}
+    assert built["raw"]["titles_compared"] is True
+    reasons = {key: t.get("reason") for key, t in titles.items()}
     assert reasons == {
         "00001.mpls": None,
         "00002.mpls": None,
-        "00003.mpls": "whole_kept",
-        "00004.mpls": "whole_kept",
-        "00005.mpls": "same_as_another",
-        "00006.mpls": "parts_kept",
+        "00003.mpls": "played_by_kept_titles",
+        "00004.mpls": "played_by_kept_titles",
+        "00005.mpls": "played_by_kept_titles",
+        "00006.mpls": "played_by_kept_titles",
         "00007.mpls": None,
+        "00008.mpls": "played_by_kept_titles",
     }
-    assert built["wholes"][0] == {
-        "playlist": "00006.mpls",
-        "kept": "parts",
-        "interleaved": False,
-        "parts": [
-            {"playlist": "00001.mpls", "start": 0.0},
-            {"playlist": "00002.mpls", "start": 60.5},
-        ],
+    # Said once: by a whole's parts, or by played_by where nothing else does.
+    played_by = {k: t["played_by"] for k, t in titles.items() if "played_by" in t}
+    assert played_by == {
+        "00005.mpls": {"playlist": "00001.mpls"},
+        "00008.mpls": {"playlist": "00007.mpls"},
     }
+    assert titles["00006.mpls"]["parts"] == [
+        {"playlist": "00001.mpls", "start": 1.0},
+        {"playlist": "00002.mpls", "start": 2.0},
+    ]
+    assert titles["00007.mpls"]["interleaved"] is False
+    assert '"kept"' not in json.dumps(built)
     # HandBrake's numbering stays in the exporter.
     assert "handbrake_title" not in json.dumps(built)
+
+
+def test_titles_not_compared_say_nothing_of_repeats():
+    record = json.loads(blu_ray({}, {}, transcoded=[1]))
+    del record["duplicates"]
+    built = one({"job_id": 1, "disctype": "bluray"}, json.dumps(record))
+    assert "titles_compared" not in built["raw"]
+    assert all("parts" not in t and t.get("reason") is None for t in built["titles"])
+
+
+def test_a_manifest_that_contradicts_itself_is_not_written():
+    # Skipped, yet nothing that was kept plays it.
+    record = blu_ray(skipped={5: {}}, wholes={}, transcoded=[1])
+    with pytest.raises(SerialiseError, match="nothing says what plays"):
+        one({"job_id": 1, "disctype": "bluray"}, record)
 
 
 @pytest.mark.parametrize(
@@ -286,7 +359,8 @@ def test_a_path_outside_arms_slice_fails_the_job(path):
     [
         {"schema": 2},
         {"form": "floppy"},
-        {"complete": {"value": True, "reason": "looked fine"}},
+        {"check": {"sizes": "fine", "hashes": "passed"}},
+        {"check": {"sizes": "failed", "hashes": "passed"}},
         {"title_map": [{"handbrake_title": 1}]},
     ],
 )
@@ -296,16 +370,20 @@ def test_a_raw_copy_it_cannot_read_fails_the_job(change):
         one({"job_id": 1}, json.dumps(record | change))
 
 
-def test_arm_root_is_parsed_strictly():
-    assert ArmRoot.parse("/root/video/=import/arm").container == "/root/video"
+def test_arm_path_maps_one_folder_both_ways():
+    video = Path("/video")
+    path = ArmPath.parse("/root/video/=/video/import/arm/", video)
+    assert (path.arm, path.share) == ("/root/video", "import/arm")
     for value in (
         "/root/video",
-        "root/video=import",
-        "/root/video=/import",
-        "/v=a/../b",
+        "root/video=/video/import",
+        "/root/video=import/arm",
+        "/root/video=/elsewhere/import",
+        "/root/video=/video",
+        "/root/video=/video/../import",
     ):
         with pytest.raises(ValueError):
-            ArmRoot.parse(value)
+            ArmPath.parse(value, video)
 
 
 # --- what a pass does -------------------------------------------------------
@@ -381,7 +459,7 @@ def test_a_status_change_rewrites_only_that_job(db, export, out):
     )
     export.run_pass()
     assert load(out, 2)["state"] == "succeeded"
-    assert load(out, 2)["finish_time"] == "2026-10-21T21:02:13.204518+00:00"
+    assert load(out, 2)["finish_time"] == "2026-10-21T21:02:13.204518Z"
     assert stat(out, 1) == before
 
 
@@ -595,15 +673,13 @@ def test_the_command(db, out, monkeypatch, capsys):
     arm_db.insert(db, "job", arm_db.job(1))
     argv = [
         "reelbarrow",
-        "export-manifests",
+        "arm-export-manifests",
         "--db",
         str(db),
         "--out",
         str(out),
-        "--arm-root",
-        "/root/video=import/automatic-ripping-machine",
-        "--arm-timezone",
-        "Etc/UTC",
+        "--arm-path",
+        "/root/video=/video/import/automatic-ripping-machine",
         "--once",
     ]
     monkeypatch.setattr(sys, "argv", argv)
@@ -619,9 +695,9 @@ def test_the_command(db, out, monkeypatch, capsys):
 
     for flag, bad in (
         ("--arm-timezone", "Mars/Olympus"),
-        ("--arm-root", "/root/video"),
+        ("--arm-path", "/root/video"),
     ):
-        wrong = list(argv)
+        wrong = [*argv, "--arm-timezone", "Etc/UTC"]
         wrong[wrong.index(flag) + 1] = bad
         monkeypatch.setattr(sys, "argv", wrong)
         with pytest.raises(SystemExit) as exit:

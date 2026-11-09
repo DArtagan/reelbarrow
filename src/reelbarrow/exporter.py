@@ -1,6 +1,6 @@
 """ARM's jobs, copied out of its database as manifests.
 
-`reelbarrow export-manifests` runs beside ARM, reads its SQLite database
+`reelbarrow arm-export-manifests` runs beside ARM, reads its SQLite database
 read-only on an interval, and writes a manifest for every job into the
 manifest directory, which the service scans. *The manifest* in the design says
 why it polls rather than hooks a notification: ARM sets a job's final status
@@ -29,13 +29,15 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from pydantic import ValidationError
+
 from reelbarrow import manifest
 from reelbarrow.manifest import (
-    CompleteReason,
+    CheckState,
     IdentityReason,
+    Manifest,
     RawForm,
     ShareRef,
-    ShareRefError,
     State,
     TitleReason,
 )
@@ -92,36 +94,42 @@ class SchemaError(RuntimeError):
 
 
 @dataclass(frozen=True, slots=True)
-class ArmRoot:
-    """Where ARM's container sees its slice of the share: `container`, an
-    absolute path in ARM's container, is `share`, a path from the share's root.
+class ArmPath:
+    """One folder as ARM's container and reelbarrow each see it: `arm`, ARM's
+    path, is `share`, that folder's path from the share's root, which is where
+    reelbarrow's own path to it puts it under its video root.
     """
 
-    container: str
+    arm: str
     share: str
 
     @classmethod
-    def parse(cls, value: str) -> "ArmRoot":
-        container, sep, share = value.partition("=")
-        if not sep or not posixpath.isabs(container):
-            raise ValueError(f"{value!r} is not CONTAINER=SHARE, CONTAINER absolute")
-        ShareRef(share)
-        return cls(posixpath.normpath(container), share)
+    def parse(cls, value: str, video_root: Path) -> "ArmPath":
+        """From `ARM=REELBARROW`, two absolute paths to one folder; the second
+        is under reelbarrow's video root."""
+        arm, sep, ours = value.partition("=")
+        if not sep or not posixpath.isabs(arm) or not posixpath.isabs(ours):
+            raise ValueError(f"{value!r} is not ARM=REELBARROW, both absolute")
+        root = posixpath.normpath(str(video_root))
+        share = posixpath.relpath(posixpath.normpath(ours), root)
+        if share == "." or share == ".." or share.startswith("../"):
+            raise ValueError(f"{ours} is not inside the video root {root}")
+        ShareRef(path=share)
+        return cls(posixpath.normpath(arm), share)
 
-    def ref(self, path: str, what: str) -> ShareRef:
-        """ARM's path as a share reference. A path outside ARM's slice of the
-        share fails, rather than becoming a plausible wrong one."""
+    def ref(self, path: str, what: str) -> dict:
+        """ARM's path as a share reference. A path outside the folder mapped
+        fails, rather than becoming a plausible wrong one."""
         normal = posixpath.normpath(path)
         if normal != path.rstrip("/") or not posixpath.isabs(normal):
             raise SerialiseError(f"{what} {path!r} is not a plain absolute path")
-        relative = posixpath.relpath(normal, self.container)
+        relative = posixpath.relpath(normal, self.arm)
         if relative == ".." or relative.startswith("../"):
-            raise SerialiseError(f"{what} {path!r} is outside {self.container}")
+            raise SerialiseError(f"{what} {path!r} is outside {self.arm}")
+        share = self.share if relative == "." else f"{self.share}/{relative}"
         try:
-            return ShareRef(
-                self.share if relative == "." else f"{self.share}/{relative}"
-            )
-        except ShareRefError as error:
+            return ShareRef(path=share).model_dump()
+        except ValidationError as error:
             raise SerialiseError(f"{what}: {error}") from error
 
 
@@ -181,10 +189,14 @@ def _time(value: Any, zone: ZoneInfo, column: str) -> str | None:
 def _identity(job: dict) -> dict:
     """Each field with who supplied it.
 
-    ARM's UI writes a `_manual` column for each field its form sets; the series
-    route sets `year` without `year_manual`. So a field also counts as set by a
-    person when the job has a manual title and the field differs from what
-    ARM's own lookup found.
+    ARM's UI writes a `_manual` column for each field its form sets, and its
+    lookup the `_auto` ones; the plain column is what ARM filed under. Two other
+    writers leave no column of their own. ARM's series route sets `year`
+    without `year_manual`, so on a job with a manual title a field that differs
+    from ARM's lookup is a person's too. And `job_dupe_check`, finding one
+    earlier successful job with the same disc label, copies its title, year
+    and kind over whatever the lookup found, so on a job with no manual title
+    such a field was copied.
     """
     corrected = _text(job["title_manual"]) is not None
     identity = {}
@@ -192,33 +204,21 @@ def _identity(job: dict) -> dict:
         value = _text(job[column])
         if name == "kind" and value not in KINDS:
             value = None
-        if _text(job[f"{column}_manual"]) is not None or (
-            corrected and value is not None and value != _text(job[f"{column}_auto"])
-        ):
+        found = _text(job[f"{column}_auto"])
+        differs = value is not None and value != found
+        if _text(job[f"{column}_manual"]) is not None or (corrected and differs):
             reason = IdentityReason.SET_BY_PERSON
-        elif job["hasnicetitle"]:
-            reason = IdentityReason.LOOKUP
-        else:
+        elif not job["hasnicetitle"]:
+            # Before the copy: an unidentified job's title is its label, which
+            # differs from the lookup that found nothing. job_dupe_check copies
+            # `hasnicetitle` with the rest, so a copied identity still gets past.
             reason = IdentityReason.NOT_IDENTIFIED
+        elif differs:
+            reason = IdentityReason.COPIED_FROM_EARLIER_JOB
+        else:
+            reason = IdentityReason.LOOKUP
         identity[name] = {"value": value, "reason": reason}
     return identity
-
-
-def _skip_reasons(duplicates: dict) -> dict[int, TitleReason]:
-    """HandBrake's number for each title ARM didn't transcode, and why."""
-    accounted = {}
-    for whole in duplicates.get("wholes", []):
-        if whole["kept"] == "parts":
-            accounted[whole["handbrake_title"]] = TitleReason.PARTS_KEPT
-        elif whole["kept"] == "whole":
-            for part in whole["parts"]:
-                accounted[part["handbrake_title"]] = TitleReason.WHOLE_KEPT
-    return {
-        skipped["handbrake_title"]: accounted.get(
-            skipped["handbrake_title"], TitleReason.SAME_AS_ANOTHER
-        )
-        for skipped in duplicates.get("skipped", [])
-    }
 
 
 def _key(entry: dict) -> dict:
@@ -229,20 +229,20 @@ def _key(entry: dict) -> dict:
     raise SerialiseError(f"a title with no disc_title or playlist: {entry!r}")
 
 
-def _raw(document: dict, root: ArmRoot) -> dict:
+def _raw(document: dict, root: ArmPath) -> dict:
     """The raw copy's record as `raw`, `titles` and `wholes`."""
     if document.get("schema") != RAW_COPY_SCHEMA:
         raise SerialiseError(f"raw copy schema {document.get('schema')!r}")
-    complete = document["complete"]
+    check = document["check"]
     raw = {
         "form": RawForm(document["form"]),
-        "folder": root.ref(document["folder"], "raw folder").to_json(),
+        "folder": root.ref(document["folder"], "raw folder"),
     }
     if document.get("image"):
-        raw["image"] = root.ref(document["image"], "image").to_json()
-    raw["complete"] = {
-        "value": complete["value"],
-        "reason": CompleteReason(complete["reason"]),
+        raw["image"] = root.ref(document["image"], "image")
+    raw["check"] = {
+        "sizes": CheckState(check["sizes"]),
+        "hashes": CheckState(check["hashes"]),
     }
     raw["problems"] = list(document.get("problems", []))
     out = {"raw": raw}
@@ -250,37 +250,54 @@ def _raw(document: dict, root: ArmRoot) -> dict:
     title_map = document.get("title_map")
     if title_map is None:
         return out
+    keys = {
+        entry["handbrake_title"]: _key(entry)
+        for entry in title_map
+        if entry["handbrake_title"] is not None
+    }
     duplicates = document.get("duplicates")
-    skipped = _skip_reasons(duplicates) if duplicates is not None else {}
+    wholes, skipped = {}, {}
+    if duplicates is not None:
+        raw["titles_compared"] = True
+        wholes = {whole["handbrake_title"]: whole for whole in duplicates["wholes"]}
+        skipped = {entry["handbrake_title"]: entry for entry in duplicates["skipped"]}
+    # Whose part each title is, for the wholes that say what plays it.
+    part_of = {
+        part["handbrake_title"]: number
+        for number, whole in wholes.items()
+        for part in whole["parts"]
+    }
     transcodes = document.get("transcodes", {})
     titles = []
     for entry in title_map:
         number = entry["handbrake_title"]
         title = _key(entry)
         if entry.get("mkv") and number is not None:
-            title["extracted"] = root.ref(entry["mkv"], "extracted title").to_json()
+            title["extracted"] = root.ref(entry["mkv"], "extracted title")
         if number is None:
             title |= {"transcode": None, "reason": TitleReason.NOT_EXTRACTED}
         elif number in skipped:
-            title |= {"transcode": None, "reason": skipped[number]}
+            title |= {"transcode": None, "reason": TitleReason.PLAYED_BY_KEPT_TITLES}
+            played_by = skipped[number].get("played_by")
+            # A part of the whole that plays it says so already.
+            if played_by is not None and part_of.get(number) != played_by:
+                if played_by not in keys:
+                    raise SerialiseError(
+                        f"title {number} played by unmapped {played_by}"
+                    )
+                title["played_by"] = keys[played_by]
         elif str(number) in transcodes:
             path = root.ref(transcodes[str(number)], "transcode")
-            title |= {"transcode": path.to_json(), "reason": None}
+            title |= {"transcode": path, "reason": None}
         # Otherwise its transcode isn't recorded, yet or at all.
+        if number in wholes:
+            title["interleaved"] = wholes[number]["interleaved"]
+            title["parts"] = [
+                {**_key(part), "start": part["start"]}
+                for part in wholes[number]["parts"]
+            ]
         titles.append(title)
     out["titles"] = titles
-    if duplicates is not None:
-        out["wholes"] = [
-            {
-                **_key(whole),
-                "kept": whole["kept"],
-                "interleaved": whole["interleaved"],
-                "parts": [
-                    {**_key(part), "start": part["start"]} for part in whole["parts"]
-                ],
-            }
-            for whole in duplicates.get("wholes", [])
-        ]
     return out
 
 
@@ -292,8 +309,9 @@ def job_id(job: dict) -> str:
     return f"{job['job_id']}-{job['stage']}"
 
 
-def build(job: dict, document: str | None, root: ArmRoot, zone: ZoneInfo) -> dict:
-    """The manifest of one job. Raises SerialiseError for one it can't carry."""
+def build(job: dict, document: str | None, root: ArmPath, zone: ZoneInfo) -> dict:
+    """The manifest of one job, validated against the model. Raises
+    SerialiseError for one it can't carry."""
     out = {
         "schema": manifest.SCHEMA,
         "source": SOURCE,
@@ -310,7 +328,7 @@ def build(job: dict, document: str | None, root: ArmRoot, zone: ZoneInfo) -> dic
         "identity": _identity(job),
         "completed": None
         if _text(job["path"]) is None
-        else {"folder": root.ref(job["path"], "completed folder").to_json()},
+        else {"folder": root.ref(job["path"], "completed folder")},
     }
     if document is not None:
         try:
@@ -320,7 +338,10 @@ def build(job: dict, document: str | None, root: ArmRoot, zone: ZoneInfo) -> dic
         except (KeyError, TypeError, ValueError) as error:
             # A document of the right schema in the wrong shape.
             raise SerialiseError(f"raw copy: {error!r}") from error
-    return out
+    try:
+        return Manifest.model_validate(out).to_json()
+    except ValidationError as error:
+        raise SerialiseError(f"not a valid manifest: {error}") from error
 
 
 def encode(document: dict[str, Any]) -> bytes:
@@ -361,7 +382,7 @@ def remove_stale_temporaries(out: Path) -> None:
 class Exporter:
     db: Path
     out: Path
-    root: ArmRoot
+    root: ArmPath
     zone: ZoneInfo
     timeout: float = 5.0
     # Manifests whose job's row has gone, logged once each.

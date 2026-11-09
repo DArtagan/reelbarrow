@@ -1,0 +1,84 @@
+{
+  "job": {
+    "job_id": 77,
+    "stage": "179268446978",
+    "status": "success",
+    "start_time": "2026-10-22 15:54:29.800909",
+    "stop_time": "2026-10-22 19:39:18.306668",
+    "errors": null,
+    "disctype": "dvd",
+    "label": "PINKY_AND_THE_BRAIN_D2",
+    "crc_id": "7969bce42a920b30",
+    "path": "/root/video/completed/tv/Pinky-and-the-Brain (1995-1998)_179268446978",
+    "hasnicetitle": 1,
+    "title": "Pinky-and-the-Brain",
+    "title_auto": "Pinky-and-the-Brain",
+    "title_manual": null,
+    "year": "1995–1998",
+    "year_auto": "1995–1998",
+    "year_manual": null,
+    "imdb_id": "tt0112123",
+    "imdb_id_auto": "tt0112123",
+    "imdb_id_manual": null,
+    "video_type": "series",
+    "video_type_auto": "series",
+    "video_type_manual": null
+  },
+  "raw_copy": {
+    "schema": 1,
+    "folder": "/root/video/raw/Pinky-and-the-Brain_179268446978",
+    "form": "dvd-image",
+    "check": {
+      "sizes": "passed",
+      "hashes": "passed"
+    },
+    "problems": [],
+    "title_map": [
+      {
+        "disc_title": 1,
+        "mkv": "/root/video/raw/Pinky-and-the-Brain_179268446978/titles/PINKY AND THE BRAIN VOL 3 DISC 2-B1_t00.mkv",
+        "handbrake_title": 1
+      },
+      {
+        "disc_title": 4,
+        "mkv": "/root/video/raw/Pinky-and-the-Brain_179268446978/titles/PINKY AND THE BRAIN VOL 3 DISC 2-C1_t01.mkv",
+        "handbrake_title": 2
+      },
+      {
+        "disc_title": 5,
+        "mkv": "/root/video/raw/Pinky-and-the-Brain_179268446978/titles/PINKY AND THE BRAIN VOL 3 DISC 2-C2_t02.mkv",
+        "handbrake_title": 3
+      },
+      {
+        "disc_title": 6,
+        "mkv": "/root/video/raw/Pinky-and-the-Brain_179268446978/titles/PINKY AND THE BRAIN VOL 3 DISC 2-C4_t03.mkv",
+        "handbrake_title": 4
+      },
+      {
+        "disc_title": 7,
+        "mkv": "/root/video/raw/Pinky-and-the-Brain_179268446978/titles/PINKY AND THE BRAIN VOL 3 DISC 2-D1_t04.mkv",
+        "handbrake_title": 5
+      },
+      {
+        "disc_title": 8,
+        "mkv": "/root/video/raw/Pinky-and-the-Brain_179268446978/titles/PINKY AND THE BRAIN VOL 3 DISC 2-D3_t05.mkv",
+        "handbrake_title": 6
+      },
+      {
+        "disc_title": 9,
+        "mkv": "/root/video/raw/Pinky-and-the-Brain_179268446978/titles/PINKY AND THE BRAIN VOL 3 DISC 2-D4_t06.mkv",
+        "handbrake_title": 7
+      }
+    ],
+    "image": "/root/video/raw/Pinky-and-the-Brain_179268446978/Pinky-and-the-Brain_179268446978.iso",
+    "transcodes": {
+      "1": "/root/video/completed/tv/Pinky-and-the-Brain (1995-1998)_179268446978/title_1.mkv",
+      "2": "/root/video/completed/tv/Pinky-and-the-Brain (1995-1998)_179268446978/title_2.mkv",
+      "3": "/root/video/completed/tv/Pinky-and-the-Brain (1995-1998)_179268446978/title_3.mkv",
+      "4": "/root/video/completed/tv/Pinky-and-the-Brain (1995-1998)_179268446978/title_4.mkv",
+      "5": "/root/video/completed/tv/Pinky-and-the-Brain (1995-1998)_179268446978/title_5.mkv",
+      "6": "/root/video/completed/tv/Pinky-and-the-Brain (1995-1998)_179268446978/title_6.mkv",
+      "7": "/root/video/completed/tv/Pinky-and-the-Brain (1995-1998)_179268446978/title_7.mkv"
+    }
+  }
+}

@@ -1,0 +1,3083 @@
+{
+  "job": {
+    "job_id": 103,
+    "stage": "179417475679",
+    "status": "transcoding",
+    "start_time": "2026-11-08 21:52:36.805910",
+    "stop_time": null,
+    "errors": null,
+    "disctype": "bluray",
+    "label": "DOWNTON_ABBEY_SEASON_6_D1",
+    "crc_id": null,
+    "path": "/root/video/completed/tv/Downton Abbey (2010-2015)_179417475679",
+    "hasnicetitle": 1,
+    "title": "Downton Abbey",
+    "title_auto": "The-Manners-of-Downton-Abbey",
+    "title_manual": "Downton Abbey",
+    "year": "2010–2015",
+    "year_auto": "2015",
+    "year_manual": "2010–2015",
+    "imdb_id": "tt1606375",
+    "imdb_id_auto": "tt5109000",
+    "imdb_id_manual": "tt1606375",
+    "video_type": "series",
+    "video_type_auto": "movie",
+    "video_type_manual": "series"
+  },
+  "raw_copy": {
+    "schema": 1,
+    "folder": "/root/video/raw/Downton Abbey_179417475679",
+    "form": "bluray-backup",
+    "check": {
+      "sizes": "passed",
+      "hashes": "passed"
+    },
+    "problems": [],
+    "title_map": [
+      {
+        "playlist": "00016.mpls",
+        "handbrake_title": 7
+      },
+      {
+        "playlist": "00021.mpls",
+        "handbrake_title": 8
+      },
+      {
+        "playlist": "00024.mpls",
+        "handbrake_title": 9
+      },
+      {
+        "playlist": "00025.mpls",
+        "handbrake_title": 10
+      },
+      {
+        "playlist": "00026.mpls",
+        "handbrake_title": 11
+      },
+      {
+        "playlist": "00027.mpls",
+        "handbrake_title": 12
+      },
+      {
+        "playlist": "00030.mpls",
+        "handbrake_title": 13
+      },
+      {
+        "playlist": "00031.mpls",
+        "handbrake_title": 14
+      },
+      {
+        "playlist": "00042.mpls",
+        "handbrake_title": 15
+      },
+      {
+        "playlist": "00043.mpls",
+        "handbrake_title": 16
+      },
+      {
+        "playlist": "00045.mpls",
+        "handbrake_title": 17
+      },
+      {
+        "playlist": "00047.mpls",
+        "handbrake_title": 18
+      },
+      {
+        "playlist": "00051.mpls",
+        "handbrake_title": 19
+      },
+      {
+        "playlist": "00058.mpls",
+        "handbrake_title": 20
+      },
+      {
+        "playlist": "00061.mpls",
+        "handbrake_title": 21
+      },
+      {
+        "playlist": "00062.mpls",
+        "handbrake_title": 22
+      },
+      {
+        "playlist": "00063.mpls",
+        "handbrake_title": 23
+      },
+      {
+        "playlist": "00064.mpls",
+        "handbrake_title": 24
+      },
+      {
+        "playlist": "00067.mpls",
+        "handbrake_title": 25
+      },
+      {
+        "playlist": "00068.mpls",
+        "handbrake_title": 26
+      },
+      {
+        "playlist": "00069.mpls",
+        "handbrake_title": 27
+      },
+      {
+        "playlist": "00072.mpls",
+        "handbrake_title": 28
+      },
+      {
+        "playlist": "00073.mpls",
+        "handbrake_title": 29
+      },
+      {
+        "playlist": "00075.mpls",
+        "handbrake_title": 30
+      },
+      {
+        "playlist": "00080.mpls",
+        "handbrake_title": 31
+      },
+      {
+        "playlist": "00081.mpls",
+        "handbrake_title": 32
+      },
+      {
+        "playlist": "00082.mpls",
+        "handbrake_title": 33
+      },
+      {
+        "playlist": "00083.mpls",
+        "handbrake_title": 34
+      },
+      {
+        "playlist": "00085.mpls",
+        "handbrake_title": 35
+      },
+      {
+        "playlist": "00090.mpls",
+        "handbrake_title": 36
+      },
+      {
+        "playlist": "00095.mpls",
+        "handbrake_title": 37
+      },
+      {
+        "playlist": "00096.mpls",
+        "handbrake_title": 38
+      },
+      {
+        "playlist": "00098.mpls",
+        "handbrake_title": 39
+      },
+      {
+        "playlist": "00106.mpls",
+        "handbrake_title": 40
+      },
+      {
+        "playlist": "00110.mpls",
+        "handbrake_title": 41
+      },
+      {
+        "playlist": "00111.mpls",
+        "handbrake_title": 42
+      },
+      {
+        "playlist": "00112.mpls",
+        "handbrake_title": 43
+      },
+      {
+        "playlist": "00113.mpls",
+        "handbrake_title": 44
+      },
+      {
+        "playlist": "00118.mpls",
+        "handbrake_title": 45
+      },
+      {
+        "playlist": "00119.mpls",
+        "handbrake_title": 46
+      },
+      {
+        "playlist": "00123.mpls",
+        "handbrake_title": 47
+      },
+      {
+        "playlist": "00127.mpls",
+        "handbrake_title": 48
+      },
+      {
+        "playlist": "00131.mpls",
+        "handbrake_title": 49
+      },
+      {
+        "playlist": "00132.mpls",
+        "handbrake_title": 50
+      },
+      {
+        "playlist": "00133.mpls",
+        "handbrake_title": 51
+      },
+      {
+        "playlist": "00136.mpls",
+        "handbrake_title": 52
+      },
+      {
+        "playlist": "00146.mpls",
+        "handbrake_title": 53
+      },
+      {
+        "playlist": "00153.mpls",
+        "handbrake_title": 54
+      },
+      {
+        "playlist": "00158.mpls",
+        "handbrake_title": 55
+      },
+      {
+        "playlist": "00159.mpls",
+        "handbrake_title": 56
+      },
+      {
+        "playlist": "00168.mpls",
+        "handbrake_title": 57
+      },
+      {
+        "playlist": "00169.mpls",
+        "handbrake_title": 58
+      },
+      {
+        "playlist": "00170.mpls",
+        "handbrake_title": 59
+      },
+      {
+        "playlist": "00173.mpls",
+        "handbrake_title": 60
+      },
+      {
+        "playlist": "00175.mpls",
+        "handbrake_title": 61
+      },
+      {
+        "playlist": "00176.mpls",
+        "handbrake_title": 62
+      },
+      {
+        "playlist": "00180.mpls",
+        "handbrake_title": 63
+      },
+      {
+        "playlist": "00192.mpls",
+        "handbrake_title": 64
+      },
+      {
+        "playlist": "00193.mpls",
+        "handbrake_title": 65
+      },
+      {
+        "playlist": "00195.mpls",
+        "handbrake_title": 66
+      },
+      {
+        "playlist": "00198.mpls",
+        "handbrake_title": 67
+      },
+      {
+        "playlist": "00202.mpls",
+        "handbrake_title": 68
+      },
+      {
+        "playlist": "00203.mpls",
+        "handbrake_title": 69
+      },
+      {
+        "playlist": "00204.mpls",
+        "handbrake_title": 70
+      },
+      {
+        "playlist": "00206.mpls",
+        "handbrake_title": 71
+      },
+      {
+        "playlist": "00207.mpls",
+        "handbrake_title": 72
+      },
+      {
+        "playlist": "00214.mpls",
+        "handbrake_title": 73
+      },
+      {
+        "playlist": "00218.mpls",
+        "handbrake_title": 74
+      },
+      {
+        "playlist": "00225.mpls",
+        "handbrake_title": 75
+      },
+      {
+        "playlist": "00228.mpls",
+        "handbrake_title": 76
+      },
+      {
+        "playlist": "00231.mpls",
+        "handbrake_title": 77
+      },
+      {
+        "playlist": "00234.mpls",
+        "handbrake_title": 78
+      },
+      {
+        "playlist": "00236.mpls",
+        "handbrake_title": 79
+      },
+      {
+        "playlist": "00240.mpls",
+        "handbrake_title": 80
+      },
+      {
+        "playlist": "00241.mpls",
+        "handbrake_title": 81
+      },
+      {
+        "playlist": "00244.mpls",
+        "handbrake_title": 82
+      },
+      {
+        "playlist": "00246.mpls",
+        "handbrake_title": 83
+      },
+      {
+        "playlist": "00248.mpls",
+        "handbrake_title": 84
+      },
+      {
+        "playlist": "00252.mpls",
+        "handbrake_title": 85
+      },
+      {
+        "playlist": "00260.mpls",
+        "handbrake_title": 86
+      },
+      {
+        "playlist": "00262.mpls",
+        "handbrake_title": 87
+      },
+      {
+        "playlist": "00264.mpls",
+        "handbrake_title": 88
+      },
+      {
+        "playlist": "00274.mpls",
+        "handbrake_title": 90
+      },
+      {
+        "playlist": "00278.mpls",
+        "handbrake_title": 91
+      },
+      {
+        "playlist": "00280.mpls",
+        "handbrake_title": 92
+      },
+      {
+        "playlist": "00282.mpls",
+        "handbrake_title": 93
+      },
+      {
+        "playlist": "00283.mpls",
+        "handbrake_title": 94
+      },
+      {
+        "playlist": "00285.mpls",
+        "handbrake_title": 95
+      },
+      {
+        "playlist": "00289.mpls",
+        "handbrake_title": 96
+      },
+      {
+        "playlist": "00291.mpls",
+        "handbrake_title": 97
+      },
+      {
+        "playlist": "00295.mpls",
+        "handbrake_title": 98
+      },
+      {
+        "playlist": "00298.mpls",
+        "handbrake_title": 99
+      },
+      {
+        "playlist": "00304.mpls",
+        "handbrake_title": 100
+      },
+      {
+        "playlist": "00314.mpls",
+        "handbrake_title": 101
+      },
+      {
+        "playlist": "00319.mpls",
+        "handbrake_title": 102
+      },
+      {
+        "playlist": "00327.mpls",
+        "handbrake_title": 103
+      },
+      {
+        "playlist": "00328.mpls",
+        "handbrake_title": 104
+      },
+      {
+        "playlist": "00333.mpls",
+        "handbrake_title": 105
+      },
+      {
+        "playlist": "00335.mpls",
+        "handbrake_title": 106
+      },
+      {
+        "playlist": "00341.mpls",
+        "handbrake_title": 107
+      },
+      {
+        "playlist": "00342.mpls",
+        "handbrake_title": 108
+      },
+      {
+        "playlist": "00346.mpls",
+        "handbrake_title": 109
+      },
+      {
+        "playlist": "00350.mpls",
+        "handbrake_title": 110
+      },
+      {
+        "playlist": "00351.mpls",
+        "handbrake_title": 111
+      },
+      {
+        "playlist": "00353.mpls",
+        "handbrake_title": 112
+      },
+      {
+        "playlist": "00355.mpls",
+        "handbrake_title": 113
+      },
+      {
+        "playlist": "00358.mpls",
+        "handbrake_title": 114
+      },
+      {
+        "playlist": "00362.mpls",
+        "handbrake_title": 115
+      },
+      {
+        "playlist": "00368.mpls",
+        "handbrake_title": 116
+      },
+      {
+        "playlist": "00374.mpls",
+        "handbrake_title": 117
+      },
+      {
+        "playlist": "00375.mpls",
+        "handbrake_title": 118
+      },
+      {
+        "playlist": "00379.mpls",
+        "handbrake_title": 119
+      },
+      {
+        "playlist": "00381.mpls",
+        "handbrake_title": 120
+      },
+      {
+        "playlist": "00383.mpls",
+        "handbrake_title": 121
+      },
+      {
+        "playlist": "00389.mpls",
+        "handbrake_title": 122
+      },
+      {
+        "playlist": "00390.mpls",
+        "handbrake_title": 123
+      },
+      {
+        "playlist": "00391.mpls",
+        "handbrake_title": 124
+      },
+      {
+        "playlist": "00393.mpls",
+        "handbrake_title": 125
+      },
+      {
+        "playlist": "00394.mpls",
+        "handbrake_title": 126
+      },
+      {
+        "playlist": "00396.mpls",
+        "handbrake_title": 127
+      },
+      {
+        "playlist": "00397.mpls",
+        "handbrake_title": 128
+      },
+      {
+        "playlist": "00398.mpls",
+        "handbrake_title": 129
+      },
+      {
+        "playlist": "00399.mpls",
+        "handbrake_title": 130
+      },
+      {
+        "playlist": "00400.mpls",
+        "handbrake_title": 131
+      },
+      {
+        "playlist": "00403.mpls",
+        "handbrake_title": 132
+      },
+      {
+        "playlist": "00409.mpls",
+        "handbrake_title": 133
+      },
+      {
+        "playlist": "00412.mpls",
+        "handbrake_title": 134
+      },
+      {
+        "playlist": "00416.mpls",
+        "handbrake_title": 135
+      },
+      {
+        "playlist": "00417.mpls",
+        "handbrake_title": 136
+      },
+      {
+        "playlist": "00424.mpls",
+        "handbrake_title": 137
+      },
+      {
+        "playlist": "00425.mpls",
+        "handbrake_title": 138
+      },
+      {
+        "playlist": "00437.mpls",
+        "handbrake_title": 139
+      },
+      {
+        "playlist": "00445.mpls",
+        "handbrake_title": 140
+      },
+      {
+        "playlist": "00446.mpls",
+        "handbrake_title": 141
+      },
+      {
+        "playlist": "00451.mpls",
+        "handbrake_title": 142
+      },
+      {
+        "playlist": "00452.mpls",
+        "handbrake_title": 143
+      },
+      {
+        "playlist": "00454.mpls",
+        "handbrake_title": 144
+      },
+      {
+        "playlist": "00458.mpls",
+        "handbrake_title": 145
+      },
+      {
+        "playlist": "00462.mpls",
+        "handbrake_title": 146
+      },
+      {
+        "playlist": "00464.mpls",
+        "handbrake_title": 147
+      },
+      {
+        "playlist": "00471.mpls",
+        "handbrake_title": 148
+      },
+      {
+        "playlist": "00473.mpls",
+        "handbrake_title": 149
+      },
+      {
+        "playlist": "00475.mpls",
+        "handbrake_title": 150
+      },
+      {
+        "playlist": "00478.mpls",
+        "handbrake_title": 151
+      },
+      {
+        "playlist": "00486.mpls",
+        "handbrake_title": 152
+      },
+      {
+        "playlist": "00487.mpls",
+        "handbrake_title": 153
+      },
+      {
+        "playlist": "00491.mpls",
+        "handbrake_title": 154
+      },
+      {
+        "playlist": "00495.mpls",
+        "handbrake_title": 155
+      },
+      {
+        "playlist": "00496.mpls",
+        "handbrake_title": 156
+      },
+      {
+        "playlist": "00508.mpls",
+        "handbrake_title": 157
+      },
+      {
+        "playlist": "00511.mpls",
+        "handbrake_title": 158
+      },
+      {
+        "playlist": "00514.mpls",
+        "handbrake_title": 159
+      },
+      {
+        "playlist": "00517.mpls",
+        "handbrake_title": 160
+      },
+      {
+        "playlist": "00521.mpls",
+        "handbrake_title": 161
+      },
+      {
+        "playlist": "00526.mpls",
+        "handbrake_title": 162
+      },
+      {
+        "playlist": "00530.mpls",
+        "handbrake_title": 163
+      },
+      {
+        "playlist": "00533.mpls",
+        "handbrake_title": 164
+      },
+      {
+        "playlist": "00536.mpls",
+        "handbrake_title": 165
+      },
+      {
+        "playlist": "00538.mpls",
+        "handbrake_title": 166
+      },
+      {
+        "playlist": "00544.mpls",
+        "handbrake_title": 167
+      },
+      {
+        "playlist": "00546.mpls",
+        "handbrake_title": 168
+      },
+      {
+        "playlist": "00551.mpls",
+        "handbrake_title": 169
+      },
+      {
+        "playlist": "00552.mpls",
+        "handbrake_title": 170
+      },
+      {
+        "playlist": "00553.mpls",
+        "handbrake_title": 171
+      },
+      {
+        "playlist": "00555.mpls",
+        "handbrake_title": 172
+      },
+      {
+        "playlist": "00559.mpls",
+        "handbrake_title": 173
+      },
+      {
+        "playlist": "00561.mpls",
+        "handbrake_title": 174
+      },
+      {
+        "playlist": "00565.mpls",
+        "handbrake_title": 175
+      },
+      {
+        "playlist": "00575.mpls",
+        "handbrake_title": 176
+      },
+      {
+        "playlist": "00587.mpls",
+        "handbrake_title": 177
+      },
+      {
+        "playlist": "00589.mpls",
+        "handbrake_title": 178
+      },
+      {
+        "playlist": "00591.mpls",
+        "handbrake_title": 179
+      },
+      {
+        "playlist": "00593.mpls",
+        "handbrake_title": 180
+      },
+      {
+        "playlist": "00594.mpls",
+        "handbrake_title": 181
+      },
+      {
+        "playlist": "00596.mpls",
+        "handbrake_title": 182
+      },
+      {
+        "playlist": "00598.mpls",
+        "handbrake_title": 183
+      },
+      {
+        "playlist": "00603.mpls",
+        "handbrake_title": 184
+      },
+      {
+        "playlist": "00604.mpls",
+        "handbrake_title": 185
+      },
+      {
+        "playlist": "00605.mpls",
+        "handbrake_title": 186
+      },
+      {
+        "playlist": "00607.mpls",
+        "handbrake_title": 187
+      },
+      {
+        "playlist": "00609.mpls",
+        "handbrake_title": 188
+      },
+      {
+        "playlist": "00611.mpls",
+        "handbrake_title": 189
+      },
+      {
+        "playlist": "00612.mpls",
+        "handbrake_title": 190
+      },
+      {
+        "playlist": "00617.mpls",
+        "handbrake_title": 191
+      },
+      {
+        "playlist": "00621.mpls",
+        "handbrake_title": 192
+      },
+      {
+        "playlist": "00623.mpls",
+        "handbrake_title": 193
+      },
+      {
+        "playlist": "00625.mpls",
+        "handbrake_title": 194
+      },
+      {
+        "playlist": "00626.mpls",
+        "handbrake_title": 195
+      },
+      {
+        "playlist": "00636.mpls",
+        "handbrake_title": 196
+      },
+      {
+        "playlist": "00637.mpls",
+        "handbrake_title": 197
+      },
+      {
+        "playlist": "00641.mpls",
+        "handbrake_title": 198
+      },
+      {
+        "playlist": "00648.mpls",
+        "handbrake_title": 199
+      },
+      {
+        "playlist": "00650.mpls",
+        "handbrake_title": 200
+      },
+      {
+        "playlist": "00656.mpls",
+        "handbrake_title": 201
+      },
+      {
+        "playlist": "00657.mpls",
+        "handbrake_title": 202
+      },
+      {
+        "playlist": "00658.mpls",
+        "handbrake_title": 203
+      },
+      {
+        "playlist": "00667.mpls",
+        "handbrake_title": 204
+      },
+      {
+        "playlist": "00672.mpls",
+        "handbrake_title": 205
+      },
+      {
+        "playlist": "00673.mpls",
+        "handbrake_title": 206
+      },
+      {
+        "playlist": "00684.mpls",
+        "handbrake_title": 207
+      },
+      {
+        "playlist": "00687.mpls",
+        "handbrake_title": 208
+      },
+      {
+        "playlist": "00699.mpls",
+        "handbrake_title": 209
+      },
+      {
+        "playlist": "00700.mpls",
+        "handbrake_title": 210
+      },
+      {
+        "playlist": "00706.mpls",
+        "handbrake_title": 211
+      },
+      {
+        "playlist": "00709.mpls",
+        "handbrake_title": 212
+      },
+      {
+        "playlist": "00710.mpls",
+        "handbrake_title": 213
+      },
+      {
+        "playlist": "00713.mpls",
+        "handbrake_title": 214
+      },
+      {
+        "playlist": "00714.mpls",
+        "handbrake_title": 215
+      },
+      {
+        "playlist": "00725.mpls",
+        "handbrake_title": 216
+      },
+      {
+        "playlist": "00727.mpls",
+        "handbrake_title": 217
+      },
+      {
+        "playlist": "00732.mpls",
+        "handbrake_title": 218
+      },
+      {
+        "playlist": "00734.mpls",
+        "handbrake_title": 219
+      },
+      {
+        "playlist": "00736.mpls",
+        "handbrake_title": 220
+      },
+      {
+        "playlist": "00737.mpls",
+        "handbrake_title": 221
+      },
+      {
+        "playlist": "00746.mpls",
+        "handbrake_title": 222
+      },
+      {
+        "playlist": "00748.mpls",
+        "handbrake_title": 223
+      },
+      {
+        "playlist": "00749.mpls",
+        "handbrake_title": 224
+      },
+      {
+        "playlist": "00751.mpls",
+        "handbrake_title": 225
+      },
+      {
+        "playlist": "00753.mpls",
+        "handbrake_title": 226
+      },
+      {
+        "playlist": "00754.mpls",
+        "handbrake_title": 227
+      },
+      {
+        "playlist": "00757.mpls",
+        "handbrake_title": 228
+      },
+      {
+        "playlist": "00760.mpls",
+        "handbrake_title": 229
+      },
+      {
+        "playlist": "00766.mpls",
+        "handbrake_title": 230
+      },
+      {
+        "playlist": "00767.mpls",
+        "handbrake_title": 231
+      },
+      {
+        "playlist": "00768.mpls",
+        "handbrake_title": 232
+      },
+      {
+        "playlist": "00774.mpls",
+        "handbrake_title": 233
+      },
+      {
+        "playlist": "00777.mpls",
+        "handbrake_title": 234
+      },
+      {
+        "playlist": "00779.mpls",
+        "handbrake_title": 235
+      },
+      {
+        "playlist": "00780.mpls",
+        "handbrake_title": 236
+      },
+      {
+        "playlist": "00784.mpls",
+        "handbrake_title": 237
+      },
+      {
+        "playlist": "00792.mpls",
+        "handbrake_title": 238
+      },
+      {
+        "playlist": "00793.mpls",
+        "handbrake_title": 239
+      },
+      {
+        "playlist": "00794.mpls",
+        "handbrake_title": 240
+      },
+      {
+        "playlist": "00799.mpls",
+        "handbrake_title": 241
+      },
+      {
+        "playlist": "00800.mpls",
+        "handbrake_title": 242
+      },
+      {
+        "playlist": "00802.mpls",
+        "handbrake_title": 243
+      },
+      {
+        "playlist": "00810.mpls",
+        "handbrake_title": 244
+      },
+      {
+        "playlist": "00813.mpls",
+        "handbrake_title": 245
+      },
+      {
+        "playlist": "00814.mpls",
+        "handbrake_title": 246
+      },
+      {
+        "playlist": "00816.mpls",
+        "handbrake_title": 247
+      },
+      {
+        "playlist": "00818.mpls",
+        "handbrake_title": 248
+      },
+      {
+        "playlist": "00822.mpls",
+        "handbrake_title": 249
+      },
+      {
+        "playlist": "00823.mpls",
+        "handbrake_title": 250
+      },
+      {
+        "playlist": "00825.mpls",
+        "handbrake_title": 251
+      },
+      {
+        "playlist": "00828.mpls",
+        "handbrake_title": 252
+      },
+      {
+        "playlist": "00829.mpls",
+        "handbrake_title": 253
+      },
+      {
+        "playlist": "00836.mpls",
+        "handbrake_title": 254
+      },
+      {
+        "playlist": "00837.mpls",
+        "handbrake_title": 255
+      },
+      {
+        "playlist": "00839.mpls",
+        "handbrake_title": 256
+      },
+      {
+        "playlist": "00841.mpls",
+        "handbrake_title": 257
+      },
+      {
+        "playlist": "00850.mpls",
+        "handbrake_title": 258
+      },
+      {
+        "playlist": "00851.mpls",
+        "handbrake_title": 259
+      },
+      {
+        "playlist": "00853.mpls",
+        "handbrake_title": 260
+      },
+      {
+        "playlist": "00855.mpls",
+        "handbrake_title": 261
+      },
+      {
+        "playlist": "00858.mpls",
+        "handbrake_title": 262
+      },
+      {
+        "playlist": "00861.mpls",
+        "handbrake_title": 263
+      },
+      {
+        "playlist": "00862.mpls",
+        "handbrake_title": 264
+      },
+      {
+        "playlist": "00863.mpls",
+        "handbrake_title": 265
+      },
+      {
+        "playlist": "00869.mpls",
+        "handbrake_title": 266
+      },
+      {
+        "playlist": "00875.mpls",
+        "handbrake_title": 267
+      },
+      {
+        "playlist": "00876.mpls",
+        "handbrake_title": 268
+      },
+      {
+        "playlist": "00878.mpls",
+        "handbrake_title": 269
+      },
+      {
+        "playlist": "00885.mpls",
+        "handbrake_title": 270
+      },
+      {
+        "playlist": "00887.mpls",
+        "handbrake_title": 271
+      },
+      {
+        "playlist": "00888.mpls",
+        "handbrake_title": 272
+      },
+      {
+        "playlist": "00889.mpls",
+        "handbrake_title": 273
+      },
+      {
+        "playlist": "00890.mpls",
+        "handbrake_title": 274
+      },
+      {
+        "playlist": "00900.mpls",
+        "handbrake_title": 275
+      },
+      {
+        "playlist": "00906.mpls",
+        "handbrake_title": 276
+      },
+      {
+        "playlist": "00907.mpls",
+        "handbrake_title": 277
+      },
+      {
+        "playlist": "00911.mpls",
+        "handbrake_title": 278
+      },
+      {
+        "playlist": "00919.mpls",
+        "handbrake_title": 279
+      },
+      {
+        "playlist": "00923.mpls",
+        "handbrake_title": 280
+      },
+      {
+        "playlist": "00926.mpls",
+        "handbrake_title": 281
+      },
+      {
+        "playlist": "00927.mpls",
+        "handbrake_title": 282
+      },
+      {
+        "playlist": "00928.mpls",
+        "handbrake_title": 283
+      },
+      {
+        "playlist": "00930.mpls",
+        "handbrake_title": 284
+      },
+      {
+        "playlist": "00936.mpls",
+        "handbrake_title": 285
+      },
+      {
+        "playlist": "00938.mpls",
+        "handbrake_title": 286
+      },
+      {
+        "playlist": "00940.mpls",
+        "handbrake_title": 287
+      },
+      {
+        "playlist": "00942.mpls",
+        "handbrake_title": 288
+      },
+      {
+        "playlist": "00945.mpls",
+        "handbrake_title": 289
+      },
+      {
+        "playlist": "00956.mpls",
+        "handbrake_title": 290
+      },
+      {
+        "playlist": "00959.mpls",
+        "handbrake_title": 291
+      },
+      {
+        "playlist": "00964.mpls",
+        "handbrake_title": 292
+      },
+      {
+        "playlist": "00965.mpls",
+        "handbrake_title": 293
+      },
+      {
+        "playlist": "00966.mpls",
+        "handbrake_title": 294
+      },
+      {
+        "playlist": "00967.mpls",
+        "handbrake_title": 295
+      },
+      {
+        "playlist": "00968.mpls",
+        "handbrake_title": 296
+      },
+      {
+        "playlist": "00969.mpls",
+        "handbrake_title": 297
+      },
+      {
+        "playlist": "00970.mpls",
+        "handbrake_title": 298
+      },
+      {
+        "playlist": "00974.mpls",
+        "handbrake_title": 299
+      },
+      {
+        "playlist": "00975.mpls",
+        "handbrake_title": 300
+      },
+      {
+        "playlist": "00982.mpls",
+        "handbrake_title": 301
+      },
+      {
+        "playlist": "00983.mpls",
+        "handbrake_title": 302
+      },
+      {
+        "playlist": "00985.mpls",
+        "handbrake_title": 303
+      },
+      {
+        "playlist": "00986.mpls",
+        "handbrake_title": 304
+      },
+      {
+        "playlist": "00989.mpls",
+        "handbrake_title": 305
+      },
+      {
+        "playlist": "00990.mpls",
+        "handbrake_title": 306
+      },
+      {
+        "playlist": "00992.mpls",
+        "handbrake_title": 307
+      },
+      {
+        "playlist": "00993.mpls",
+        "handbrake_title": 308
+      }
+    ],
+    "duplicates": {
+      "skipped": [
+        {
+          "handbrake_title": 7,
+          "playlist": "00016.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 8,
+          "playlist": "00021.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 9,
+          "playlist": "00024.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 10,
+          "playlist": "00025.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 11,
+          "playlist": "00026.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 12,
+          "playlist": "00027.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 13,
+          "playlist": "00030.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 14,
+          "playlist": "00031.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 15,
+          "playlist": "00042.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 16,
+          "playlist": "00043.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 17,
+          "playlist": "00045.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 18,
+          "playlist": "00047.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 19,
+          "playlist": "00051.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 20,
+          "playlist": "00058.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 21,
+          "playlist": "00061.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 22,
+          "playlist": "00062.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 23,
+          "playlist": "00063.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 24,
+          "playlist": "00064.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 25,
+          "playlist": "00067.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 26,
+          "playlist": "00068.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 27,
+          "playlist": "00069.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 28,
+          "playlist": "00072.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 29,
+          "playlist": "00073.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 30,
+          "playlist": "00075.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 31,
+          "playlist": "00080.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 32,
+          "playlist": "00081.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 33,
+          "playlist": "00082.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 34,
+          "playlist": "00083.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 35,
+          "playlist": "00085.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 36,
+          "playlist": "00090.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 37,
+          "playlist": "00095.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 38,
+          "playlist": "00096.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 39,
+          "playlist": "00098.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 40,
+          "playlist": "00106.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 41,
+          "playlist": "00110.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 42,
+          "playlist": "00111.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 43,
+          "playlist": "00112.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 44,
+          "playlist": "00113.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 45,
+          "playlist": "00118.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 46,
+          "playlist": "00119.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 47,
+          "playlist": "00123.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 48,
+          "playlist": "00127.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 49,
+          "playlist": "00131.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 50,
+          "playlist": "00132.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 51,
+          "playlist": "00133.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 52,
+          "playlist": "00136.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 53,
+          "playlist": "00146.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 54,
+          "playlist": "00153.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 55,
+          "playlist": "00158.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 56,
+          "playlist": "00159.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 57,
+          "playlist": "00168.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 58,
+          "playlist": "00169.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 59,
+          "playlist": "00170.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 60,
+          "playlist": "00173.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 61,
+          "playlist": "00175.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 62,
+          "playlist": "00176.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 63,
+          "playlist": "00180.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 64,
+          "playlist": "00192.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 65,
+          "playlist": "00193.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 66,
+          "playlist": "00195.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 67,
+          "playlist": "00198.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 68,
+          "playlist": "00202.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 69,
+          "playlist": "00203.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 70,
+          "playlist": "00204.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 71,
+          "playlist": "00206.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 72,
+          "playlist": "00207.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 73,
+          "playlist": "00214.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 74,
+          "playlist": "00218.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 75,
+          "playlist": "00225.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 76,
+          "playlist": "00228.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 77,
+          "playlist": "00231.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 78,
+          "playlist": "00234.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 79,
+          "playlist": "00236.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 80,
+          "playlist": "00240.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 81,
+          "playlist": "00241.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 82,
+          "playlist": "00244.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 83,
+          "playlist": "00246.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 84,
+          "playlist": "00248.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 85,
+          "playlist": "00252.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 86,
+          "playlist": "00260.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 87,
+          "playlist": "00262.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 88,
+          "playlist": "00264.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 90,
+          "playlist": "00274.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 91,
+          "playlist": "00278.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 92,
+          "playlist": "00280.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 93,
+          "playlist": "00282.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 94,
+          "playlist": "00283.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 95,
+          "playlist": "00285.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 96,
+          "playlist": "00289.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 97,
+          "playlist": "00291.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 98,
+          "playlist": "00295.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 99,
+          "playlist": "00298.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 100,
+          "playlist": "00304.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 101,
+          "playlist": "00314.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 103,
+          "playlist": "00327.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 104,
+          "playlist": "00328.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 105,
+          "playlist": "00333.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 106,
+          "playlist": "00335.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 107,
+          "playlist": "00341.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 108,
+          "playlist": "00342.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 109,
+          "playlist": "00346.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 110,
+          "playlist": "00350.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 111,
+          "playlist": "00351.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 112,
+          "playlist": "00353.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 113,
+          "playlist": "00355.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 114,
+          "playlist": "00358.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 115,
+          "playlist": "00362.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 116,
+          "playlist": "00368.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 117,
+          "playlist": "00374.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 118,
+          "playlist": "00375.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 119,
+          "playlist": "00379.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 120,
+          "playlist": "00381.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 121,
+          "playlist": "00383.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 122,
+          "playlist": "00389.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 123,
+          "playlist": "00390.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 124,
+          "playlist": "00391.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 125,
+          "playlist": "00393.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 126,
+          "playlist": "00394.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 127,
+          "playlist": "00396.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 128,
+          "playlist": "00397.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 129,
+          "playlist": "00398.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 130,
+          "playlist": "00399.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 131,
+          "playlist": "00400.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 132,
+          "playlist": "00403.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 133,
+          "playlist": "00409.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 134,
+          "playlist": "00412.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 135,
+          "playlist": "00416.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 136,
+          "playlist": "00417.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 137,
+          "playlist": "00424.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 138,
+          "playlist": "00425.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 139,
+          "playlist": "00437.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 140,
+          "playlist": "00445.mpls",
+          "reason": "plays titles 306, 150, 102 in turn"
+        },
+        {
+          "handbrake_title": 141,
+          "playlist": "00446.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 142,
+          "playlist": "00451.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 143,
+          "playlist": "00452.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 144,
+          "playlist": "00454.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 145,
+          "playlist": "00458.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 146,
+          "playlist": "00462.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 147,
+          "playlist": "00464.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 148,
+          "playlist": "00471.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 149,
+          "playlist": "00473.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 151,
+          "playlist": "00478.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 152,
+          "playlist": "00486.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 153,
+          "playlist": "00487.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 154,
+          "playlist": "00491.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 155,
+          "playlist": "00495.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 156,
+          "playlist": "00496.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 157,
+          "playlist": "00508.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 158,
+          "playlist": "00511.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 159,
+          "playlist": "00514.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 160,
+          "playlist": "00517.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 161,
+          "playlist": "00521.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 162,
+          "playlist": "00526.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 163,
+          "playlist": "00530.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 164,
+          "playlist": "00533.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 165,
+          "playlist": "00536.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 166,
+          "playlist": "00538.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 167,
+          "playlist": "00544.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 168,
+          "playlist": "00546.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 169,
+          "playlist": "00551.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 170,
+          "playlist": "00552.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 171,
+          "playlist": "00553.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 172,
+          "playlist": "00555.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 173,
+          "playlist": "00559.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 174,
+          "playlist": "00561.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 175,
+          "playlist": "00565.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 176,
+          "playlist": "00575.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 177,
+          "playlist": "00587.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 178,
+          "playlist": "00589.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 179,
+          "playlist": "00591.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 180,
+          "playlist": "00593.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 181,
+          "playlist": "00594.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 182,
+          "playlist": "00596.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 183,
+          "playlist": "00598.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 184,
+          "playlist": "00603.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 185,
+          "playlist": "00604.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 186,
+          "playlist": "00605.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 187,
+          "playlist": "00607.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 188,
+          "playlist": "00609.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 189,
+          "playlist": "00611.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 190,
+          "playlist": "00612.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 191,
+          "playlist": "00617.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 192,
+          "playlist": "00621.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 193,
+          "playlist": "00623.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 194,
+          "playlist": "00625.mpls",
+          "reason": "plays title 306's clips and a still picture",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 195,
+          "playlist": "00626.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 196,
+          "playlist": "00636.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 197,
+          "playlist": "00637.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 198,
+          "playlist": "00641.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 199,
+          "playlist": "00648.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 200,
+          "playlist": "00650.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 201,
+          "playlist": "00656.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 202,
+          "playlist": "00657.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 203,
+          "playlist": "00658.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 204,
+          "playlist": "00667.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 205,
+          "playlist": "00672.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 206,
+          "playlist": "00673.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 207,
+          "playlist": "00684.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 208,
+          "playlist": "00687.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 209,
+          "playlist": "00699.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 210,
+          "playlist": "00700.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 211,
+          "playlist": "00706.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 212,
+          "playlist": "00709.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 213,
+          "playlist": "00710.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 214,
+          "playlist": "00713.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 215,
+          "playlist": "00714.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 216,
+          "playlist": "00725.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 217,
+          "playlist": "00727.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 218,
+          "playlist": "00732.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 219,
+          "playlist": "00734.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 220,
+          "playlist": "00736.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 221,
+          "playlist": "00737.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 222,
+          "playlist": "00746.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 223,
+          "playlist": "00748.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 224,
+          "playlist": "00749.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 225,
+          "playlist": "00751.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 226,
+          "playlist": "00753.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 227,
+          "playlist": "00754.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 228,
+          "playlist": "00757.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 229,
+          "playlist": "00760.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 230,
+          "playlist": "00766.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 231,
+          "playlist": "00767.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 232,
+          "playlist": "00768.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 233,
+          "playlist": "00774.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 234,
+          "playlist": "00777.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 235,
+          "playlist": "00779.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 236,
+          "playlist": "00780.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 237,
+          "playlist": "00784.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 238,
+          "playlist": "00792.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 239,
+          "playlist": "00793.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 240,
+          "playlist": "00794.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 241,
+          "playlist": "00799.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 242,
+          "playlist": "00800.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 243,
+          "playlist": "00802.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 244,
+          "playlist": "00810.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 245,
+          "playlist": "00813.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 246,
+          "playlist": "00814.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 247,
+          "playlist": "00816.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 248,
+          "playlist": "00818.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 249,
+          "playlist": "00822.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 250,
+          "playlist": "00823.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 251,
+          "playlist": "00825.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 252,
+          "playlist": "00828.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 253,
+          "playlist": "00829.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 254,
+          "playlist": "00836.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 255,
+          "playlist": "00837.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 256,
+          "playlist": "00839.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 257,
+          "playlist": "00841.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 258,
+          "playlist": "00850.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 259,
+          "playlist": "00851.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 260,
+          "playlist": "00853.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 261,
+          "playlist": "00855.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 262,
+          "playlist": "00858.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 263,
+          "playlist": "00861.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 264,
+          "playlist": "00862.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 265,
+          "playlist": "00863.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 266,
+          "playlist": "00869.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 267,
+          "playlist": "00875.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 268,
+          "playlist": "00876.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 269,
+          "playlist": "00878.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 270,
+          "playlist": "00885.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 271,
+          "playlist": "00887.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 272,
+          "playlist": "00888.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 273,
+          "playlist": "00889.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 274,
+          "playlist": "00890.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 275,
+          "playlist": "00900.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 276,
+          "playlist": "00906.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 277,
+          "playlist": "00907.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 278,
+          "playlist": "00911.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 279,
+          "playlist": "00919.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 280,
+          "playlist": "00923.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 281,
+          "playlist": "00926.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 282,
+          "playlist": "00927.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 283,
+          "playlist": "00928.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 284,
+          "playlist": "00930.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 285,
+          "playlist": "00936.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 286,
+          "playlist": "00938.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 287,
+          "playlist": "00940.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 288,
+          "playlist": "00942.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 289,
+          "playlist": "00945.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 290,
+          "playlist": "00956.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 291,
+          "playlist": "00959.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 292,
+          "playlist": "00964.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 293,
+          "playlist": "00965.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 294,
+          "playlist": "00966.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 295,
+          "playlist": "00967.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 296,
+          "playlist": "00968.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 297,
+          "playlist": "00969.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 298,
+          "playlist": "00970.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 299,
+          "playlist": "00974.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 300,
+          "playlist": "00975.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 301,
+          "playlist": "00982.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 302,
+          "playlist": "00983.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 303,
+          "playlist": "00985.mpls",
+          "reason": "plays title 306's clips out of order",
+          "played_by": 306
+        },
+        {
+          "handbrake_title": 304,
+          "playlist": "00986.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 305,
+          "playlist": "00989.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 307,
+          "playlist": "00992.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        },
+        {
+          "handbrake_title": 308,
+          "playlist": "00993.mpls",
+          "reason": "plays title 140's clips out of order",
+          "played_by": 140
+        }
+      ],
+      "wholes": [
+        {
+          "handbrake_title": 140,
+          "playlist": "00445.mpls",
+          "kept": "parts",
+          "interleaved": false,
+          "parts": [
+            {
+              "handbrake_title": 306,
+              "playlist": "00990.mpls",
+              "start": 0.0
+            },
+            {
+              "handbrake_title": 150,
+              "playlist": "00475.mpls",
+              "start": 4173.961
+            },
+            {
+              "handbrake_title": 102,
+              "playlist": "00319.mpls",
+              "start": 7141.509
+            }
+          ]
+        }
+      ],
+      "orders": [
+        {
+          "handbrake_title": 140,
+          "playlist": "00445.mpls",
+          "mismatch": 5.992,
+          "titles": 148,
+          "runner_up": {
+            "handbrake_title": 26,
+            "playlist": "00068.mpls",
+            "mismatch": 7.691
+          }
+        },
+        {
+          "handbrake_title": 306,
+          "playlist": "00990.mpls",
+          "mismatch": 5.992,
+          "titles": 151,
+          "runner_up": {
+            "handbrake_title": 160,
+            "playlist": "00517.mpls",
+            "mismatch": 7.85
+          }
+        }
+      ]
+    }
+  }
+}

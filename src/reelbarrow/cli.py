@@ -12,23 +12,24 @@ def main() -> None:
     serve.add_argument("--port", type=int, default=8000)
 
     export = commands.add_parser(
-        "export-manifests",
-        help="copy ARM's database out as job manifests, on an interval",
+        "arm-export-manifests",
+        help="copy ARM's jobs out of its database as manifests, on an interval",
     )
     export.add_argument("--db", type=Path, required=True, help="ARM's arm.db")
     # Required, as no default is right everywhere and a wrong one makes
-    # plausible paths and times rather than failing.
+    # plausible paths rather than failing.
     export.add_argument(
-        "--arm-root",
+        "--arm-path",
         required=True,
-        metavar="CONTAINER=SHARE",
-        help="where ARM's container sees its slice of the share, and that slice's "
-        "path from the share's root, e.g. /root/video=import/automatic-ripping-machine",
+        metavar="ARM=REELBARROW",
+        help="one folder as ARM's container and reelbarrow each mount it, e.g. "
+        "/root/video=/video/import/automatic-ripping-machine",
     )
     export.add_argument(
         "--arm-timezone",
-        required=True,
-        help="the IANA time zone ARM's container runs in, e.g. Etc/UTC",
+        default="Etc/UTC",
+        help="the IANA time zone ARM's container runs in (default: Etc/UTC, "
+        "ARM's image's)",
     )
     export.add_argument(
         "--out",
@@ -53,21 +54,22 @@ def main() -> None:
         from reelbarrow.web import create_app
 
         uvicorn.run(create_app(), host=args.host, port=args.port)
-    elif args.command == "export-manifests":
+    elif args.command == "arm-export-manifests":
         from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
         from reelbarrow.config import Settings
-        from reelbarrow.exporter import ArmRoot, Exporter
+        from reelbarrow.exporter import ArmPath, Exporter
 
+        settings = Settings()
         try:
-            root = ArmRoot.parse(args.arm_root)
+            root = ArmPath.parse(args.arm_path, settings.video_root)
             zone = ZoneInfo(args.arm_timezone)
         except (ValueError, ZoneInfoNotFoundError) as error:
             parser.error(str(error))
         logging.basicConfig(
             level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
         )
-        out = args.out or Settings().manifest_dir
+        out = args.out or settings.manifest_dir
         exporter = Exporter(
             db=args.db, out=out, root=root, zone=zone, timeout=args.timeout
         )

@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "80-179280640613",
+  "state": "succeeded",
+  "start_time": "2026-10-24T01:46:46.200578Z",
+  "finish_time": "2026-10-25T07:14:42.343227Z",
+  "errors": null,
+  "disc": {
+    "type": "bluray",
+    "label": "DOWNTON_ABBEY_D1",
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "Downton-Abbey",
+      "reason": "lookup"
+    },
+    "year": {
+      "value": "2010–2015",
+      "reason": "lookup"
+    },
+    "imdb_id": {
+      "value": "tt1606375",
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": "series",
+      "reason": "lookup"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)"
+    }
+  },
+  "raw": {
+    "form": "bluray-backup",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/Downton-Abbey_179280640613"
+    },
+    "check": {
+      "sizes": "passed",
+      "hashes": "passed"
+    },
+    "problems": []
+  },
+  "titles": [
+    {
+      "playlist": "00001.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)/title_2.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00002.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)/title_3.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00003.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)/title_4.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00004.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)/title_5.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00006.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton-Abbey (2010-2015)/title_6.mkv"
+      },
+      "reason": null
+    }
+  ]
+}
