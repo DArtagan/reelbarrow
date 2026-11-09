@@ -1,0 +1,477 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DArtagan/reelbarrow/blob/main/docs/manifest.schema.json",
+  "$defs": {
+    "Check": {
+      "description": "The backup's two checks. The copy is whole when both passed.",
+      "properties": {
+        "sizes": {
+          "$ref": "#/$defs/CheckState",
+          "description": "Every file against the disc's own record of its size."
+        },
+        "hashes": {
+          "$ref": "#/$defs/CheckState",
+          "description": "MakeMKV's check of each file against the disc's hashes, as it copied. Never rerun, so `not_run` on a copy checked afterwards."
+        }
+      },
+      "required": [
+        "sizes",
+        "hashes"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "CheckState": {
+      "enum": [
+        "passed",
+        "failed",
+        "not_run"
+      ],
+      "title": "CheckState",
+      "type": "string"
+    },
+    "Claim": {
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "reason": {
+          "$ref": "#/$defs/IdentityReason"
+        }
+      },
+      "required": [
+        "value",
+        "reason"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Completed": {
+      "properties": {
+        "folder": {
+          "$ref": "#/$defs/ShareRef"
+        }
+      },
+      "required": [
+        "folder"
+      ],
+      "title": "Completed",
+      "type": "object"
+    },
+    "Disc": {
+      "properties": {
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "crc64": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{16}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A DVD's pydvdid CRC64; null for a Blu-ray.",
+          "title": "Crc64"
+        }
+      },
+      "title": "Disc",
+      "type": "object"
+    },
+    "DiscKey": {
+      "description": "A title by the disc's own number for it: a DVD's title number, which\nopens it in the image, or a Blu-ray's playlist.",
+      "properties": {
+        "disc_title": {
+          "default": null,
+          "minimum": 1,
+          "title": "Disc Title",
+          "type": "integer"
+        },
+        "playlist": {
+          "default": null,
+          "pattern": "(?i)^\\d{5}\\.mpls$",
+          "title": "Playlist",
+          "type": "string"
+        }
+      },
+      "title": "DiscKey",
+      "type": "object"
+    },
+    "Identity": {
+      "description": "What the work is, each field with who supplied it.",
+      "properties": {
+        "title": {
+          "$ref": "#/$defs/Claim"
+        },
+        "year": {
+          "$ref": "#/$defs/Claim"
+        },
+        "imdb_id": {
+          "$ref": "#/$defs/Claim"
+        },
+        "kind": {
+          "$ref": "#/$defs/KindClaim"
+        }
+      },
+      "required": [
+        "title",
+        "year",
+        "imdb_id",
+        "kind"
+      ],
+      "title": "Identity",
+      "type": "object"
+    },
+    "IdentityReason": {
+      "enum": [
+        "set_by_person",
+        "lookup",
+        "copied_from_earlier_job",
+        "not_identified"
+      ],
+      "title": "IdentityReason",
+      "type": "string"
+    },
+    "KindClaim": {
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "enum": [
+                "movie",
+                "series"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "reason": {
+          "$ref": "#/$defs/IdentityReason"
+        }
+      },
+      "required": [
+        "value",
+        "reason"
+      ],
+      "title": "KindClaim",
+      "type": "object"
+    },
+    "Part": {
+      "properties": {
+        "disc_title": {
+          "default": null,
+          "minimum": 1,
+          "title": "Disc Title",
+          "type": "integer"
+        },
+        "playlist": {
+          "default": null,
+          "pattern": "(?i)^\\d{5}\\.mpls$",
+          "title": "Playlist",
+          "type": "string"
+        },
+        "start": {
+          "description": "The second of the whole at which the part begins, in the playback time its transcode's chapters keep.",
+          "minimum": 0,
+          "title": "Start",
+          "type": "number"
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "title": "Part",
+      "type": "object"
+    },
+    "Raw": {
+      "properties": {
+        "form": {
+          "$ref": "#/$defs/RawForm"
+        },
+        "folder": {
+          "$ref": "#/$defs/ShareRef"
+        },
+        "image": {
+          "$ref": "#/$defs/ShareRef",
+          "default": null,
+          "title": "Image"
+        },
+        "check": {
+          "$ref": "#/$defs/Check"
+        },
+        "problems": {
+          "description": "Each check's failures.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Problems",
+          "type": "array"
+        },
+        "titles_compared": {
+          "const": true,
+          "default": null,
+          "description": "The titles were compared for those that repeat others, so a title that is no whole and has no reason repeats nothing. Left out: they weren't, and nothing is known either way.",
+          "title": "Titles Compared",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "form",
+        "folder",
+        "check",
+        "problems"
+      ],
+      "title": "Raw",
+      "type": "object"
+    },
+    "RawForm": {
+      "enum": [
+        "bluray-backup",
+        "dvd-image",
+        "mkv-titles"
+      ],
+      "title": "RawForm",
+      "type": "string"
+    },
+    "ShareRef": {
+      "description": "A file or folder on the video share, by its path from the share's root.\n\nThe root is the share's, not any process's mount of it: reelbarrow, ARM and\nthe exporter each see a different slice at a different place, and a path in\na manifest has to mean the same file to all of them.",
+      "properties": {
+        "path": {
+          "description": "From the share's root: `/` separators, no leading `/`, no `.` or `..`, the name exactly as on the share.",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "ShareRef",
+      "type": "object"
+    },
+    "State": {
+      "enum": [
+        "running",
+        "succeeded",
+        "failed"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "Title": {
+      "properties": {
+        "disc_title": {
+          "default": null,
+          "minimum": 1,
+          "title": "Disc Title",
+          "type": "integer"
+        },
+        "playlist": {
+          "default": null,
+          "pattern": "(?i)^\\d{5}\\.mpls$",
+          "title": "Playlist",
+          "type": "string"
+        },
+        "extracted": {
+          "$ref": "#/$defs/ShareRef",
+          "default": null,
+          "description": "A DVD title's MKV, extracted from the image.",
+          "title": "Extracted"
+        },
+        "transcode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ShareRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Where the producer put its transcode. Null: none, and `reason` says why. Left out: not recorded."
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TitleReason"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "played_by": {
+          "$ref": "#/$defs/DiscKey",
+          "default": null,
+          "description": "The title kept that plays this one, where its own `parts` or a whole it is a part of don't say so: a copy, a shuffle, a title inside a whole.",
+          "title": "Played By"
+        },
+        "interleaved": {
+          "default": null,
+          "description": "A whole's parts are cut into one another.",
+          "title": "Interleaved",
+          "type": "boolean"
+        },
+        "parts": {
+          "default": null,
+          "description": "A whole's: the disjoint titles that play it between them, in order.",
+          "items": {
+            "$ref": "#/$defs/Part"
+          },
+          "minLength": 2,
+          "title": "Parts",
+          "type": "array"
+        }
+      },
+      "title": "Title",
+      "type": "object"
+    },
+    "TitleReason": {
+      "description": "Why a title has no transcode.",
+      "enum": [
+        "played_by_kept_titles",
+        "not_extracted"
+      ],
+      "title": "TitleReason",
+      "type": "string"
+    }
+  },
+  "description": "One unit of work to file. *The manifest*, in reelbarrow's design.",
+  "properties": {
+    "schema": {
+      "const": 1,
+      "title": "Schema",
+      "type": "integer"
+    },
+    "source": {
+      "pattern": "^[a-z0-9]+$",
+      "title": "Source",
+      "type": "string"
+    },
+    "id": {
+      "description": "Unique within its source; ARM's is `<job_id>-<stage>`.",
+      "pattern": "^[A-Za-z0-9._-]+$",
+      "title": "Id",
+      "type": "string"
+    },
+    "state": {
+      "$ref": "#/$defs/State"
+    },
+    "start_time": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Start Time"
+    },
+    "finish_time": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Finish Time"
+    },
+    "errors": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Errors"
+    },
+    "disc": {
+      "$ref": "#/$defs/Disc",
+      "default": null
+    },
+    "identity": {
+      "$ref": "#/$defs/Identity",
+      "default": null
+    },
+    "completed": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Completed"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Null: the producer made no output folder."
+    },
+    "raw": {
+      "$ref": "#/$defs/Raw",
+      "default": null,
+      "description": "Left out: not recorded."
+    },
+    "titles": {
+      "default": null,
+      "description": "Each title from the disc to its transcode, keyed by the disc's own number for it. Left out: not recorded.",
+      "items": {
+        "$ref": "#/$defs/Title"
+      },
+      "title": "Titles",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "source",
+    "id",
+    "state"
+  ],
+  "title": "reelbarrow manifest",
+  "type": "object"
+}

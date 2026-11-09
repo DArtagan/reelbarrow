@@ -216,15 +216,40 @@ ARM's SQLite database (`/root/db/arm.db`, on a node-local PVC on worker-1) is th
 only place that knows, per job: `title`, `year`, `imdb_id`, `video_type`,
 `label`, `disctype`, `crc_id`, `status`, `path` (the completed directory,
 including any `_<stage>` suffix), and a `track` table holding **both** MakeMKV's
-and HandBrake's view of every title. None of it is written next to the output,
-except what the raw folder's stamp carries (below).
+and HandBrake's view of every title. None of it is written next to the output.
+The exporter copies what reelbarrow needs of it out as manifests (*The
+manifest*).
 
 - **`crc_id`** is pydvdid's CRC64 for DVDs. It is `None` for every Blu-ray job.
+- **Who identified a job is in three sets of columns.** ARM's lookup, a hit in
+  its CRC64 database (`identify_dvd`) or an OMDb/TMDB search (`update_job`),
+  writes the `_auto` columns and sets `hasnicetitle`; the two hits write the
+  same columns, so the database can't tell them apart. ARM's UI alone writes
+  the `_manual` columns, and only the fields its form sets: the series route
+  sets `title_manual` and `year` but not `year_manual`. The plain
+  `title`/`year`/`imdb_id`/`video_type` are what ARM filed under. With
+  `hasnicetitle` false, `title` is only the disc's label or a Blu-ray's
+  embedded name. Of 103 jobs (2026-11-08), 28 have a `title_manual` and 8 no
+  identification. **Read from 2.24.4's source.**
+- **ARM copies an identity between jobs by label.** After its lookup,
+  `job_dupe_check` (`main.py:116`) finds the successful jobs with the new job's
+  disc label and, when there is exactly one, copies its `title`, `year`,
+  `video_type` and `hasnicetitle` over the lookup's, writing no `_auto` or
+  `_manual` column and leaving `imdb_id` as the lookup found it. Labels are
+  shared by different discs (`Sherlock` is on five successful jobs), so a
+  copied identity is as good as the label match. Jobs 23, 27 and 61 have one:
+  23 and 27 took job 5's corrected *The Rescuers (1977)*, with no IMDb ID.
+  It is upstream code; the deployment doesn't patch it, and with
+  `ALLOW_DUPLICATES` on, copying is all it does there.
+- **`job_id` restarts at 1 if ARM's database is recreated; `stage` doesn't
+  repeat.** ARM sets `stage` once per job from the clock in hundredths of a
+  second. It was unique across all 103 jobs, and the `stage` in every
+  `arm-job.json` (*The raw copy's record*) matched its job's (2026-11-08).
 - **The track table is not a reliable raw↔transcode map.** For job 21,
   HandBrake's track *N* is MakeMKV's track *N−1*, and the final `title_K.mkv`
   names follow neither cleanly. Nothing links a MakeMKV row to a HandBrake one,
   and their lengths for one title differ by seconds. Pairing has to be done by
-  content, unless the raw folder's stamp maps the titles (below).
+  content, unless the raw copy's record maps the titles (below).
 - **There is no completion hook, and no notification sees a job's end.** ARM
   calls `BASH_SCRIPT` with `$1=title $2=body` on every notification
   (`ripper/utils.py:88`), synchronously, logging and ignoring its exit status,
@@ -233,118 +258,109 @@ except what the raw folder's stamp carries (below).
   `else:`, after `main()` and its closing `notify_exit()` have returned, and
   `fail` after the fatal-error notification. A job abandoned from the UI is
   never notified. So a hook that reads the database never sees `success` or
-  `fail`, which is why the manifest is exported by polling (*The ARM
+  `fail`, which is why the manifest is exported by polling (*The
   manifest*). **Read from 2.24.4's source, not exercised.**
 - **Pushover is wired** (`PO_USER_KEY`/`PO_APP_KEY`), so the brother already
   receives ARM's messages on his phone.
 
-### The raw folder's stamp
+### The raw copy's record
 
-The deployment patches ARM to write `arm-job.json` into each raw folder as it
-creates it, from 2026-10-21. The deployment repository's ARM documentation
-defines it; this is what reelbarrow relies on. It is the only thing on the share
-that ties a raw folder to its job: ARM's database records no raw path, and the
+ARM's database records a job's completed folder and never its raw one, nor
+whether the copy is whole, nor which transcode each disc title became. The raw
 folder keeps the name the job had when its rip started, while a title corrected
-later renames only the completed folder. Job 76's, shortened:
+later renames only the completed folder, so nothing on the share ties the two
+by name. The deployment patches ARM to record those facts as the job runs, in
+ARM's own database, in a table of the patch's, `reelbarrow_raw_copy`, one JSON
+document a job. The document is the manifest's `raw` and `titles` already, in
+ARM's container's paths, each title also holding `handbrake_title`, the
+number HandBrake and ARM's moves know it by and the patch's key for it. The
+exporter translates the paths, drops that number, and checks the rest against
+the model; it is the one contract, and the deployment repository's ARM
+documentation describes how the patch keeps it. A site without the patch exports no `raw`, and
+its raw folders are paired by structure and fingerprint. **Not yet deployed;
+see [arm-manifest-export](../todos/arm-manifest-export.md).**
 
-```json
-{
-  "schema": 1,
-  "job_id": 76,
-  "label": "PINKY_AND_THE_BRAIN_D2",
-  "disctype": "dvd",
-  "crc_id": "7969bce42a920b30",
-  "stage": "179261218992",
-  "start_time": "2026-10-21T19:49:49.973701+00:00",
-  "complete": true,
-  "problems": [],
-  "title_map": [
-    {"disc_title": 1, "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-B1_t00.mkv", "handbrake_title": 1},
-    {"disc_title": 4, "mkv": "PINKY AND THE BRAIN VOL 3 DISC 2-C1_t01.mkv", "handbrake_title": 2}
-  ]
-}
-```
+Before the record, the patch wrote the same facts into each raw folder as
+`arm-job.json` (from job 76, and written afterwards for Blu-ray jobs 7, 8, 23,
+25 and 27, the early folders that hold the whole disc and are provably their
+job's). The deployment moves those into the table once, so a job's record is
+in one place whenever it was ripped. A stamp still in a folder is superseded,
+and nothing reads it.
 
-- **`job_id`** joins the folder to its manifest. Never join on the folder's name.
-- **`complete`** is the backup checked against the disc's own record of its
-  size: every Blu-ray clip against its `.clpi`, or a DVD image against its ISO
-  9660 volume size, with no file failing MakeMKV's hash check. `true` passed.
-  `false` failed, `problems` says how, and the job failed before transcoding.
-  `null` means the check never ran because the job died or was abandoned
-  mid-backup, so the copy is partial. A stamp written afterwards (below) has
-  it only as `false`, and otherwise not at all: its copy's sizes can be checked
-  again, but not MakeMKV's hashes.
-- **`title_map`** traces each title from the disc to its transcode, its
-  identifiers in the order the title passes through them. A DVD's entries are
-  `disc_title`, `mkv` and `handbrake_title`, for the titles MakeMKV extracted
-  from the image, so those of seven minutes or more, not every title on the
-  disc. `disc_title` is the DVD's own title number, which opens the title in the
-  image directly (`HandBrakeCLI -i <iso> -t <disc_title>`). `mkv` is the file in
-  `titles/`, whose `_tNN` is not the disc's number, since MakeMKV counts only
-  the titles it kept: above, `t01` is DVD title 4. A Blu-ray's transcodes are
-  made from `BDMV/` directly, so its entries are `playlist` and
-  `handbrake_title`, for every title HandBrake was given, skipped ones
-  included. Lengths can't recover a Blu-ray's: four of job 79's featurettes come
-  in variants 1–3 s apart that share 99–100% of their clips, and nearest length
-  paired `title_76` with the playlist that made `title_84` (E34).
-  `handbrake_title` is the *N* of the transcode's `title_N.mkv`, or null for a
-  DVD title MakeMKV listed and did not save. `title_map` is null until it is
-  written, and stays null for a job that ended first, or one stamped afterwards
-  whose log was gone. In `completed/` every transcode keeps its `title_N.mkv`
-  once the deployment's patch for it is in (2026-10-26; the first job after it
-  is the first so named): flat for a series, and for a movie the title ARM took
-  for the feature sits above `extras/`, the rest inside it. That placement is
-  ARM's guess, from HandBrake's main-feature flag or the largest file, and is
-  often wrong on a bonus disc; the feature is decided here. Earlier jobs renamed
-  it `<Title (Year)>.mkv`, so the feature's number is the one in the title map
-  with no `title_N.mkv` beside it. The stamp holds no length: MakeMKV's
+What a manifest's raw-copy fields mean:
+
+- **`raw.form`** is what the folder holds (*What a raw folder holds*):
+  `bluray-backup`, `dvd-image` with its `image`, or `mkv-titles`.
+- **`raw.check`** is the backup's two checks, each `passed`, `failed` or
+  `not_run`: `sizes`, every Blu-ray clip against its `.clpi` or a DVD image
+  against its ISO 9660 volume size, and `hashes`, MakeMKV's check of each file
+  against the disc's hashes as it copied. The copy is whole when both passed.
+  When either failed, `raw.problems` says how, and the job failed before
+  transcoding. Both are `not_run` when the job died or was abandoned
+  mid-backup, so the copy is partial. A copy recorded afterwards has `hashes`
+  `not_run` for good: its sizes could be checked again, MakeMKV's hashes
+  can't.
+- **`titles`** traces each title from the disc to its transcode, keyed by the
+  disc's own number for it. A DVD's are its `disc_title`s, which open the title
+  in the image directly (`HandBrakeCLI -i <iso> -t <disc_title>`), for the
+  titles MakeMKV extracted, those of seven minutes or more and not every title
+  on the disc; `extracted` is its MKV in `titles/`, whose `_tNN` is neither
+  number, since MakeMKV counts only the titles it kept. A Blu-ray's are its
+  `playlist`s, for every title HandBrake was given, skipped ones included,
+  since its transcodes are made from `BDMV/` directly. Lengths can't recover a
+  Blu-ray's: four of job 79's featurettes come in variants 1–3 s apart that
+  share 99–100% of their clips, and nearest length paired `title_76` with the
+  playlist that made `title_84` (E34). `titles` holds no length: MakeMKV's
   duration counts each kept cell in whole seconds of the IFO's clock, up to a
   second a cell short of what plays (E33), and a length is read from the raw
   copy.
-- **`duplicates`**, from job 83 (2026-10-26), records the titles ARM chose not
-  to transcode because other titles already play them, compared by what each
-  plays from the disc (a Blu-ray playlist's clips and times, a DVD title's
-  cells), at 99% coverage. `skipped` lists each such title by
-  `handbrake_title`, with its `playlist` (Blu-ray) or `disc_title` (DVD) and a
-  `reason`; the entries in `wholes` and their `parts` name titles the same way. A
-  skipped title has no transcode, and its absence is neither a failed
-  transcode nor an incomplete copy. `wholes` lists each title that two or more
-  disjoint others play between them: `kept` (`parts`, `whole` or `both`),
-  `interleaved`, and its `parts`, each with `start`, the second of the whole at
-  which it begins, in the playback time its transcode's chapters keep, a DVD's
-  as a Blu-ray's (*Case 9*). A series keeps the parts, so a play-all is skipped. A movie
-  disc keeps a whole whose parts follow one another with a chapter at each
-  join, a documentary in parts, and skips the parts; its transcode has a
-  keyframe at each chapter, so a part can be cut out at `start` without
-  re-encoding. Interleaved parts, featurettes cut into a film, are kept and the
-  whole skipped. A series ARM filed as a movie therefore arrives as one long
-  file, and `start` is where to split it. Both lists are empty when nothing
-  repeats. A stamp without `duplicates` predates it, comes from a job that
-  ended before transcoding began, or from one whose disc structure couldn't be
-  read, which transcodes every title. None of those says nothing repeated.
-- **`crc_id`** carries a DVD's identity into the raw folder (*Disc identity*).
-- **`schema`** other than 1 is refused, not guessed at, as for a manifest. A
-  field added leaves it at 1, as `duplicates` was; once reelbarrow's reader is
-  deployed, removing a field or changing what one means raises it. Until then
-  the contract is still being settled and stays at 1, every stamp on the share
-  rewritten to its latest form. So a reader ignores fields it
-  doesn't know and takes a missing one as not recorded, never as empty.
-- **Title numbers** are named for their numbering wherever they appear:
-  `handbrake_title` is HandBrake's, the *N* of `title_N.mkv`, and `disc_title`
-  or `playlist` the disc's own. No field is a bare `title`.
+- **A title's `transcode`** is the file where ARM put it, recorded as ARM moves
+  it. In `completed/` every transcode keeps its `title_N.mkv` once the
+  deployment's patch for it is in (2026-10-26): flat for a series, and for a movie the title ARM took for the
+  feature sits above `extras/`, the rest inside it. That placement is ARM's
+  guess, from HandBrake's main-feature flag or the largest file, and is often
+  wrong on a bonus disc; the feature is decided here. Earlier jobs renamed it
+  `<Title (Year)>.mkv`; which title that was is ARM's own record, the one
+  HandBrake track it marked `main_feature`, and the record names that file
+  its transcode (jobs 25, 27, 78 and 79).
+- **A title with no transcode** says why in its `reason`:
+  `played_by_kept_titles` for a title ARM chose not to transcode because titles
+  it kept already play it, compared by what each plays from the disc (a Blu-ray
+  playlist's clips and times, a DVD title's cells) at 99% coverage, and
+  `not_extracted` for a DVD title MakeMKV listed and did not save. Such a
+  title's absence is neither a failed transcode nor an incomplete copy.
+- **A whole**, a title that two or more disjoint others play between them,
+  carries those `parts`, each with `start`, the second of the whole at which it
+  begins, in the playback time its transcode's chapters keep, a DVD's as a
+  Blu-ray's (*Case 9*), and `interleaved`. A series keeps the parts, so a
+  play-all is skipped. A movie disc keeps a whole whose parts follow one
+  another with a chapter at each join, a documentary in parts, and skips the
+  parts; its transcode has a keyframe at each chapter, so a part can be cut
+  out at `start` without re-encoding. Interleaved parts, featurettes cut into a
+  film, are kept and the whole skipped. Which side was kept is which side has
+  no `reason`. A series ARM filed as a movie therefore arrives as one long
+  file, and `start` is where to split it.
+- **What plays a title not transcoded is said once.** A whole's own `parts`,
+  or the whole a part is in, say it; otherwise `played_by` names the title it
+  repeats: a copy, a shuffle (one of many playlists a disc offers an episode
+  as, its clips in different orders, only one in order), or a title inside a
+  kept whole that isn't one of its parts. What it names may be played by others in turn, as a
+  shuffle of a play-all is by the play-all's episodes; every chain ends in
+  titles kept, and the model refuses a manifest where one doesn't.
+- **`raw.titles_compared`** is `true` when the titles were compared for those
+  that repeat others, so a title that is no whole and has no `reason` repeats
+  nothing. It is absent from a job from before job 83, one that ended before
+  transcoding began, or one whose disc structure couldn't be read, which
+  transcodes every title. None of those says nothing repeated.
+- **Title numbers** are named for their numbering: `disc_title` or `playlist`,
+  the disc's own. HandBrake's numbering, the *N* of `title_N.mkv`, stays inside
+  the exporter: the transcode's path replaces it.
 
-Real stamps are test fixtures, `tests/fixtures/stamps/`, each named for its
-case, with a test holding each rule above against them. A change to the stamp
-brings a fixture.
-
-ARM writes it from job 76 on: DVD jobs 76, 77 and 87 and Blu-ray jobs 78–80
-and 82–86 by 2026-10-29. A raw folder from before job 76 has one only where it holds
-the whole disc and is provably its job's, by its `_<stage>` suffix or the job's
-own log, written afterwards by the deployment from ARM's database and that log:
-Blu-ray jobs 7, 8, 23, 25 and 27. Such a stamp has no `duplicates`, as its job
-skipped nothing. Every other early folder, the 2024 ones, and any site that
-doesn't run the deployment's patch have none, and are paired by structure and
-fingerprint.
+Manifests exported from real records are test fixtures, one folder per case in
+`tests/fixtures/manifests/`, each holding the exporter's input from ARM's
+database (`arm-db.json`) beside its output (`manifest.json`), with a test
+holding each rule above against them. A change to the record brings a
+fixture.
 
 ### What a raw folder holds
 
@@ -426,7 +442,7 @@ something that has actually happened on this share.
 | 5 | **two cuts of one film on one disc** | Robin Hood job 35: 155.9 min and 140.5 min | audio of the shorter is found, in order, inside the longer |
 | 6 | **two films on one disc** | The Rescuers job 27: `title_71` is *The Rescuers Down Under* | two feature-length titles whose audio does not overlap at all |
 | 7 | **a misidentified disc** | job 24 named The Polar Express "The Adventures of Mary-Kate and Ashley" (D12 in disc-ripping) | the runtime check; disc identity shared with a correctly named job |
-| 8 | **a play-all title** | Tweety: 168.8 min on D1, 105.7 min on D2 | the stamp's `duplicates`; without one, length ≈ sum of the others, *and* every episode's audio is found inside it |
+| 8 | **a play-all title** | Tweety: 168.8 min on D1, 105.7 min on D2 | the manifest's titles, compared; without that, length ≈ sum of the others, *and* every episode's audio is found inside it |
 | 9 | **already in the library** | Shrek the Third | the target folder exists |
 
 Underneath all of them: **`title_N` carries no identity.** Re-ripping Tweety D2
@@ -522,14 +538,14 @@ threshold, is in the section it names; *Confidence* holds the bars.
 
 ```mermaid
 flowchart TD
-  arm["ARM job: its manifest, completed/ by its path,<br/>the raw folder whose stamp has its job_id"]
+  arm["ARM job: its manifest, completed/ and raw/<br/>by the paths it records"]
   backlog["Backlog folder: no manifest,<br/>a title supplied by hand"]
   raw{"What raw is there?<br/>What a raw folder holds"}
   arm --> raw
   backlog --> raw
-  raw -->|DVD image and stamp| pIso["Pair by the stamp's title map,<br/>confirmed by the image title's chapters"]
-  raw -->|DVD MKVs, no stamp| pMkv["Pair each transcode with its source MKV:<br/>equal length and chapters"]
-  raw -->|Blu-ray BDMV| pBd["Pair by the stamp's title map;<br/>else predicted length, one to one"]
+  raw -->|DVD image, recorded| pIso["Pair by the manifest's titles,<br/>confirmed by the image title's chapters"]
+  raw -->|DVD MKVs, not recorded| pMkv["Pair each transcode with its source MKV:<br/>equal length and chapters"]
+  raw -->|Blu-ray BDMV| pBd["Pair by the manifest's titles;<br/>else predicted length, one to one"]
   raw -->|none usable| pNone["Nothing to pair:<br/>the transcode is the only copy"]
   pIso -.->|image unreadable| pMkv
   pIso & pMkv & pBd -.->|ambiguous| pFp["Pair by fingerprint;<br/>shared audio goes to review"]
@@ -537,7 +553,7 @@ flowchart TD
   pIso & pMkv & pBd & pFp & pNone --> roles
   disc{"Which disc? Disc identity"}
   roles --> disc
-  disc -->|DVD| dDvd["crc_id from the manifest or stamp;<br/>an image without one: label and structure"]
+  disc -->|DVD| dDvd["crc64 from the manifest;<br/>an image without one: label and structure"]
   disc -->|Blu-ray| dBd["nav hash"]
   disc -->|no raw| dNone["none: the work's identity stands alone"]
   work{"Which work?"}
@@ -555,8 +571,9 @@ flowchart TD
 The raw copy is needed only to pair, to place wholes and parts by structure, and
 to identify a disc no ARM job vouches for. Where it is missing, each of those
 falls back as the chart shows, and the work is identified from its transcodes
-alone. A stamped DVD job with transcodes had a complete image when it ran,
-since a backup that fails its check stops the job before transcoding.
+alone. A DVD job whose raw copy is recorded and which has transcodes had a
+complete image when it ran, since a backup that fails its check stops the job
+before transcoding.
 
 ### Disc identity
 
@@ -564,13 +581,13 @@ since a backup that fails its check stops the job before transcoding.
 |---|---|---|
 | DVD | ARM's `crc_id` (pydvdid CRC64) | distinguishes Tweety D1 from D2, Robin Hood feature disc from bonus disc, Around the World disc 1 from disc 2; equal across re-rips |
 | Blu-ray | SHA-1 over `BDMV/PLAYLIST/*`, `BDMV/index.bdmv`, `BDMV/MovieObject.bdmv` (path + bytes) | equal across all five Rescuers backups, **and across complete vs incomplete copies** (Scott Pilgrim 49.3 GB vs 1.0 GB; both X-Men DoFP pairs); joins Polar Express to the misnamed Mary-Kate folder |
-| Blu-ray listing | SHA-1 over relative path + size of every file under `BDMV/` | differs between complete and partial copies of the same disc. It says two copies differ, not which is whole: the stamp's `complete` does |
+| Blu-ray listing | SHA-1 over relative path + size of every file under `BDMV/` | differs between complete and partial copies of the same disc. It says two copies differ, not which is whole: the manifest's `raw.complete` does |
 
 **Do not use `CERTIFICATE/id.bdmv`.** Three different Dark Knight bonus discs
 share one; several discs lack it.
 
-For DVDs, `crc_id` comes from ARM, through the manifest (below) and, for a
-stamped raw folder, its stamp. Nothing on the share can be trusted to recompute
+For DVDs, the CRC64 comes from ARM, through the manifest's `disc.crc64`, and
+`disc.json` carries it into the library with the raw copy. Nothing on the share can be trusted to recompute
 it: raw MKVs can't, pydvdid over the 2009 Shrek ISO gave a different CRC64
 because the image had re-stamped every file (E24), and over one of ARM's images
 it is untested.
@@ -640,7 +657,7 @@ times, or a DVD title's cells as sector ranges of its title set
 where their segments overlap, so a play-all, or a documentary the disc also
 offers in parts, is found without decoding anything, and each part's start is
 read off the whole's own clock. The definitions are those the deployment's ARM
-skips titles by (*The raw folder's stamp*, `duplicates`): a part is at least 95%
+skips titles by (*The raw copy's record*, a whole): a part is at least 95%
 inside the whole, parts overlap one another by less than 5% (a DVD's episodes
 can share a closing cell that their play-all plays once), and between them they
 play at least 99% of it. A part's start is placed by what only it plays, since
@@ -648,7 +665,7 @@ episodes can share a recap and featurettes an intro.
 
 | disc | whole | parts | the whole played by them | each part's start |
 |---|---|---|---|---|
-| Downton Abbey D2, job 83, Blu-ray | `00006.mpls`, 157.1 min | `00001`–`00003.mpls`, each 100% inside | 99.94% | 0.000, 2859.790, 5658.620 s: the stamp's figures exactly, each on a chapter |
+| Downton Abbey D2, job 83, Blu-ray | `00006.mpls`, 157.1 min | `00001`–`00003.mpls`, each 100% inside | 99.94% | 0.000, 2859.790, 5658.620 s: the raw copy's record's figures exactly, each on a chapter |
 | Pinky and the Brain D2, job 76, DVD image | disc title 1, 127.9 min | disc titles 4–9, each ≥ 99.98% inside, sharing a 0.5 s closing cell | 100% | each on a chapter of the whole |
 
 A DVD ripped before images (*What a raw folder holds*) keeps only per-title
@@ -690,51 +707,148 @@ I-picture times libbluray finds a mark by, so it needs no video read (E36).
      ▼              │                       ▼
   video share   exporter, a sidecar      Plex API
   (import/ and  in ARM's pod: arm.db
-   library)     → manifests/job-<id>.json
+   library)     → manifests/manifest-arm-<id>.json
 ```
 
-### The ARM manifest
+### The manifest
 
-How reelbarrow learns of ARM's jobs. `reelbarrow export-manifests`, shipped in
-reelbarrow's image and run beside ARM (a sidecar in ARM's pod), reads ARM's
-database read-only every 30 seconds and writes `manifests/job-<id>.json` for
-every job, into `import/automatic-ripping-machine/manifests/` on the share: under
-`"schema": 1`, every column of the job row and of its track rows, as ARM holds
-them. A pass rewrites a manifest only when its job has changed. A job's row
-exists before ARM's "Found disc" notification, so its manifest appears within
-one interval of it, while the disc is still in the drive (the case photo
-depends on that), and the last rewrite carries the status ARM ends the job
-with. No notification hook can see that status (*What ARM knows*).
+How reelbarrow learns of work to file: one JSON file per unit of work, a disc's
+worth of files and what is claimed about them. It is reelbarrow's own
+vocabulary, not any producer's, so that whatever produces the files can say so
+in the same terms and intake has one thing to read. ARM's exporter writes one
+per job (below); a backlog folder has no producer and no file, and intake can
+build the same record from a scan. Job 87's, shortened:
 
-Only `success` and `fail` are final. `active` also means between stages, and a
-job whose ripper died reads as unfinished until ARM's next job marks it `fail`.
-Intake reads every other status as "not yet". `path` is the completed directory
-as ARM's container sees it, under `/root/video/`, which is
-`import/automatic-ripping-machine/` on the share. Datetimes are as ARM stores
-them: ISO 8601, ARM's local time, no zone.
+```json
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "87-179323748073",
+  "state": "succeeded",
+  "start_time": "2026-10-29T01:31:20.799631Z",
+  "finish_time": "2026-10-29T02:44:18.917235Z",
+  "errors": null,
+  "disc": {"type": "dvd", "label": "ROBIN_HOOD", "crc64": "d3c5ce89aef40f61"},
+  "identity": {
+    "title": {"value": "Robin Hood", "reason": "set_by_person"},
+    "year": {"value": "2010", "reason": "set_by_person"},
+    "imdb_id": {"value": "tt0955308", "reason": "set_by_person"},
+    "kind": {"value": "movie", "reason": "set_by_person"}
+  },
+  "completed": {"folder": {"path": "import/automatic-ripping-machine/completed/movies/Robin Hood (2010)"}},
+  "raw": {
+    "form": "dvd-image",
+    "folder": {"path": "import/automatic-ripping-machine/raw/Robin Hood"},
+    "image": {"path": "import/automatic-ripping-machine/raw/Robin Hood/Robin Hood.iso"},
+    "check": {"sizes": "passed", "hashes": "passed"},
+    "problems": [],
+    "titles_compared": true
+  },
+  "titles": [
+    {
+      "disc_title": 1,
+      "extracted": {"path": "import/automatic-ripping-machine/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E1_t00.mkv"},
+      "transcode": {"path": "import/automatic-ripping-machine/completed/movies/Robin Hood (2010)/title_3.mkv"},
+      "reason": null,
+      "interleaved": false,
+      "parts": [{"disc_title": 2, "start": 0.0}, {"disc_title": 3, "start": 1086.118},
+                {"disc_title": 4, "start": 2854.385}]
+    },
+    {
+      "disc_title": 2,
+      "extracted": {"path": "import/automatic-ripping-machine/raw/Robin Hood/titles/Robin Hood (Unrated) [2010]-E2_t01.mkv"},
+      "transcode": null,
+      "reason": "played_by_kept_titles"
+    }
+  ]
+}
+```
 
-A track row's `ripped` is not "transcoded". ARM sets it when it registers a
-title longer than `MINLENGTH`, before any transcode, and sets it again once the
-transcode is done. A title the deployment's ARM chose not to transcode (the
-stamp's `duplicates`) keeps `ripped` true and an empty `filename`: job 83's
-skipped play-all, track 7, reads so. A title has a transcode when its
-`filename` is set. The deployment may later clear `ripped` on a skipped title;
-reading `filename` holds either way. How it is built is
-[`todos/arm-manifest-export.md`](../todos/arm-manifest-export.md).
+The models in `reelbarrow.manifest` are its machine-checkable form: the
+exporter builds one for every manifest, so none is written that breaks the
+contract, and intake parses with them. [`manifest.schema.json`](manifest.schema.json)
+is the JSON Schema generated from them (`python -m reelbarrow.manifest`), for a
+producer that isn't Python, with a test holding it current. This section says
+why each field is as it is; the schema says exactly what it may hold.
+
+- **`source` and `id`** name the unit, `id` unique within its source, and the
+  file is `manifest-<source>-<id>.json`. ARM's `id` is `<job_id>-<stage>`: a job
+  id alone restarts if ARM's database is recreated (*What ARM knows*), and a
+  manifest of an unrelated disc would replace the old one. The job id is the
+  part ARM's UI shows.
+- **`state`** is `running`, `succeeded` or `failed`. Only the last two are
+  final, and intake reads `running` as "not yet".
+- **Every path is a share reference**, `{"path": …}`, and nothing else in the
+  manifest holds a path. A path is relative to the video root, the root of the
+  share that holds `import/` and the libraries, which filing already requires
+  to be one filesystem; it uses `/`, has no leading `/`, no `.` or `..`, and is
+  the name exactly as on the share. It is never a fragment to join with
+  another field. No process's mounts appear in it, and each process knows only
+  its own: reelbarrow where it mounts the share's root,
+  `REELBARROW_VIDEO_ROOT`, and the exporter where ARM mounts one folder of it
+  (`--arm-path /root/video=import/automatic-ripping-machine`, ARM's path and
+  the folder's path on the share). A path outside that folder fails the
+  manifest rather than becoming a plausible wrong one, and intake refuses one
+  that resolves outside the video root.
+- **A claim is `{"value", "reason"}`**, the reason from a closed vocabulary,
+  since the gate branches on it. For `identity`'s fields: `set_by_person`
+  (corrected in the producer's UI), `lookup` (a database matched the disc),
+  `copied_from_earlier_job` (taken from another job matched only by the disc's
+  label, *What ARM knows*), or `not_identified` (the value is only the disc's
+  own name, never an identity). A title's `reason`, null when it has a
+  transcode, says why it has none (*The raw copy's record*).
+- **Absent means not recorded; null means none.** A producer that doesn't know
+  a fact leaves its field out, and a reader takes a missing field as unknown,
+  never as empty: `raw` absent is a copy nobody recorded, not a job without
+  one, and a title without `transcode` one whose transcode wasn't recorded.
+- **Times are UTC, with the zone written.** A time with no zone is refused,
+  never guessed. A producer's own times are what it must convert: ARM stores
+  its local time without a zone, and the exporter takes it as UTC, the zone
+  ARM's image runs in, unless told otherwise (`--arm-timezone`). Nothing
+  compares ARM's times only with each other: the metrics' age of a job, a case
+  photo matched to its job, and another source's manifests are all on other
+  clocks.
+- **`schema`** other than 1 is refused, not guessed at. A field added leaves it
+  at 1. Once reelbarrow's reader is deployed, removing a field or changing what
+  one means raises it; until then the contract is still being settled and
+  stays at 1. A reader ignores fields it doesn't know.
+
+**After filing the manifest is out of date, and that is its nature.** It is the
+producer's account of what it made as of its last write, a delivery note.
+Filing moves the files, and from then on the ledger and the library's
+`disc.json` are authoritative; the service never moves or marks a manifest,
+whose directory is the exporter's. Intake takes every path as a claim and
+checks the file is there. The ledger, keyed by `source` and `id`, says whether a
+unit was filed; a manifest that changes after its unit was filed goes to
+review, never to a fresh plan, since its paths are stale and a title corrected
+in ARM afterwards is evidence the filing was wrong.
+
+**ARM's manifests.** `reelbarrow arm-export-manifests`, shipped in reelbarrow's
+image and run beside ARM (a sidecar in ARM's pod), reads ARM's database
+read-only every 30 seconds and writes a manifest for every job into
+`import/automatic-ripping-machine/manifests/` on the share, rewriting one only
+when its job has changed. It is the one place that knows ARM's schema: it
+reads the `job` row and the raw copy's record, and nothing else, not the track
+table nor the `config` table, which holds API keys. A job's row exists before
+ARM's "Found disc" notification, so its manifest appears within one interval
+of it, while the disc is still in the drive (the case photo depends on that),
+and the last rewrite carries the status ARM ends the job with, which no
+notification hook can see (*What ARM knows*). ARM's `success` and `fail` are
+`succeeded` and `failed`; every other status is `running`, including `active`,
+which also means between stages, and a job whose ripper died, which ARM marks
+`fail` only when its next job starts. A column the exporter needs that ARM no
+longer has stops every pass, rather than letting fields go silently missing.
+Using it is [exporter.md](exporter.md).
 
 A file on the share rather than an HTTP call because it is durable: if the
-service is down, nothing is lost, and the manifest outlives ARM's own job-log
-retention, and a manifest stays when ARM's UI deletes its job. The service finds
-new manifests by scanning on an interval. If that proves too slow, ARM's
-`JSON_URL` notification could trigger an early pass. It carries no job id, so
-it can only say "look now".
+service is down, nothing is lost, the manifest outlives ARM's own job-log
+retention, and it stays when ARM's UI deletes its job. The service finds new
+manifests by scanning on an interval. If that proves too slow, ARM's `JSON_URL`
+notification could trigger an early pass. It carries no job id, so it can only
+say "look now".
 
 Jobs from before the exporter need nothing special: its first pass writes a
 manifest for every job in the database.
-
-The manifest describes the job, and the raw folder's stamp says which raw folder
-is the job's. The database can't, so the manifest doesn't try. Intake joins the
-two on `job_id`.
 
 ### The service
 
@@ -753,9 +867,9 @@ run is on, so a bug in the flag's handling meets `EROFS` rather than the library
 
 The pipeline, per ARM job (and later per backlog folder):
 
-1. **Intake.** Read the manifest; locate the completed directory (by the job's
-   `path`, never by name-matching) and the raw folder whose stamp carries the
-   job's `job_id`, or, where no stamp does, the raw candidates.
+1. **Intake.** Read the manifest; locate the completed folder and the raw
+   folder by the paths it records, never by name-matching, and check they are
+   there. Where it records no raw copy, find the raw candidates.
 2. **Analyse.** For every output file: duration, streams, chapters, video MD5,
    audio fingerprint. For raw: Blu-ray nav and listing hashes, a DVD
    image's titles, what each title plays (*Title identity* 4), per-title
@@ -763,10 +877,11 @@ The pipeline, per ARM job (and later per backlog folder):
    fingerprint.
 3. **Classify titles**: feature, episode, play-all, extra, exact duplicate, other
    cut of the same work, other work. Pair each transcode with its raw source by
-   the stamp's title map where there is one, otherwise by fingerprint. A
-   stamp's `duplicates` names the play-alls, and the wholes and parts, that ARM
-   resolved before transcoding. Without it, the raw's structure or the
-   fingerprints find them, and the same rule decides which to keep.
+   the manifest's `titles` where it has them, otherwise by fingerprint. Where
+   its titles were compared, their `parts`, `reason`s and `played_by` name the
+   play-alls, and the wholes and parts, that ARM resolved before transcoding.
+   Where they weren't, the raw's structure or the fingerprints find them, and
+   the same rule decides which to keep.
 4. **Identify.** Film: ARM's IMDb ID → TMDB, checked against the feature's
    runtime. Series: episodes by transcript. Evidence from a case photo, if any.
 5. **Plan.** A complete list of operations — renames, sidecar writes,
@@ -839,18 +954,18 @@ read as a test case.
 | decision | automatic when | otherwise |
 |---|---|---|
 | this disc is film X | ARM's identification (OMDb hit, CRC64 hit, or confirmed in the manual wait) **and** exactly one title within ±3% of TMDB's runtime for X | review — this is what catches case 7 |
-| a title is a whole of others: a play-all, or a documentary in parts | the stamp's `duplicates` lists it, **or** its raw keeps the disc's structure and ≥2 others each ≥95% inside it, overlapping one another by <5%, play ≥99% of it (*Title identity* 4), **or** its length within 0.5% of the sum of ≥2 others **and** each of those others' audio is found inside it | treat as an ordinary title |
+| a title is a whole of others: a play-all, or a documentary in parts | the manifest's titles were compared and give it `parts`, **or** its raw keeps the disc's structure and ≥2 others each ≥95% inside it, overlapping one another by <5%, play ≥99% of it (*Title identity* 4), **or** its length within 0.5% of the sum of ≥2 others **and** each of those others' audio is found inside it | treat as an ordinary title |
 | … which of a whole and its parts is kept | as the deployment's ARM decides (Will, 2026-10-28): a series keeps the parts, and the whole's transcode is a leftover; a movie disc keeps the whole when each part after the first starts within 1 s of one of its chapters and the parts follow one another, and the parts' transcodes are leftovers; parts that interleave are kept, and the whole's transcode is a leftover | keep both |
 | a file is a duplicate | identical video MD5 to a file being kept | not a duplicate |
-| best copy | rule 1: identical MD5 → keep the earliest successful job's. Rule 2: same disc identity, one copy incomplete (failed job, a stamp whose `complete` isn't `true`, missing files other than titles the stamp's `duplicates` skipped, decoded length short of the track table) → keep the complete one | ask — never choose by size or bitrate |
-| a transcode is raw title X | by the raw's form. **DVD image:** the stamp's `title_map` pairs them **and** the image's `disc_title` matches the transcode as in *which raw survives*. **DVD MKVs:** the MKV, which is the transcode's source, matches it in length and chapters within 0.25 s, one to one. **Blu-ray:** the stamp's `title_map` pairs them **and** the transcode's length is within 0.15 s of the one predicted from the playlist; without a map, that prediction assigned one to one, playlists that differ only by clips of black silence counting as one. The prediction is HandBrake's (1.10 and 1.11): the playlist's length, except that where a chapter mark starts within 1.5 s of the end, the transcode stops at the keyframe at or before that mark, which the clip's `.clpi` lists (E35) | pair by fingerprint; candidates that share their audio, as featurette variants do, → review |
+| best copy | rule 1: identical MD5 → keep the earliest successful job's. Rule 2: same disc identity, one copy incomplete (failed job, a raw copy whose `complete` isn't `true`, missing files other than titles with a `reason` for having no transcode, decoded length short of its raw title's) → keep the complete one | ask — never choose by size or bitrate |
+| a transcode is raw title X | by the raw's form. **DVD image:** the manifest's `titles` pair them **and** the image's `disc_title` matches the transcode as in *which raw survives*. **DVD MKVs:** the MKV, which is the transcode's source, matches it in length and chapters within 0.25 s, one to one. **Blu-ray:** the manifest's `titles` pair them **and** the transcode's length is within 0.15 s of the one predicted from the playlist; without a map, that prediction assigned one to one, playlists that differ only by clips of black silence counting as one. The prediction is HandBrake's (1.10 and 1.11): the playlist's length, except that where a chapter mark starts within 1.5 s of the end, the transcode stops at the keyframe at or before that mark, which the clip's `.clpi` lists (E35) | pair by fingerprint; candidates that share their audio, as featurette variants do, → review |
 | a title is an extra of film X | shorter than the feature, not another cut or another work (fingerprint), from a disc identified as X or as X's bonus disc | review |
 | two cuts of one film | fingerprint coverage ≥ 90% with a monotonic offset | edition **labels** always need a source — the case photo, or TMDB/IMDb release data naming those exact runtimes |
 | a bonus disc | no title near the film's runtime **and** the disc says so (label, embedded disc name, or the case photo) | review — otherwise indistinguishable from a misidentified disc |
 | episode N | the LLM matcher assigns it with high confidence **and** an independent signal agrees (the TF-IDF baseline's assignment, the reference runtime, or the case photo's episode list) **and** the season assignment is one-to-one with no duplicates | review the disc's whole mapping |
 | filing into an existing folder (case 9) | the existing entry is the same work by TMDB ID **and** every role below resolves by its own rule | review the whole fold |
 | … which transcode is the film | same cut (fingerprint coverage ≥ 90%, lengths within 1%) **and** the newer is encoded from a source of equal or higher resolution → keep the newer, current-preset transcode (Will, 2026-10-05) | a different cut is an edition (case 5), not a replacement; a newer transcode from a *lower*-resolution source (a DVD rip beside a Blu-ray one) → review |
-| … which raw survives | a decrypted full-disc image (ISO, `VIDEO_TS`, `BDMV`) of the same disc (`crc_id`, or for an image without one its label) holding, for each per-title MKV, a title whose chapters start within 0.25 s of the MKV's (by ffprobe; an MKV with none has one, at 0) and whose length is within 0.25 s of the MKV's, the title allowed one final chapter of ≤ 1 s more than the MKV, the stub MakeMKV drops, and its length then taken without it, is a superset of them → keep the image, drop the MKVs. Structure can't tell two pressings with the same edit apart, a widescreen and a full-screen one, which is why disc identity comes first (*Case 9*). A stamped DVD folder whose `complete` is `true` and whose every file in `titles/` is in its `title_map` → keep the image and the stamp, drop `titles/`. Two raws of different discs (a DVD and a Blu-ray of one film) are both kept, each in its own `raw/<disc>/` | review |
+| … which raw survives | a decrypted full-disc image (ISO, `VIDEO_TS`, `BDMV`) of the same disc (`crc_id`, or for an image without one its label) holding, for each per-title MKV, a title whose chapters start within 0.25 s of the MKV's (by ffprobe; an MKV with none has one, at 0) and whose length is within 0.25 s of the MKV's, the title allowed one final chapter of ≤ 1 s more than the MKV, the stub MakeMKV drops, and its length then taken without it, is a superset of them → keep the image, drop the MKVs. Structure can't tell two pressings with the same edit apart, a widescreen and a full-screen one, which is why disc identity comes first (*Case 9*). A DVD image whose `complete` is `true` and whose every file in `titles/` is an `extracted` of the manifest's `titles` → keep the image, drop `titles/`. Two raws of different discs (a DVD and a Blu-ray of one film) are both kept, each in its own `raw/<disc>/` | review |
 
 **The episode matcher.** Whisper transcripts from two windows per episode (to
 survive a cold open or recap), plus reference text from several sources, given
@@ -1044,15 +1159,15 @@ library file, so a re-transcode or a menu-driven play of the raw copy (goal 2)
 never needs this pipeline again. The 2024 entries keep their flat `raw/`; they
 are not migrated.
 
-A DVD ripped to an image files as the image, its `arm-job.json` unchanged, and
-`disc.json`. Its `titles/` is a leftover, by *Confidence*. `disc.json` then
+A DVD ripped to an image files as the image and `disc.json`. Its `titles/` is a
+leftover, by *Confidence*, and so is an `arm-job.json` left from before the raw
+copy's record, which `disc.json` supersedes. `disc.json` then
 records each library file against the image's `disc_title`, which a player or
 HandBrake opens directly, rather than against an MKV that no longer exists:
 
 ```
       PINKY_AND_THE_BRAIN_D2 [dvd-7969bce42a920b30]/
         Pinky-and-the-Brain_179261218992.iso
-        arm-job.json                    ARM's stamp, as written
         disc.json
 ```
 
@@ -1100,8 +1215,8 @@ shows/
 ```
 
 The play-all's transcode, where ARM made one, is a leftover; its raw stays,
-because it is part of the disc. A job whose stamp carries `duplicates` has no
-play-all transcode.
+because it is part of the disc. A job whose titles were compared
+(`raw.titles_compared`) has no play-all transcode.
 
 ### Editions
 
@@ -1209,7 +1324,7 @@ All read-only against the cluster and the share. Artefacts in
 Projects in the deployment repository:
 
 - **disc-ripping** — produces what this consumes. Owns the raw copy (DVD to
-  ISO, and the raw folder's stamp), D12 (misidentification) and the play-all
+  ISO, and the raw copy's record), D12 (misidentification) and the play-all
   observation.
 - **the filename-charset migration** — library names come from TMDB and will
   contain curly apostrophes and en dashes, which the share currently rejects

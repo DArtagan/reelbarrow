@@ -1,168 +1,154 @@
-# arm-manifest-export: ARM's database, copied out as manifests
+# arm-manifest-export: ARM's jobs, copied out as manifests
 
 ## Opening prompt
 
-> Build `reelbarrow export-manifests`, which reads ARM's database read-only on
-> an interval and writes `manifests/job-<id>.json` for every job, and prove it
-> on a real disc. Read `todos/arm-manifest-export.md`, then *What ARM knows,
-> and where* and *The ARM manifest* in `docs/design.md`. Nothing here has been
-> written or run; every fact about ARM below was read from ARM `2.24.4`'s
-> source, not exercised.
+> `reelbarrow arm-export-manifests` and the deployment's raw-copy record are built
+> and tested; what remains is deploying them and proving them on the cluster
+> and a real disc. Read `todos/arm-manifest-export.md`, then *The manifest* and
+> *The raw copy's record* in `docs/design.md`, and `docs/exporter.md`. The
+> deployment half is in the deployment repository's
+> `todos/video-library-ingest.md`. Check which reelbarrow release is deployed,
+> and whether ARM's patch and the migration have gone in, before anything else.
 
-## Why it lives here (decided 2026-10-19)
+## What is done (2026-11-08)
 
-The manifest is how reelbarrow learns of ARM's jobs, so what writes it ships
-with reelbarrow and every user runs the same one. Will agreed with this split:
+- **The manifest**, reelbarrow's own record of a unit of work (*The manifest*):
+  `src/reelbarrow/manifest.py` holds it as pydantic models, which validate
+  every manifest written and generate `docs/manifest.schema.json`. Twenty-one
+  real jobs exported are its fixtures, one folder per case in
+  `tests/fixtures/manifests/`, ARM's rows and raw-copy records beside the
+  manifests made of them, with `tests/test_manifest.py` holding the design's
+  rules against them.
+- **The exporter**, `src/reelbarrow/exporter.py`, ARM's adapter to it, tested
+  in `tests/test_exporter.py` against a database shaped like the deployed one
+  (`tests/arm_db.py`). Its use, mounts and the journal-mode finding are in
+  `docs/exporter.md`.
+- **The deployment's half, on its `video-library-ingest` branch** (its pull
+  request #35): the patch records each job's raw copy in
+  `reelbarrow_raw_copy` in ARM's database instead of `arm-job.json`, including
+  each transcode's final path as ARM moves it; and
+  `tools/arm-stamps/raw_copies.py` moves the existing stamps into that table
+  once. The patch's tests run against real SQLAlchemy 2.0, in a uv
+  environment that repository gained for them.
+- **Read from the deployed ARM, read-only, 2026-11-08**: `PRAGMA journal_mode`
+  is `delete`; SQLite 3.37.2; `arm.db` is `0:0` 0644 in a 0777 directory; the
+  share is CIFS in ARM's pod with `uid=0,gid=0,file_mode=0755,dir_mode=0755`;
+  `manifests/` doesn't exist; ARM's `TZ` is `Etc/UTC`; Flask-SQLAlchemy 3.1.1
+  and SQLAlchemy 2.0.19 give the patch `db.text`. 103 jobs, every one with a
+  `stage`, all distinct, each matching its stamp's. The migration's dry run
+  would write 32 rows (jobs 7, 8, 23, 25, 27 and 76–103) and passed over none;
+  its transcode paths were checked against five jobs' completed folders, and
+  321 of its 329 skipped titles name the title kept for them, the other 8
+  being play-alls whose parts say. ARM's `job_dupe_check` copied job 5's
+  corrected identity onto jobs 23 and 27 by label (and onto 61).
+- **Read from ARM 2.24.4's source**: its migrations touch only the tables they
+  name and rebuild `job` with `batch_alter_table`, so the patch's table
+  survives an upgrade and declares no foreign key; ARM moves every transcode
+  through `utils.move_files`.
 
-- **Here:** the exporter, the manifest's schema, and their tests.
-- **In each deployment:** running it beside ARM, with ARM's database and the
-  manifest directory mounted.
+## Decisions, so they aren't relitigated
 
-## Why an exporter, not a hook (decided 2026-11-08)
+- The exporter, the manifest's schema and their tests live here; running it
+  beside ARM is each deployment's (2026-10-19).
+- Polling ARM's database rather than a notification hook, run as a sidecar
+  from reelbarrow's image: *"That sounds good, proceed"* (2026-11-08). Don't
+  reintroduce the hook to save the polling interval: whatever runs inside a
+  notification sees the job before ARM has finished with it.
+- **Not every column** (2026-11-08): *"An interface that includes everything
+  is both fragile and wasteful."* The manifest is in reelbarrow's vocabulary,
+  not ARM's, and the exporter is the one place that knows ARM's schema. Every
+  field is traced to a rule that reads it.
+- **One file, not a manifest and a stamp.** Will: *"Matters having to do with
+  the stamp are not a call for a different spec, they're for us to resolve
+  right now - in this session"*, and asked whether the two could be condensed.
+  They can, because every job of interest has its raw copy recorded: *"For the
+  time being, let's assume that pre-76 DVD jobs will be re-ripped or matched up
+  (raw to completed) in another manner."* The patch records into ARM's
+  database, and the stamp file is retired. ARM's track rows are dropped,
+  MakeMKV's with them: they matter only for those pre-76 DVD jobs.
+- **Every path whole, and one way of holding one**: *"there needs to be
+  standardization & encapsulation of these fields"*; a share reference,
+  relative to the share's root, so no process's mounts appear in a manifest.
+- **Names**: `start_time` and `finish_time`; `reason` for why a claim holds or a
+  title has no transcode; `completed.folder.path` mirroring `raw.folder.path`;
+  `mkv-titles`; the command `arm-export-manifests`.
+- **From the review of pull request #12** (2026-11-09): absent means not
+  recorded and null means none, kept; the backup's two checks stated
+  separately, `raw.check`, not a `complete` with a null in it; JSON Schema,
+  generated from pydantic models; ARM's times taken as UTC unless told
+  otherwise; `wholes` folded into `titles`, one reason, `played_by` where
+  structure doesn't say what plays a title (*"A+"*). Will, on `wholes`: *"It
+  feels like something is being duplicated between `titles` and `wholes`"*:
+  the reason, `kept` and the list each held which titles another plays.
+- **`--arm-path ARM=SHARE`**, ARM's path and the folder's path on the share. A
+  wrong turn worth not repeating: asked for *"a clear mapping
+  `/path/in/arm=/path/in/reelbarrow`"*, it was built with reelbarrow's path on
+  the right, which made the exporter take the service's
+  `REELBARROW_VIDEO_ROOT` off it. Will: *"If feels like these concepts are
+  beginning to collide."* They did: the sidecar had to keep a setting it
+  doesn't own equal to the service's. With the share's path on the right each
+  process knows only its own mount.
+- **The raw-copy table holds the manifest's shape** (2026-11-09), asked *"is
+  this the best form for that?"* of the stamp's vocabulary it had kept. The
+  exporter translates ARM's paths and drops `handbrake_title`, the patch's own
+  key, and nothing else; the stamp's vocabulary lives only in the one-off
+  migration.
+- **A feature ARM renamed is recorded from ARM's `main_feature` row**
+  (2026-11-09), when one track has it and the folder holds one other `.mkv`:
+  jobs 25, 27, 78 and 79.
+- **Each transcode's final path recorded by the patch** as ARM moves it (*"go
+  with your option #1, recording the path"*), not found by listing folders.
+- **After filing the manifest is out of date, and stays so**: *"maybe that's
+  fine and this file has done its job of getting us there."* The ledger and
+  `disc.json` take over; a manifest that changes after filing goes to review.
+- **ARM's `job_dupe_check` stays unpatched** (2026-11-09). Offered patching
+  out its copying of an identity between jobs by label, Will: *"It can stay
+  as-is for now."* The manifest marks what it copies `copied_from_earlier_job`.
+- Approved as a whole: *"Yes, do all of the above: checks, design, and code."*
 
-This spec was first written as `arm-manifest-hook`: a bash shim set as ARM's
-`BASH_SCRIPT`, run on every notification, finding its job by `$PPID` = `job.pid`
-and rewriting the manifest from the database. Reading more of ARM's source
-showed it cannot record how a job ends:
+## What is left, in order
 
-- **ARM sets the final status after its last notification.** On success the
-  last notification is `notify_exit()` near the end of `main()`, while the
-  status is still `active`; `success` is set in `main.py`'s `else:` after
-  `main()` returns and committed in its `finally:`, and nothing is notified
-  after. On a fatal error `notify()` runs first and `status = fail`, `errors`
-  and `stop_time` follow it. A job abandoned from ARM's UI is never notified at
-  all: `abandon_job` writes a `Notifications` row directly. So every manifest
-  the hook wrote would end at `active` or `transcoding`, and its done-when
-  check could never pass.
-- The hook also needed a bash shim, an environment variable naming the
-  ripper's pid, and a dispatcher in every site that already uses
-  `BASH_SCRIPT`, all to make the pid link work, and a separate export mode for
-  past jobs.
+Each step that changes the cluster or the share is confirmed with Will first.
 
-Polling the database removes all of that, sees every status ARM commits, and is
-one code path for past and new jobs. Offered the poller run as a sidecar from
-reelbarrow's image, Will said: *"That sounds good, proceed"* (2026-11-08).
+1. **Release reelbarrow**: merge this pull request, then its release pull
+   request, so the image has `arm-export-manifests`.
+2. **Deploy ARM's patch** (the deployment's pull request). It changes ARM's
+   pod, and the `Recreate` strategy kills any job running: merge it while ARM
+   is idle, then check in the container, not the ConfigMap, that
+   `arm-source-patches.py` logged `applied raw-copy-code`.
+3. **Run the migration** in ARM's pod, dry run first, then `--write`. It is a
+   write to ARM's live database, adding rows to a table no ARM code reads;
+   check the dry run's count and passed-over list again, as jobs will have run
+   since 2026-11-08.
+4. **Add the sidecar** in ARM's pod, from the first release with the command.
+   What it needs is in the deployment's spec.
 
-Don't reintroduce the hook to save the polling interval: whatever runs inside a
-notification sees the job before ARM has finished with it. A ping for latency
-is in *The ARM manifest*; it would trigger a pass, never replace one.
+## Not yet checked
 
-## What ARM gives (read from 2.24.4's source, not exercised)
-
-- **The job row exists before "Found disc".** `setup()` adds it with status
-  `active` (`main.py`, `database_adder(job)`), and `main()` calls
-  `notify_entry()`, the "Found disc" notification, as its first step, before
-  any rip.
-- **Statuses** are `JobState` (`models/job.py`). `success` and `fail` are the
-  only final ones. `active` means initialised *or* between stages (ARM sets it
-  back after HandBrake), so it never means done.
-- **A job whose ripper died stays unfinished in the database** until the next
-  job's `setup()` runs `clean_old_jobs()`, which marks it `fail`. A pass reads
-  what ARM has committed, so its manifest says the same until then.
-- **`path` is the completed directory as ARM's container sees it**
-  (`/root/video/completed/…`), set by `database_updater` before the files are
-  moved, and set again if the title changes. It includes any `_<stage>`
-  suffix.
-- **`start_time` and `stop_time` are naive `datetime.now()`**, ARM's local
-  time.
-- **ARM's processes already share the database**: the UI and each ripper hold
-  their own SQLAlchemy sessions on it. A reader taking a shared lock for a few
-  milliseconds is one more of the same. Not checked: its journal mode (see
-  *Design*).
-
-## Design
-
-- **A subcommand of reelbarrow's CLI**, `reelbarrow export-manifests --db <arm.db>
-  --out <dir>`, looping every `--interval` seconds (30 to start), with `--once`
-  for one pass. It is ordinary reelbarrow code, tested here and shipped in
-  reelbarrow's image. It runs on Python 3.13, unlike ARM's container, which has
-  3.10.
-- **Each pass reads in one read transaction**: every job row and its track rows,
-  so a manifest never mixes two states of a job. Open the database with
-  `file:…?mode=ro` and a busy timeout, never for writing.
-- **Write only what changed.** Build each job's manifest, compare it with the
-  file already there, and replace the file only if they differ: write to a
-  temporary file in the same directory, then `rename()`. The service scans that
-  directory and must never read half a file, and an unchanged job leaves its
-  file's modification time alone, so the service's "manifest changed" is real.
-- **Never delete a manifest.** ARM's UI can delete a job's row. Its manifest
-  stays, since a manifest that outlives ARM's records is why it's a file. Log
-  the row's disappearance once.
-- **Contents**, under a top-level `"schema": 1`, so intake can refuse a
-  manifest it does not understand rather than misread it: every column of the
-  `job` row, and of each of its `track` rows, as ARM holds them. Don't pick
-  columns. `title_auto` and `title_manual` show a correction, `errors` why a job
-  failed, and choosing now would guess at what a later spec needs. Never the
-  `config` table, which holds API keys. Datetimes go out as ISO 8601 without a
-  zone, as stored. Don't convert them: the exporter's zone needn't be ARM's.
-  `ripped` is not "transcoded" (*The ARM manifest*). Don't reinterpret it here,
-  so intake reads one meaning however the deployment sets it. The schema
-  follows the stamp's rule (*The raw folder's stamp*): a field added leaves it
-  at 1, and a field removed or changed in meaning raises it once reelbarrow's
-  reader is deployed.
-- **No raw folder, and no logs.** ARM's database records no raw path. The raw
-  folder's stamp names its job, and intake joins the two on `job_id`. A
-  Blu-ray's title map is in the stamp of every raw folder that holds the whole
-  disc (*The raw folder's stamp*), so job logs needn't be read either.
-- **Liveness.** If the exporter stops, no manifest changes, and nothing in the
-  service can tell "no discs" from "no exporter". Each pass also rewrites
-  `exporter.json` in the output directory, with the pass's time in UTC and
-  reelbarrow's version. The service exports that time as a metric
-  ([metrics](metrics.md)). Intake reads only `job-*.json`.
-- **Fail loudly, and don't stop.** A pass that can't open or read the database
-  (locked past the timeout, or missing) logs and tries again next interval. A
-  row that can't be serialised logs its `job_id` and skips that job, not the
-  pass.
-- **Journal mode.** With ARM's default rollback journal, a `mode=ro`
-  connection reads a database on a read-only mount. In WAL mode, or with a hot
-  journal left by a crash, SQLite has to write beside the database, and a
-  read-only mount fails. Check `PRAGMA journal_mode` on the real database in
-  this session, and mount for whatever that needs. The connection stays `mode=ro`
-  either way.
-- **The library's write rule.** `AGENTS.md` lets only the executor write under
-  the video root. The exporter is a separate process that never mounts the
-  library. It writes only inside `--out`, and the test that holds the
-  executor's line ([movie-filing](movie-filing.md)) allows this module's
-  writes there and nowhere else.
-
-## Tests
-
-pytest against a SQLite database built from ARM `2.24.4`'s `job` and `track`
-models, with synthetic rows. A real `arm.db` is never committed. Cover: a pass
-over several jobs; a status change rewriting only that job's manifest; an
-unchanged job's file untouched; a deleted row leaving its manifest; atomic
-replacement (no reader sees a partial file); a database opened read-only, and
-an attempt to write through that connection refused; a locked database, retried
-next pass; `exporter.json` rewritten each pass; and the manifest's shape, held
-by a fixture manifest in `tests/fixtures/`.
-
-## The deployment half
-
-Described here; the deployment repository's own spec carries it out. Its
-*ARM's manifest hook* section, which describes the dispatcher, changes to:
-
-- **A sidecar in ARM's pod**, running reelbarrow's image with
-  `reelbarrow export-manifests`. It mounts ARM's database volume (the
-  `openebs-hostpath` PVC on worker-1, `/root/db/arm.db` in ARM's container) and,
-  of the share, only the manifest directory,
-  `import/automatic-ripping-machine/manifests/`. Its image tag follows the same
-  image policy as the service, so exporter and reader move together.
-- **No dispatcher.** `BASH_SCRIPT` stays `arm-audio-handoff.sh`.
-- **No one-off export.** The sidecar's first pass writes a manifest for every
-  job in the database, 1–41 included.
-- **uid.** The sidecar must read the database file and write the manifest
-  directory. Check what owns both.
+- **A rename over an existing file on the share.** The exporter replaces a
+  manifest with `os.replace()`. Over SMB2+ the Linux client renames with
+  replace-if-exists, but if the server refuses, with a reader holding the file
+  open say, the client falls back to unlinking the target and renaming. A
+  reader would then briefly see no file, never a partial one. Measure it with
+  the sidecar's first rewrite of a manifest while something reads it.
+- **The patch's writes through ARM's session**, on a real job: the record
+  appears at the start of the rip, `check` after the backup's checks, and
+  each transcode's path as it moves.
 
 ## Done when
 
-- The tests pass, and the exporter's use is documented in `docs/`, including
-  the mounts it needs and the journal-mode finding.
 - The sidecar's first pass writes a manifest for every job in ARM's database,
-  and those in the design's fixtures table have the titles and `crc_id`s the
-  table gives. The failed ones (15–17, 30, 31, 40, 41) read `fail`.
-- On a real disc insert, `job-<id>.json` appears within one interval of
-  "Found disc", before the rip finishes. It is rewritten as the status moves,
-  and ends at `success` (or `fail`) with `stop_time` set. Its job id matches
-  ARM's UI.
+  and those in the design's fixtures table have the titles and CRC64s the
+  table gives. The failed ones (15–17, 30, 31, 40, 41) read `failed`. Jobs 7,
+  8, 23, 25, 27 and 76 on have a `raw`, and its `folder` is on the share.
+- On a real disc insert, its manifest appears within one interval of "Found
+  disc", before the rip finishes, with both of `raw.check` `not_run`. It is
+  rewritten as the job moves, and ends at `succeeded` (or `failed`) with
+  `finish_time` set and both checks run. Each transcode it lists is at
+  its path on the share. Its id's job number matches ARM's UI.
 - `exporter.json` on the share is never older than two intervals while the
   sidecar runs.
+- The rename check above is measured and its result written into
+  `docs/exporter.md`.
+
+Then this spec is deleted, with a line in `docs/project_log.md`.

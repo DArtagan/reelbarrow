@@ -10,6 +10,8 @@ It is built for one home server's Kubernetes cluster, and is in its dry-run
 phase: it plans, records, and changes nothing.
 
 - [docs/design.md](docs/design.md): what it does and why, with the evidence
+- [docs/exporter.md](docs/exporter.md): the sidecar that copies ARM's jobs out as
+  manifests
 - [docs/releasing.md](docs/releasing.md): how versions are cut and deployed
 - [todos/](todos/README.md): the work remaining, one spec per step
 

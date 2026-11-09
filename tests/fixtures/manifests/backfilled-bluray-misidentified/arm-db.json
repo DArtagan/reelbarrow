@@ -1,0 +1,63 @@
+{
+  "job": {
+    "job_id": 25,
+    "stage": "178850716455",
+    "status": "success",
+    "start_time": "2026-09-04 07:32:44.574504",
+    "stop_time": "2026-09-04 11:59:14.982642",
+    "errors": null,
+    "disctype": "bluray",
+    "label": "LOGICAL_VOLUME_ID",
+    "crc_id": null,
+    "path": "/root/video/completed/movies/The-Polar-Express (2004)",
+    "hasnicetitle": 1,
+    "title": "The-Polar-Express",
+    "title_auto": "The-Adventures-of-Mary-Kate-and-Ashley--The-Case-of-the-Logical-i-Ranch",
+    "title_manual": "The-Polar-Express",
+    "year": "2004",
+    "year_auto": "1994",
+    "year_manual": "2004",
+    "imdb_id": "tt0338348",
+    "imdb_id_auto": "tt0338348",
+    "imdb_id_manual": null,
+    "video_type": "movie",
+    "video_type_auto": "movie",
+    "video_type_manual": null
+  },
+  "raw_copy": {
+    "schema": 1,
+    "folder": "/root/video/raw/The-Adventures-of-Mary-Kate-and-Ashley--The-Case-of-the-Logical-i-Ranch",
+    "form": "bluray-backup",
+    "check": {
+      "sizes": "passed",
+      "hashes": "not_run"
+    },
+    "problems": [],
+    "titles": [
+      {
+        "handbrake_title": 1,
+        "playlist": "00000.mpls",
+        "transcode": "/root/video/completed/movies/The-Polar-Express (2004)/The-Polar-Express (2004).mkv",
+        "reason": null
+      },
+      {
+        "handbrake_title": 18,
+        "playlist": "00019.mpls",
+        "transcode": "/root/video/completed/movies/The-Polar-Express (2004)/extras/title_18.mkv",
+        "reason": null
+      },
+      {
+        "handbrake_title": 25,
+        "playlist": "00026.mpls",
+        "transcode": "/root/video/completed/movies/The-Polar-Express (2004)/extras/title_25.mkv",
+        "reason": null
+      },
+      {
+        "handbrake_title": 26,
+        "playlist": "00027.mpls",
+        "transcode": "/root/video/completed/movies/The-Polar-Express (2004)/extras/title_26.mkv",
+        "reason": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "job": {
+    "job_id": 80,
+    "stage": "179280640613",
+    "status": "success",
+    "start_time": "2026-10-24 01:46:46.200578",
+    "stop_time": "2026-10-25 07:14:42.343227",
+    "errors": null,
+    "disctype": "bluray",
+    "label": "DOWNTON_ABBEY_D1",
+    "crc_id": null,
+    "path": "/root/video/completed/tv/Downton-Abbey (2010-2015)",
+    "hasnicetitle": 1,
+    "title": "Downton-Abbey",
+    "title_auto": "Downton-Abbey",
+    "title_manual": null,
+    "year": "2010–2015",
+    "year_auto": "2010–2015",
+    "year_manual": null,
+    "imdb_id": "tt1606375",
+    "imdb_id_auto": "tt1606375",
+    "imdb_id_manual": null,
+    "video_type": "series",
+    "video_type_auto": "series",
+    "video_type_manual": null
+  },
+  "raw_copy": {
+    "schema": 1,
+    "folder": "/root/video/raw/Downton-Abbey_179280640613",
+    "form": "bluray-backup",
+    "check": {
+      "sizes": "passed",
+      "hashes": "passed"
+    },
+    "problems": [],
+    "titles": [
+      {
+        "handbrake_title": 2,
+        "playlist": "00001.mpls",
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_2.mkv",
+        "reason": null
+      },
+      {
+        "handbrake_title": 3,
+        "playlist": "00002.mpls",
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_3.mkv",
+        "reason": null
+      },
+      {
+        "handbrake_title": 4,
+        "playlist": "00003.mpls",
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_4.mkv",
+        "reason": null
+      },
+      {
+        "handbrake_title": 5,
+        "playlist": "00004.mpls",
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_5.mkv",
+        "reason": null
+      },
+      {
+        "handbrake_title": 6,
+        "playlist": "00006.mpls",
+        "transcode": "/root/video/completed/tv/Downton-Abbey (2010-2015)/title_6.mkv",
+        "reason": null
+      }
+    ]
+  }
+}

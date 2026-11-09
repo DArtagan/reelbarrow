@@ -11,7 +11,7 @@ dependencies = ["fastapi>=0.115", "pydantic-settings>=2.6", "uvicorn>=0.32"]
 reelbarrow = "reelbarrow.cli:main"
 
 [dependency-groups]
-dev = ["httpx>=0.28", "pytest>=8.3"]
+dev = ["httpx>=0.28", "pytest>=8.3", "pytest-xdist>=3.8.0"]
 
 [build-system]
 requires = ["hatchling"]
@@ -19,6 +19,8 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Across the CPUs; `-n 0` runs in one process, for a debugger.
+addopts = "-n auto"
 
 [tool.ruff.lint]
 extend-select = ["B", "I", "UP"]

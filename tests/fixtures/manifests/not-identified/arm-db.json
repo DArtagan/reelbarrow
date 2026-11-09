@@ -1,0 +1,28 @@
+{
+  "job": {
+    "job_id": 66,
+    "stage": "179235895046",
+    "status": "success",
+    "start_time": "2026-10-18 21:29:10.529708",
+    "stop_time": "2026-10-18 22:19:18.947073",
+    "errors": null,
+    "disctype": "dvd",
+    "label": "MADMAX2",
+    "crc_id": "0851b792ac93101b",
+    "path": "/root/video/completed/unidentified/MADMAX2",
+    "hasnicetitle": 0,
+    "title": "MADMAX2",
+    "title_auto": null,
+    "title_manual": null,
+    "year": null,
+    "year_auto": null,
+    "year_manual": null,
+    "imdb_id": null,
+    "imdb_id_auto": null,
+    "imdb_id_manual": null,
+    "video_type": "unknown",
+    "video_type_auto": null,
+    "video_type_manual": null
+  },
+  "raw_copy": null
+}

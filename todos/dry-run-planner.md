@@ -13,13 +13,13 @@
 Steps 1–6 of the pipeline in *The service*: intake, analyse, classify, identify,
 plan, gate. Step 7, file, is [movie-filing](movie-filing.md).
 
-- **Intake** reads a manifest and finds the job's completed directory by its
-  `path` and its raw folder by the stamp carrying its `job_id`, never by
+- **Intake** reads a manifest and finds the job's completed and raw folders by
+  the paths it records (*The manifest*), checking they are there, never by
   matching names.
 - **Classify** sorts each title into one of: feature, episode, play-all, extra,
   exact duplicate, other cut, other work. It pairs transcodes with raw by the
   raw's form, as *Confidence* (a transcode is raw title X) and the flowchart
-  under *Identity* lay out: the stamp's title map confirmed by
+  under *Identity* lay out: the manifest's `titles` confirmed by
   structure, structure alone where there is no map, and fingerprints only
   where structure can't decide. Job 79 is the case that has to go to review,
   or be decided by its map: featurette variants that share their clips. A
@@ -48,21 +48,23 @@ manifest changes.
   lands. A name the share would reject with `EIO` is a
   planning error to catch here, not at filing time.
 - The thresholds are starting points, and the evaluation sets them.
-- Every job in the fixtures table predates the stamp (*The raw folder's stamp*),
-  so the table exercises only fingerprint pairing. The stamped path needs a case
-  of its own. Job 76, *Pinky and the Brain* D2, is the first stamped DVD, and
-  job 75 ripped the same disc the day before without a stamp, so the two give
-  both paths on one disc. Job 76's title map was filled in after the job, and
-  matches job 77's, a re-rip of the same disc that wrote its own.
-- A stamp's `duplicates` (*The raw folder's stamp*) means a title can be absent
-  from `completed/` on purpose. Read it before calling a job's output
-  incomplete. Downton Abbey gives both paths on one series: job 80 (D1) predates
-  `duplicates` and transcoded its 207-minute play-all, and job 83 (D2) skipped
+- Every job in the fixtures table predates the raw copy's record (*The raw
+  copy's record*), so the table exercises only fingerprint pairing. The
+  recorded path needs a case of its own. Job 76, *Pinky and the Brain* D2, is
+  the first DVD whose raw copy is recorded, and job 75 ripped the same disc the
+  day before without one, so the two give both paths on one disc. Job 76's
+  title map was recorded after the job, and matches job 77's, a re-rip of the
+  same disc that recorded its own.
+- A title's `reason` (*The raw copy's record*) means it can be absent from
+  `completed/` on purpose. Read it before calling a job's output incomplete.
+  Downton Abbey gives both paths on one series: job 80 (D1) predates skipped
+  titles being recorded and transcoded its 207-minute play-all, and job 83 (D2) skipped
   its 157-minute one and recorded the episodes' starts. Its first movie-disc
   case, a whole kept and its parts skipped, is job 87, the *Robin Hood* bonus
   DVD's re-rip: it transcoded disc title 1's documentary and the two
   featurettes, and skipped titles 2–4.
-- **Where no stamp's `duplicates` decided it, the planner decides wholes and
+- **Where the manifest's titles weren't compared (no `raw.titles_compared`),
+  the planner decides wholes and
   parts itself, by the deployment's rule** (Will, 2026-10-28; *Confidence*, which
   of a whole and its parts is kept). Port the decision from
   `_arm_duplicates` in the deployment's ARM patches, its thresholds and its
@@ -70,8 +72,8 @@ manifest changes.
   with its tests as the model. The measurements are already here:
   `analysis.segments` over `bluray.playlists` and `dvd.structure`'s cells
   (*Title identity* 4), checked against job 83's recorded result. The cases,
-  one per path: job 80 (Blu-ray, before `duplicates`, its play-all
-  transcoded) and job 76 (a DVD image whose stamp predates `duplicates`; disc
+  one per path: job 80 (Blu-ray, before titles were compared, its play-all
+  transcoded) and job 76 (a DVD image whose record predates comparing; disc
   title 1 plays titles 4–9) by structure; *Robin Hood* job 36 and Tweety by
   fingerprint, since only MKVs survive. Job 36 has to keep `E1`'s transcode and
   drop those of `E2`–`E4`, which is what job 87 recorded for the same disc.
@@ -79,7 +81,7 @@ manifest changes.
   chapter join allows is unmeasured; measure it on job 36 first.
 - **A DVD whole's `start` is in playback seconds** (Will, 2026-10-28: the
   deployment scales, not the reader). lsdvd's unscaled lengths would place
-  parts 0.1% early on NTSC. Job 87, the first stamp with a DVD whole, ran
+  parts 0.1% early on NTSC. Job 87, the first record with a DVD whole, ran
   with the deployment's scaling: its starts equal its whole's MKV chapters to
   the millisecond and sit within 0.07 s of its transcode's.
 - A movie's feature arrives as `title_N.mkv` above `extras/` since the

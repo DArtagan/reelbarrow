@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "79-179276153586",
+  "state": "succeeded",
+  "start_time": "2026-10-23T13:18:55.879352Z",
+  "finish_time": "2026-10-24T01:14:13.120874Z",
+  "errors": null,
+  "disc": {
+    "type": "bluray",
+    "label": "DOWNTON_ABBEY",
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "Downton-Abbey",
+      "reason": "lookup"
+    },
+    "year": {
+      "value": "2019",
+      "reason": "lookup"
+    },
+    "imdb_id": {
+      "value": "tt6398184",
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": "movie",
+      "reason": "lookup"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)"
+    }
+  },
+  "raw": {
+    "form": "bluray-backup",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/Downton-Abbey"
+    },
+    "check": {
+      "sizes": "passed",
+      "hashes": "passed"
+    },
+    "problems": []
+  },
+  "titles": [
+    {
+      "playlist": "00800.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/Downton-Abbey (2019).mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "01223.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/extras/title_72.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "01224.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/extras/title_73.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "01226.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/extras/title_75.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "01227.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/extras/title_76.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "01228.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/extras/title_77.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "01234.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/extras/title_83.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "01235.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/extras/title_84.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "01236.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/Downton-Abbey (2019)/extras/title_85.mkv"
+      },
+      "reason": null
+    }
+  ]
+}

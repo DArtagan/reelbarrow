@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "101-179416168414",
+  "state": "failed",
+  "start_time": "2026-11-08T18:14:44.593086Z",
+  "finish_time": "2026-11-08T18:21:26.080931Z",
+  "errors": "Error while running MakeMKV",
+  "disc": {
+    "type": "bluray",
+    "label": "DOWNTON_ABBEY_SEASON_6_D1",
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "Downton Abbey",
+      "reason": "set_by_person"
+    },
+    "year": {
+      "value": "2010–2015",
+      "reason": "set_by_person"
+    },
+    "imdb_id": {
+      "value": "tt1606375",
+      "reason": "set_by_person"
+    },
+    "kind": {
+      "value": "series",
+      "reason": "set_by_person"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/tv/Downton Abbey (2010-2015)_179416168414"
+    }
+  },
+  "raw": {
+    "form": "bluray-backup",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/Downton Abbey_179416168414"
+    },
+    "check": {
+      "sizes": "not_run",
+      "hashes": "not_run"
+    },
+    "problems": []
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "job": {
+    "job_id": 18,
+    "stage": "178824223068",
+    "status": "success",
+    "start_time": "2026-09-01 05:57:10.709135",
+    "stop_time": "2026-09-01 09:13:52.399223",
+    "errors": null,
+    "disctype": "dvd",
+    "label": "HALLELUJAH_TRAIL",
+    "crc_id": "c664091933fa7782",
+    "path": "/root/video/completed/movies/The-Hallelujah-Trail (1965)_178824223068",
+    "hasnicetitle": 1,
+    "title": "The-Hallelujah-Trail",
+    "title_auto": "The-Hallelujah-Trail",
+    "title_manual": null,
+    "year": "1965",
+    "year_auto": "1965",
+    "year_manual": null,
+    "imdb_id": "tt0059250",
+    "imdb_id_auto": "tt0059250",
+    "imdb_id_manual": null,
+    "video_type": "movie",
+    "video_type_auto": "movie",
+    "video_type_manual": null
+  },
+  "raw_copy": null
+}

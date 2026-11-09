@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "27-178961349896",
+  "state": "succeeded",
+  "start_time": "2026-09-17T02:51:39.185765Z",
+  "finish_time": "2026-09-17T12:34:28.183525Z",
+  "errors": null,
+  "disc": {
+    "type": "bluray",
+    "label": "RESCUERS_35TH_ANNIVERSARY",
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "The Rescuers",
+      "reason": "copied_from_earlier_job"
+    },
+    "year": {
+      "value": "1977",
+      "reason": "copied_from_earlier_job"
+    },
+    "imdb_id": {
+      "value": null,
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": "movie",
+      "reason": "copied_from_earlier_job"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/movies/The Rescuers (1977)_178961349896"
+    }
+  },
+  "raw": {
+    "form": "bluray-backup",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/The Rescuers_178961349896"
+    },
+    "check": {
+      "sizes": "passed",
+      "hashes": "not_run"
+    },
+    "problems": []
+  },
+  "titles": [
+    {
+      "playlist": "00251.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/The Rescuers (1977)_178961349896/extras/title_43.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00252.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/The Rescuers (1977)_178961349896/extras/title_44.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00254.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/The Rescuers (1977)_178961349896/extras/title_46.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00800.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/The Rescuers (1977)_178961349896/The Rescuers (1977).mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00801.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/movies/The Rescuers (1977)_178961349896/extras/title_71.mkv"
+      },
+      "reason": null
+    }
+  ]
+}

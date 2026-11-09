@@ -30,8 +30,9 @@
    0.75–0.85.
 5. **Play-alls and duplicates.** Per *Confidence*: drop both play-all
    transcodes, keep their raw, and treat job 33 as job 22's duplicate. A job
-   whose stamp carries `duplicates` has no play-all transcode to drop, and its
-   `wholes` give each episode's start in the play-all, which splits a series
+   whose titles were compared (`raw.titles_compared`) has no play-all
+   transcode to drop, and the play-all's `parts` give each episode's start in
+   it, which splits a series
    ARM filed as a movie.
 6. **The Inspect harness** (layer 2): datasets of whole decisions; reelbarrow's
    own solver; a scorer of the **gate's outcome**; 10 epochs, with a reducer that

@@ -1,0 +1,57 @@
+{
+  "job": {
+    "job_id": 78,
+    "stage": "179271627780",
+    "status": "success",
+    "start_time": "2026-10-23 00:44:37.859782",
+    "stop_time": "2026-10-23 10:26:55.216008",
+    "errors": null,
+    "disctype": "bluray",
+    "label": "DOWNTON_ABBEY_A_NEW_ERA",
+    "crc_id": null,
+    "path": "/root/video/completed/movies/Downton-Abbey--A-New-Era (2022)",
+    "hasnicetitle": 1,
+    "title": "Downton-Abbey--A-New-Era",
+    "title_auto": "Downton-Abbey--A-New-Era",
+    "title_manual": null,
+    "year": "2022",
+    "year_auto": "2022",
+    "year_manual": null,
+    "imdb_id": "tt11703710",
+    "imdb_id_auto": "tt11703710",
+    "imdb_id_manual": null,
+    "video_type": "movie",
+    "video_type_auto": "movie",
+    "video_type_manual": null
+  },
+  "raw_copy": {
+    "schema": 1,
+    "folder": "/root/video/raw/Downton-Abbey--A-New-Era",
+    "form": "bluray-backup",
+    "check": {
+      "sizes": "passed",
+      "hashes": "passed"
+    },
+    "problems": [],
+    "titles": [
+      {
+        "handbrake_title": 57,
+        "playlist": "00612.mpls",
+        "transcode": "/root/video/completed/movies/Downton-Abbey--A-New-Era (2022)/Downton-Abbey--A-New-Era (2022).mkv",
+        "reason": null
+      },
+      {
+        "handbrake_title": 112,
+        "playlist": "01391.mpls",
+        "transcode": "/root/video/completed/movies/Downton-Abbey--A-New-Era (2022)/extras/title_112.mkv",
+        "reason": null
+      },
+      {
+        "handbrake_title": 114,
+        "playlist": "01393.mpls",
+        "transcode": "/root/video/completed/movies/Downton-Abbey--A-New-Era (2022)/extras/title_114.mkv",
+        "reason": null
+      }
+    ]
+  }
+}

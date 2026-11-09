@@ -1,0 +1,2468 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "103-179417475679",
+  "state": "succeeded",
+  "start_time": "2026-11-08T21:52:36.805910Z",
+  "finish_time": "2026-11-09T07:11:31.865674Z",
+  "errors": null,
+  "disc": {
+    "type": "bluray",
+    "label": "DOWNTON_ABBEY_SEASON_6_D1",
+    "crc64": null
+  },
+  "identity": {
+    "title": {
+      "value": "Downton Abbey",
+      "reason": "set_by_person"
+    },
+    "year": {
+      "value": "2010–2015",
+      "reason": "set_by_person"
+    },
+    "imdb_id": {
+      "value": "tt1606375",
+      "reason": "set_by_person"
+    },
+    "kind": {
+      "value": "series",
+      "reason": "set_by_person"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/tv/Downton Abbey (2010-2015)"
+    }
+  },
+  "raw": {
+    "form": "bluray-backup",
+    "folder": {
+      "path": "import/automatic-ripping-machine/raw/Downton Abbey_179417475679"
+    },
+    "check": {
+      "sizes": "passed",
+      "hashes": "passed"
+    },
+    "problems": [],
+    "titles_compared": true
+  },
+  "titles": [
+    {
+      "playlist": "00016.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00021.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00024.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00025.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00026.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00027.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00030.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00031.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00042.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00043.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00045.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00047.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00051.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00058.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00061.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00062.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00063.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00064.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00067.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00068.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00069.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00072.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00073.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00075.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00080.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00081.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00082.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00083.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00085.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00090.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00095.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00096.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00098.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00106.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00110.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00111.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00112.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00113.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00118.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00119.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00123.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00127.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00131.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00132.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00133.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00136.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00146.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00153.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00158.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00159.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00168.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00169.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00170.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00173.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00175.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00176.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00180.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00192.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00193.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00195.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00198.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00202.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00203.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00204.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00206.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00207.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00214.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00218.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00225.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00228.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00231.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00234.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00236.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00240.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00241.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00244.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00246.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00248.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00252.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00260.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00262.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00264.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00274.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00278.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00280.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00282.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00283.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00285.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00289.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00291.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00295.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00298.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00304.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00314.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00319.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton Abbey (2010-2015)/title_102.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00327.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00328.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00333.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00335.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00341.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00342.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00346.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00350.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00351.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00353.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00355.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00358.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00362.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00368.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00374.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00375.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00379.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00381.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00383.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00389.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00390.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00391.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00393.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00394.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00396.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00397.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00398.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00399.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00400.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00403.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00409.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00412.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00416.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00417.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00424.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00425.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00437.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00445.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "interleaved": false,
+      "parts": [
+        {
+          "playlist": "00990.mpls",
+          "start": 0.0
+        },
+        {
+          "playlist": "00475.mpls",
+          "start": 4173.961
+        },
+        {
+          "playlist": "00319.mpls",
+          "start": 7141.509
+        }
+      ]
+    },
+    {
+      "playlist": "00446.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00451.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00452.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00454.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00458.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00462.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00464.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00471.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00473.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00475.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton Abbey (2010-2015)/title_150.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00478.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00486.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00487.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00491.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00495.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00496.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00508.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00511.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00514.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00517.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00521.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00526.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00530.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00533.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00536.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00538.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00544.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00546.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00551.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00552.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00553.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00555.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00559.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00561.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00565.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00575.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00587.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00589.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00591.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00593.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00594.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00596.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00598.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00603.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00604.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00605.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00607.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00609.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00611.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00612.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00617.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00621.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00623.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00625.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00626.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00636.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00637.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00641.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00648.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00650.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00656.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00657.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00658.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00667.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00672.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00673.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00684.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00687.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00699.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00700.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00706.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00709.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00710.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00713.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00714.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00725.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00727.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00732.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00734.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00736.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00737.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00746.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00748.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00749.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00751.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00753.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00754.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00757.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00760.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00766.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00767.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00768.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00774.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00777.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00779.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00780.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00784.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00792.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00793.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00794.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00799.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00800.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00802.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00810.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00813.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00814.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00816.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00818.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00822.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00823.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00825.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00828.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00829.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00836.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00837.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00839.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00841.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00850.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00851.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00853.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00855.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00858.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00861.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00862.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00863.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00869.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00875.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00876.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00878.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00885.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00887.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00888.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00889.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00890.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00900.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00906.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00907.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00911.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00919.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00923.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00926.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00927.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00928.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00930.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00936.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00938.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00940.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00942.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00945.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00956.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00959.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00964.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00965.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00966.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00967.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00968.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00969.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00970.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00974.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00975.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00982.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00983.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00985.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00990.mpls"
+      }
+    },
+    {
+      "playlist": "00986.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00989.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00990.mpls",
+      "transcode": {
+        "path": "import/automatic-ripping-machine/completed/tv/Downton Abbey (2010-2015)/title_306.mkv"
+      },
+      "reason": null
+    },
+    {
+      "playlist": "00992.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    },
+    {
+      "playlist": "00993.mpls",
+      "transcode": null,
+      "reason": "played_by_kept_titles",
+      "played_by": {
+        "playlist": "00445.mpls"
+      }
+    }
+  ]
+}

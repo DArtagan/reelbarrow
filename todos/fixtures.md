@@ -31,18 +31,19 @@ ffprobe JSON for every file in its completed and transcode directories and its
 raw candidates; video MD5s; fingerprints; Blu-ray hashes; what each raw title
 plays (*Title identity* 4), as a DVD image's `lsdvd -c -d -v -Oy` output and a
 Blu-ray's playlists read by `bluray.playlists` and its clips' entry points by
-`bluray.clips`, as JSON, which is all a decision needs of them; the manifest; and the raw folder's `arm-job.json` where
-it has one. Store them under `tests/fixtures/<case>/`, named for the case as
+`bluray.clips`, as JSON, which is all a decision needs of them; and the
+manifest, which carries the raw copy's record where there is one. Store them under `tests/fixtures/<case>/`, named for the case as
 *Testing*, layer 1, in the design says, in a layout the planner can load as if
 it were the share.
 
-The stamps frozen are in `tests/fixtures/stamps/`, each named for its case,
-every one on the share as it stood on 2026-10-29: those ARM wrote (jobs 76–80
-and 82–87, job 87 being the *Robin Hood* bonus DVD's re-rip, the first movie
-disc with `duplicates`) and those the deployment backfilled (jobs 7, 8, 23, 25 and 27, among them
-*The Rescuers* job 27 of the fixtures table), with the contract test that
-holds them. A job's own fixture copies its stamp from there, found by its
-`job_id`, rather than freezing a second one.
+Twenty-one manifests are frozen already in `tests/fixtures/manifests/`, a
+folder per case holding a real job's row and raw-copy record (`arm-db.json`)
+and the manifest exported from them, with the contract test that holds them:
+among them
+*The Rescuers* job 27, *The Polar Express* job 25 and *The Hallelujah Trail*
+jobs 15 and 18 of the fixtures table, and job 87, the *Robin Hood* bonus DVD's
+re-rip. A job's own fixture copies its manifest from there rather than
+freezing a second one.
 
 A `reelbarrow analyse <path> --out <dir>` command that does this in the pod is
 probably the right shape, and the planner's own intake will want it anyway.
