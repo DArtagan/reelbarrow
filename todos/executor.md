@@ -35,8 +35,9 @@ planner covers every case.
 - **Sidecars**: NFO and artwork per *Sidecars and embedded metadata*, from TMDB
   and fanart.tv.
 - **`raw/<LABEL> [<identity>]/disc.json`** and the ignore markers in every
-  `raw/`. `disc.json` records the source, job and disc identity of what it
-  files, which *Any order* in the design depends on.
+  `raw/`. Besides identity and which raw title became which file, `disc.json`
+  carries whatever *Any order* in the design compares that can't be measured
+  from the file, such as the raw copy's backup checks.
 - **The ledger**, in SQLite under `REELBARROW_DATA_DIR`, keyed by the
   manifest's `source` and `id` (*The manifest*).
 - **`reelbarrow file <manifest>`** plans the manifest and hands the plan to the

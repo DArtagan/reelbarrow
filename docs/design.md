@@ -915,19 +915,28 @@ the service's record of plans not yet executed:
 
 **Any order** (Will, 2026-11-09): *"the rules should ensure that manifests can
 be processable in any order, with the library eventually being filled with the
-best results."* A plan is made from one manifest and the library as it stands,
-so this holds only if:
+best results."* A plan compares what its manifest brings with what the library
+holds, and keeps the better. If the rules that prefer one file over another
+are clear, the order manifests arrive in can't change where the library ends:
+a file deleted lost to one that stays, or to one that later loses to a better
+one. The rules are clear when:
 
-- **The library records where each file came from**: source, job and disc
-  identity, in `disc.json` and the ledger, so a later manifest's plan compares
-  itself with what is filed.
-- **Every choice between copies is a fixed order, not arrival order.** Best
-  copy rule 1 keeps the earliest successful job's copy, not the first filed.
-- **Nothing is deleted that a manifest not yet planned could prefer.** A copy
-  is a leftover only once what supersedes it is in the library, or is in the
-  same plan.
-- **An outcome that needs another manifest is hold**, and is replanned when
-  that manifest arrives, as Around the World's disc 2 will.
+- **Each file has one place it competes for**: its work, cut and disc, decided
+  by the identity rows of *Confidence*. Two files either compete for one place,
+  or are both kept.
+- **Within a place, preference is a fixed order** that never consults arrival
+  or a job's age (Will, 2026-11-09: *"our desired goal is the best possible
+  outcome"*). Byte-identical copies are equal, so the one filed stays. Two
+  copies the rules can't order go to review.
+- **What the order compares is readable from a filed entry** as well as from a
+  manifest: measured from the file where it can be, so the 2024 entries, which
+  have no `disc.json`, compare too, and carried in `disc.json` where it can't,
+  such as a raw copy's backup checks.
+
+What order can change is the way there: which copies are filed and later
+replaced, and how many plans go to review. A misidentified job planned after
+its disc is filed can be matched to it by `crc_id`; planned before, it goes to
+review.
 
 ### The review UI
 
@@ -991,7 +1000,7 @@ read as a test case.
 | a title is a whole of others: a play-all, or a documentary in parts | the manifest's titles were compared and give it `parts`, **or** its raw keeps the disc's structure and ≥2 others each ≥95% inside it, overlapping one another by <5%, play ≥99% of it (*Title identity* 4), **or** its length within 0.5% of the sum of ≥2 others **and** each of those others' audio is found inside it | treat as an ordinary title |
 | … which of a whole and its parts is kept | as the deployment's ARM decides (Will, 2026-10-28): a series keeps the parts, and the whole's transcode is a leftover; a movie disc keeps the whole when each part after the first starts within 1 s of one of its chapters and the parts follow one another, and the parts' transcodes are leftovers; parts that interleave are kept, and the whole's transcode is a leftover | keep both |
 | a file is a duplicate | identical video MD5 to a file being kept | not a duplicate |
-| best copy | rule 1: identical MD5 → keep the earliest successful job's. Rule 2: same disc identity, one copy incomplete (failed job, a raw copy whose `complete` isn't `true`, missing files other than titles with a `reason` for having no transcode, decoded length short of its raw title's) → keep the complete one | ask — never choose by size or bitrate |
+| best copy | rule 1: identical MD5 → the copies are equal, and the one filed stays. Rule 2: same disc identity, one copy incomplete (failed job, a raw copy whose `complete` isn't `true`, missing files other than titles with a `reason` for having no transcode, decoded length short of its raw title's) → keep the complete one | ask — never choose by size or bitrate |
 | a transcode is raw title X | by the raw's form. **DVD image:** the manifest's `titles` pair them **and** the image's `disc_title` matches the transcode as in *which raw survives*. **DVD MKVs:** the MKV, which is the transcode's source, matches it in length and chapters within 0.25 s, one to one. **Blu-ray:** the manifest's `titles` pair them **and** the transcode's length is within 0.15 s of the one predicted from the playlist; without a map, that prediction assigned one to one, playlists that differ only by clips of black silence counting as one. The prediction is HandBrake's (1.10 and 1.11): the playlist's length, except that where a chapter mark starts within 1.5 s of the end, the transcode stops at the keyframe at or before that mark, which the clip's `.clpi` lists (E35) | pair by fingerprint; candidates that share their audio, as featurette variants do, → review |
 | a title is an extra of film X | shorter than the feature, not another cut or another work (fingerprint), from a disc identified as X or as X's bonus disc | review |
 | two cuts of one film | fingerprint coverage ≥ 90% with a monotonic offset | edition **labels** always need a source — the case photo, or TMDB/IMDb release data naming those exact runtimes |
