@@ -2,105 +2,66 @@
 
 ## Opening prompt
 
-> Build the thinnest pass through reelbarrow's pipeline: intake, analyse,
-> classify, identify, plan and gate for one manifest, *The Hallelujah Trail*
-> job 18, ending in a plan that executes nothing. Read
-> `todos/single-manifest-plan.md`, then *The service* (steps 1–6 and *Plans,
-> their basis, and the inbox*), *Confidence*, *Target layout* and *Testing*
-> (layer 1) in `docs/design.md`. Everything in this session is read-only on
-> the share.
+> Finish reelbarrow's single-manifest-plan: job 34's plan, made in the
+> deployed pod against the share, matching the one its fixture gives. Read
+> `todos/single-manifest-plan.md`, then *The service* (steps 1–6) and
+> *Testing* (layer 1) in `docs/design.md`. Everything in this session is
+> read-only on the share.
 
 The first of the steps in [README](README.md): one manifest, its inputs
 processed and its outputs proposed.
 
-## Why job 18
+## Why job 34, not job 18
 
-Its row in the fixtures table is automatic: one film, filed as *The Hallelujah
-Trail (1965) {tmdb-…}*, its raw `raw/The-Hallelujah-Trail/B1_t00.mkv` beside
-it. Its manifest is frozen already in `tests/fixtures/manifests/`. The empty
-folders of its failed jobs 15–17 are leftovers, but they belong to those jobs'
-manifests, which [manifest-loop](manifest-loop.md) plans.
+The spec was written for *The Hallelujah Trail*, job 18, whose fixtures-table
+row said automatic. Measured on 2026-11-10, its feature runs 155.5 min against
+TMDB's 165 (`23194`, the roadshow length the AFI catalogue also gives), −5.7%,
+so the ±3% runtime bar sends it to review (E38). Will chose (2026-11-10) to
+switch to job 34, *Those Daring Young Men in Their Jaunty Jalopies*, the same
+shape: a DVD from before the raw copy's record, film only, one raw MKV. It is
+within 2.3% of TMDB's 122 min and files as *Monte Carlo or Bust! (1969)
+{tmdb-38792}*, TMDB's English title. The bar stays where the design set it;
+job 18 went to [manifest-loop](manifest-loop.md)'s review rows, and the specs
+after this one name job 34.
 
-## Scope
+Will also chose (2026-11-10) how intake finds a raw copy no manifest records:
+the MKVs written while the job ran, confirmed by content. It is in the
+design's step 1.
 
-Steps 1–6 for this one case, each built only as far as job 18 needs it, and
-each in the form the harder cases will extend rather than replace.
+## Done
 
-- **`reelbarrow analyse <manifest>`** comes first. It measures the files the
-  manifest names, in the pod, and prints what it measured as one JSON document.
-  It identifies nothing and plans nothing, and writes no files, so it presumes
-  no layout. Its output is the fixtures' form, so the planner reads the same
-  thing from a fixture as from the share.
-- **Intake** reads a manifest and finds the job's completed and raw folders by
-  the paths it records (*The manifest*), checking they are there, never by
-  matching names.
-- **Classify** as far as one feature and its raw.
-- **Identify**: ARM's IMDb ID → TMDB, checked against the feature's runtime
-  (±3% to start).
-- **Plan**: every operation with its reason, in the layout of *Target layout*:
-  renames, the sidecars to write (`movie.nfo`, artwork, `raw/…/disc.json`,
-  the ignore markers), and leftover deletions. The plan says what each sidecar
-  is; [executor](executor.md) writes it.
-- **Gate**: automatic, review or hold, per *Confidence*. A plan is all or
-  nothing.
-- **`reelbarrow plan [path]`** prints each plan and its gate. A manifest file
-  plans that manifest alone; a folder plans every manifest in it; with no path,
-  every manifest in `REELBARROW_MANIFEST_DIR`. It records nothing; the inbox
-  is [plan-inbox](plan-inbox.md).
+On the `single-manifest-plan` branch:
 
-## Fixtures, case by case
+- `reelbarrow analyse <manifest>` and `reelbarrow plan [path]`
+  (`reelbarrow.intake`, `.analyse`, `.plan`, `.tmdb`, `.names`).
+- Job 34's case, `tests/fixtures/dvd-film-raw-unrecorded/`: its manifest and
+  analyse's document, captured in the pod on 2026-11-10, the in-pod and copied
+  checksums equal, and a fresh listing there agreeing on file count (one
+  each), sizes and durations (7487.913 s each). `tests/test_plan.py` plans it
+  automatic, with the row's film and raw, and sends each broken rule to
+  review. Its `tmdb.json` is `python -m reelbarrow.tmdb tt0064688`'s
+  recording of TMDB's API, 2026-11-10.
+- The secret: `REELBARROW_TMDB_TOKEN` in `kubernetes/apps/reelbarrow/secrets.sops.yaml`
+  in the deployment repository, taken by the Deployment with `envFrom`, on its
+  `video-library-ingest` branch, its value a placeholder until filled in.
 
-How every case's fixture is captured, here and in the specs after this one.
-When this spec is done, this section moves into *Testing*, layer 1, in the
-design.
+## Still to do
 
-Each case's fixture is captured with the rule that reads it, never ahead of
-it (Will, 2026-11-09). A capture made before its rules has to guess at what
-they need and at the loader's shape. The manifest's fields were chosen the
-same way, each traced to a rule that reads it; Will, 2026-11-08: *"An
-interface that includes everything is both fragile and wasteful."*
-
-- **Capture what a rule reads, no more.** The candidates are ffprobe JSON,
-  video MD5s, fingerprints, Blu-ray hashes, a DVD image's
-  `lsdvd -c -d -v -Oy` output, and a Blu-ray's playlists and clips' entry
-  points as read by `bluray.playlists` and `bluray.clips`. A case that no rule
-  reads one of these for doesn't capture it.
-- **Run it in the pod, copy out only results.** Media streamed through
-  `kubectl exec` ran at 17.6 MB/s (E25) and truncated two fingerprints (E30).
-  Compare a checksum taken in the pod with one taken after the copy, as E30
-  did.
-- **Check each capture against a fresh listing** from the pod: its file count
-  and durations. That catches a truncated capture.
-- **Named for the case, under `tests/fixtures/<case>/`** (*Testing*, layer 1):
-  the manifest and `reelbarrow analyse`'s document of it, with a loader that
-  presents a job to the planner as intake would see it on the share. A job's manifest is the one already frozen in
-  `tests/fixtures/manifests/`, where there is one, not a second copy.
-- **No Whisper transcripts.** Whether they are committed is settled in
-  [episode-matching](episode-matching.md), the first spec that reads them.
-
-## Bindings from the design that are easy to miss
-
-- Library names come from TMDB and must be folded to Latin-1 the way ARM's
-  title hook does in the deployment, until the filename-charset migration
-  lands. A name the share would reject with `EIO` is a planning error to catch
-  here, not at filing time.
-- A movie's feature arrives as `title_N.mkv` above `extras/` since the
-  deployment stopped ARM renaming it, and as `<Title (Year)>.mkv` before. Intake
-  takes neither name, nor the placement, as the identification.
-- The thresholds are starting points, and the evaluation sets them.
-
-## Secrets
-
-A TMDB API key (a free personal key) is the first secret the service needs. Add
-it to reelbarrow's encrypted secret in the deployment repository, read it from
-the environment, and keep it out of logs.
+- **Deploy**: the token filled in and the secret on `main` in the deployment
+  repository; this branch merged and released (see
+  [releasing.md](../docs/releasing.md)).
+- **The plan in the pod**: `reelbarrow plan --json
+  /video/import/automatic-ripping-machine/manifests/manifest-arm-34-178993082181.json`
+  in the deployed pod, compared with the fixture's plan. Only the basis's
+  library paths can differ, and only if the library has changed.
 
 ## Done when
 
-- A layer-1 test plans job 18 from its fixture and asserts its row of the
+- A layer-1 test plans job 34 from its fixture and asserts its row of the
   fixtures table: automatic, the film and its raw where the row puts them.
+  *Met.*
 - The fixture's file count and durations matched a fresh listing from the pod
-  when it was captured.
+  when it was captured. *Met.*
 - `reelbarrow plan` in the deployed pod, against the share, gives the same plan
   as the fixture does.
 - The share is unchanged: the mount is read-only.

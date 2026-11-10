@@ -1,0 +1,16 @@
+{
+  "find/tt0064688": {
+    "movie_results": [
+      {
+        "id": 38792
+      }
+    ]
+  },
+  "movie/38792": {
+    "id": 38792,
+    "title": "Monte Carlo or Bust!",
+    "release_date": "1969-04-28",
+    "runtime": 122,
+    "imdb_id": "tt0064688"
+  }
+}

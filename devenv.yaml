@@ -11,3 +11,7 @@ inputs:
     inputs:
       nixpkgs:
         follows: nixpkgs
+# secretspec.toml's secrets go only to the command that needs them, through
+# `secretspec run`, never into the shell, so devenv doesn't load them.
+secretspec:
+  enable: false

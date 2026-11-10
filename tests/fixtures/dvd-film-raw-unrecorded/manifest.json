@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "34-178993082181",
+  "state": "succeeded",
+  "start_time": "2026-09-20T19:00:21.899522Z",
+  "finish_time": "2026-09-20T21:48:45.463707Z",
+  "errors": null,
+  "disc": {
+    "type": "dvd",
+    "label": "THOSE_DARING_YOUNG_MEN",
+    "crc64": "ef68a3c769a42a4f"
+  },
+  "identity": {
+    "title": {
+      "value": "Those-Daring-Young-Men-in-Their-Jaunty-Jalopies",
+      "reason": "lookup"
+    },
+    "year": {
+      "value": "1969",
+      "reason": "lookup"
+    },
+    "imdb_id": {
+      "value": "tt0064688",
+      "reason": "lookup"
+    },
+    "kind": {
+      "value": "movie",
+      "reason": "lookup"
+    }
+  },
+  "completed": {
+    "folder": {
+      "path": "import/automatic-ripping-machine/completed/movies/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969)"
+    }
+  }
+}

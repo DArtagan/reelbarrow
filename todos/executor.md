@@ -3,8 +3,9 @@
 ## Opening prompt
 
 > Build reelbarrow's executor and ledger, and carry out
-> [single-manifest-plan](single-manifest-plan.md)'s plan for *The Hallelujah
-> Trail* job 18: for real against a synthetic tree in the tests, and in dry run
+> [single-manifest-plan](single-manifest-plan.md)'s plan for job 34, *Those
+> Daring Young Men…*, which files as *Monte Carlo or Bust! (1969)*: for real
+> against a synthetic tree in the tests, and in dry run
 > against the share. Read `todos/executor.md`, then step 7 of *The service*,
 > *Target layout* and *Sidecars and embedded metadata* in `docs/design.md`, and
 > *Rules that protect the library* in `AGENTS.md`. Dry run stays on: turning
@@ -50,10 +51,10 @@ Plex's token is [first-filing](first-filing.md)'s.
 
 ## Done when
 
-- A test carries out job 18's plan on a synthetic tree built from its fixture,
+- A test carries out job 34's plan on a synthetic tree built from its fixture,
   with dry run off, and the tree ends in the layout its row of the fixtures
   table gives: film, sidecars, `raw/` with `disc.json`, nothing left behind.
 - The test that nothing but the executor writes under the video root passes,
   and fails when a module is made to write there.
-- `reelbarrow file` in the deployed pod, on job 18, reports every operation
+- `reelbarrow file` in the deployed pod, on job 34, reports every operation
   refused by dry run, and the share is unchanged.

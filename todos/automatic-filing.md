@@ -13,8 +13,8 @@ The service's half of the fourth step in [README](README.md): from here an
 automatic plan goes straight to the executor, and only review and hold plans
 wait in the inbox. The review UI is never a confirmation step for what the
 gate passed (Will, 2026-11-09, agreeing that automatic plans don't wait for
-it). Of the fixtures table's automatic rows, *The Hallelujah Trail* was filed
-by [first-filing](first-filing.md); this files the other three.
+it). Of the fixtures table's automatic rows, *Monte Carlo or Bust!* (job 34)
+was filed by [first-filing](first-filing.md); this files the other two.
 
 ## Scope
 
@@ -28,16 +28,15 @@ by [first-filing](first-filing.md); this files the other three.
 
 ## The switch, in the deployment repository
 
-First, confirm in the inbox that only *Those Daring Young Men…*, *The Great
-Race* and *The Polar Express* are automatic, and every other plan review or
-hold. Then set `REELBARROW_DRY_RUN` to `"false"` and drop `readOnly` from the
+First, confirm in the inbox that only *The Great Race* and *The Polar
+Express* are automatic, and every other plan review or hold. Then set `REELBARROW_DRY_RUN` to `"false"` and drop `readOnly` from the
 video mount, in one commit.
 
 ## Done when
 
 Measured on the share and in Plex:
 
-- Each of the three is visible in Plex without a manual scan.
+- Each of the two is visible in Plex without a manual scan.
 - Each `raw/` holds the right disc, with `disc.json`.
 - `completed/movies/` holds nothing for those jobs, and *The Polar Express*'
   0.4 GB partial raw, `raw/The-Polar-Express`, is gone.

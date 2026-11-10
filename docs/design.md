@@ -132,6 +132,12 @@ Recorded verbatim where Will gave words, so they are not relitigated.
   is a deliberate act rather than a side effect of every merge. See
   [releasing.md](releasing.md).
 - **Dry run first** (2026-10-18), behind a flag; see *The service*.
+- **Library names are ASCII** (2026-11-10), not Latin-1, asked on reviewing
+  the first planner: *"Would/could this process be simpler and more portable if
+  we did ASCII names only (rather than Latin-1)?"* `media/video` held no
+  non-ASCII name when the charset migration was measured, and ASCII keeps it
+  so; the reasons are in `reelbarrow.names`. ARM's title hook in the deployment
+  folds to ASCII too, for consistency.
 
 ---
 
@@ -400,8 +406,8 @@ evidence is in *The cases*. "Leftovers" means deleted once filing succeeds.
 
 | ARM output (under `completed/`) | jobs | expected outcome |
 |---|---|---|
-| `movies/The-Hallelujah-Trail (1965)_178824223068` | 18 ok; 15–17 failed | **auto**: film → `The Hallelujah Trail (1965) {tmdb-…}`; raw `raw/The-Hallelujah-Trail/B1_t00.mkv`; leftovers: three empty sibling dirs and their `transcode/` twins |
-| `movies/Those-Daring-Young-Men-…-Jalopies (1969)` | 34 | **auto**: film only |
+| `movies/The-Hallelujah-Trail (1965)_178824223068` | 18 ok; 15–17 failed | **review**: the feature runs 155.5 min against TMDB's 165 (`23194`), −5.7%, outside the runtime bar (E38). Otherwise film → `The Hallelujah Trail (1965) {tmdb-23194}`; raw `raw/The-Hallelujah-Trail/B1_t00.mkv`, its pairing within 0.13 s; leftovers: three empty sibling dirs and their `transcode/` twins |
+| `movies/Those-Daring-Young-Men-…-Jalopies (1969)` | 34 | **auto**: film only, → `Monte Carlo or Bust! (1969) {tmdb-38792}`, TMDB's English title, the disc's being the US release's (Will, 2026-11-10: *"Sure, I'll accept the English title on this one."*); raw `raw/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies/B1_t00.mkv`; the job's emptied folders are leftovers (E38) |
 | `movies/The-Great-Race (1965)` | 29 | **auto**: film + 1 extra |
 | `movies/The-Polar-Express (2004)` | 25 ok; 24 the same disc misidentified | **auto**: film + 3 extras. Raw pairs by fingerprint: the complete backup is `raw/The-Adventures-of-Mary-Kate-and-Ashley--…` (14.3 GB); `raw/The-Polar-Express` is a 0.4 GB partial and is a leftover |
 | `movies/Field-of-Dreams (1989)` | 30, 31 — **both failed**; file recovered by hand | **review**: no successful job vouches for the file. Two raw copies whose video hashes match (disc-ripping, 2026-09-20): keep one |
@@ -878,7 +884,16 @@ The pipeline, per ARM job (and later per backlog folder):
 
 1. **Intake.** Read the manifest; locate the completed folder and the raw
    folder by the paths it records, never by name-matching, and check they are
-   there. Where it records no raw copy, find the raw candidates.
+   there. Where it records no raw copy, the copy is the one the job made:
+   the MKVs ARM wrote into a folder of its `raw/` while the job ran, by
+   their modification time, which content then confirms (*Confidence*, a
+   transcode is raw title X). That finds each rip's own copy where re-rips
+   of one disc share a label and a title, and a copy moved or rewritten since
+   isn't found, so it is left unfiled rather than misfiled. MKVs written into
+   more than one folder during one job go to review. On the share as it stood
+   on 2026-11-10 this found exactly one folder for jobs 18 and 34 (E38). Only
+   a folder's top level is looked at, where a DVD's MKVs were written before
+   images; a Blu-ray from before the record is paired by its structure.
 2. **Analyse.** For every output file: duration, streams, chapters, video MD5,
    audio fingerprint. For raw: Blu-ray nav and listing hashes, a DVD
    image's titles, what each title plays (*Title identity* 4), per-title
@@ -903,6 +918,13 @@ The pipeline, per ARM job (and later per backlog folder):
    the touched folder (`/library/sections/{id}/refresh?path=…`). Plex's own
    change detection cannot be relied on over a CIFS mount.
 8. **Notify.** Pushover to the brother: filed, or review needed, with a link.
+
+By hand, `reelbarrow analyse <manifest>` prints steps 1 and 2's result for one
+manifest as JSON, the document a fixture is (*Testing*, layer 1), and
+`reelbarrow plan [path]` prints steps 1–6's plan and gate for a manifest, a
+folder of them, or by default every manifest in `REELBARROW_MANIFEST_DIR`.
+Neither records or changes anything. A rule the planner doesn't have yet
+fails a check, so a case it can't plan goes to review, never files itself.
 
 **Plans, their basis, and the inbox** (Will, 2026-11-09). A plan is what steps
 1–6 make of one manifest: every operation with its reasons, and the gate's
@@ -1024,7 +1046,7 @@ read as a test case.
 | … which of a whole and its parts is kept | as the deployment's ARM decides (Will, 2026-10-28): a series keeps the parts, and the whole's transcode is a leftover; a movie disc keeps the whole when each part after the first starts within 1 s of one of its chapters and the parts follow one another, and the parts' transcodes are leftovers; parts that interleave are kept, and the whole's transcode is a leftover | keep both |
 | a file is a duplicate | identical video MD5 to a file being kept | not a duplicate |
 | best copy | rule 1: identical MD5 → the copies are equal, and the one filed stays. Rule 2: same disc identity, one copy incomplete (failed job, a raw copy whose `complete` isn't `true`, missing files other than titles with a `reason` for having no transcode, decoded length short of its raw title's) → keep the complete one | ask — never choose by size or bitrate |
-| a transcode is raw title X | by the raw's form. **DVD image:** the manifest's `titles` pair them **and** the image's `disc_title` matches the transcode as in *which raw survives*. **DVD MKVs:** the MKV, which is the transcode's source, matches it in length and chapters within 0.25 s, one to one. **Blu-ray:** the manifest's `titles` pair them **and** the transcode's length is within 0.15 s of the one predicted from the playlist; without a map, that prediction assigned one to one, playlists that differ only by clips of black silence counting as one. The prediction is HandBrake's (1.10 and 1.11): the playlist's length, except that where a chapter mark starts within 1.5 s of the end, the transcode stops at the keyframe at or before that mark, which the clip's `.clpi` lists (E35) | pair by fingerprint; candidates that share their audio, as featurette variants do, → review |
+| a transcode is raw title X | by the raw's form. **DVD image:** the manifest's `titles` pair them **and** the image's `disc_title` matches the transcode as in *which raw survives*. **DVD MKVs:** the MKV, which is the transcode's source, matches it in length and chapters within 0.25 s, one to one, the MKV allowed one final chapter more where it starts within 1.5 s of its end, which HandBrake drops from an MKV as from a playlist (E38). **Blu-ray:** the manifest's `titles` pair them **and** the transcode's length is within 0.15 s of the one predicted from the playlist; without a map, that prediction assigned one to one, playlists that differ only by clips of black silence counting as one. The prediction is HandBrake's (1.10 and 1.11): the playlist's length, except that where a chapter mark starts within 1.5 s of the end, the transcode stops at the keyframe at or before that mark, which the clip's `.clpi` lists (E35) | pair by fingerprint; candidates that share their audio, as featurette variants do, → review |
 | a title is an extra of film X | shorter than the feature, not another cut or another work (fingerprint), from a disc identified as X or as X's bonus disc | review |
 | two cuts of one film | fingerprint coverage ≥ 90% with a monotonic offset | edition **labels** always need a source — the case photo, or TMDB/IMDb release data naming those exact runtimes |
 | a bonus disc | no title near the film's runtime **and** the disc says so (label, embedded disc name, or the case photo) | review — otherwise indistinguishable from a misidentified disc |
@@ -1057,6 +1079,12 @@ titles-only prompt (E28) sharpened both points; see *Testing*.
 
 A misfiled automatic decision is, per Will, a bug: the fix is a new row in the
 table above plus a regression fixture, not a confirmation step.
+
+The runtime bar has met one disc it sends to review on evidence alone: *The
+Hallelujah Trail*'s DVD runs 155.5 min where TMDB and the AFI catalogue give
+its 165-minute roadshow length (E38). TMDB holds one runtime a film, so a disc
+of a film released at two lengths fails the bar, and review is the right
+outcome until a source of each release's length is evidence.
 
 The thresholds in this table — ±3% runtime, 90% fingerprint coverage, what
 counts as "high confidence" from the matcher — are starting points. They are set
@@ -1134,6 +1162,35 @@ one made by splicing tests only the splice.
 A fixture is named for the case it holds, not for the job or file it was taken
 from. Filing empties the folders it came from, and a job number tells a reader of
 the tests nothing. Where it came from is in the commit that added it.
+
+**The planner's fixtures, case by case.** A case is a folder under
+`tests/fixtures/<case>/` holding what the planner reads of one job, and
+`tests/cases.py` loads it as intake would see the job on the share:
+`reelbarrow analyse`'s document of the job, TMDB's replies as `python -m
+reelbarrow.tmdb <imdb_id>` records them, and the job's manifest, unless
+`tests/fixtures/manifests/` holds it already for the exporter's tests, which
+is then the one copy. The planner reads the same document from a fixture as
+from the share, so a fixture is that command's output.
+
+- **Captured with the rule that reads it, never ahead of it** (Will,
+  2026-11-09). A capture made before its rules has to guess at what they need
+  and at the loader's shape. The manifest's fields were chosen the same way,
+  each traced to a rule that reads it; Will, 2026-11-08: *"An interface that
+  includes everything is both fragile and wasteful."*
+- **What a rule reads, no more.** The document holds each file's size and
+  modification time and a video's length and chapter starts, and grows a field
+  when a rule first reads one: video MD5s, fingerprints, Blu-ray hashes, a DVD
+  image's `lsdvd -c -d -v -Oy` output, a Blu-ray's playlists and clips' entry
+  points as `bluray.playlists` and `bluray.clips` read them. TMDB's replies keep
+  only the fields identify reads.
+- **Run in the pod, only results copied out.** Media streamed through
+  `kubectl exec` ran at 17.6 MB/s (E25) and truncated two fingerprints (E30).
+  Compare a checksum of the output taken in the pod with one taken after the
+  copy.
+- **Checked against a fresh listing** from the pod: its file count, sizes and
+  durations. That catches a truncated capture.
+- **No Whisper transcripts** until [episode-matching](../todos/episode-matching.md),
+  the first spec that reads them, settles whether they are committed.
 
 **2. Model evaluations — Inspect, on demand and on any prompt or model change.**
 [Inspect](https://inspect.aisi.org.uk/) (UK AISI; Python, `pip install
@@ -1382,6 +1439,7 @@ All read-only against the cluster and the share. Artefacts in
 | E35 | 10-28 | job 79's playlists, clips and job log; HandBrake 1.11.2's `bd.c` and `reader.c`; keyframes at each playlist's last mark; thumbnails of transcode and clip frames | the near-identical playlists differ only by clips of black silence; HandBrake drops a chapter starting within 1.5 s of the end and stops the encode at the keyframe before it; that prediction is within −0.084 to +0.048 s on all 22 transcodes, and separates the variants by ≥ 1.4 s |
 | E36 | 10-28 | the `.clpi` EP maps of jobs 78, 79, 80 and 83 through `bluray.clips`, against ffprobe's keyframes and the 22 transcodes | every keyframe is an entry point, 2–5 ms early as the map's 5.7 ms steps store it; `Playlist.handbrake_duration` from playlists and EP maps alone is within −0.079 to +0.048 s of all 22, and each of job 79's variants is nearest its own playlist of 92, the next 1.4 s or more away |
 | E37 | 11-08 | ARM 2.24.4's `main.py`, `arm_ripper.py`, `utils.py`, `ProcessHandler.py`, `models/job.py` and the UI's JSON API, from GitHub | the final status is set after the last notification, and an abandoned job is never notified; the hook runs synchronously and its exit status is ignored; the UI's JSON API lists finished jobs only when authenticated, as strings and without tracks; `JSON_URL` carries no job id |
+| E38 | 11-10 | job 34's completed and raw folders through `reelbarrow analyse` in the pod, checked against a fresh listing and checksum there; ffprobe of job 18's transcode and raw MKV; MKVs under `raw/` by modification time against jobs 18, 34 and 35's runs; TMDB's and AFI's runtimes for both films | one folder of MKVs written during each job's run, and none from another job's; job 34's MKV and transcode both 7487.913 s, the MKV's 21st chapter 1.03 s before its end and dropped by HandBrake, the other 20 within 0.10 s; job 18's within 0.13 s; job 34 within 2.3% of TMDB's 122 min, job 18 −5.7% of its 165 min, the roadshow length AFI also gives |
 
 ---
 
@@ -1392,11 +1450,11 @@ Projects in the deployment repository:
 - **disc-ripping** — produces what this consumes. Owns the raw copy (DVD to
   ISO, and the raw copy's record), D12 (misidentification) and the play-all
   observation.
-- **the filename-charset migration** — library names come from TMDB and will
-  contain curly apostrophes and en dashes, which the share currently rejects
-  with `EIO`. The service must fold names to Latin-1 the same way ARM's title
-  hook does until that migration lands, and must not assume a failed write is
-  anything but this.
+- **the filename-charset migration** — the share rejects any name above
+  U+00FF with `EIO`, and TMDB's names hold curly apostrophes and en dashes.
+  Library names are folded to ASCII (`reelbarrow.names`), so none is ever
+  rejected and the migration never has to convert one, and a failed write is
+  not to be taken for anything but this.
 - **backups** — `media/video` is snapshotted and replicated, which is what makes
   deleting leftovers acceptable; deleted data still occupies space
   until the snapshots holding it expire (monthlies are kept two years).

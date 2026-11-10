@@ -15,6 +15,8 @@ services:
       # video mount below, together. The read-only mount is what stands between
       # a bug in the flag's handling and the library.
       REELBARROW_DRY_RUN: "true"
+      # TMDB's API Read Access Token, which identifying a film needs.
+      REELBARROW_TMDB_TOKEN: ${TMDB_TOKEN:-}
     volumes:
       - ${VIDEO_ROOT:?set VIDEO_ROOT to the video share}:/video:ro
       - data:/data

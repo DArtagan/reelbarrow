@@ -25,7 +25,12 @@ VIDEO_ROOT=/path/to/video docker compose up -d
 ```
 
 `VIDEO_ROOT` holds ARM's output and the `movies/` and `shows/` libraries, on one
-filesystem. The web UI is on port 8000.
+filesystem. The web UI is on port 8000. `TMDB_TOKEN`, TMDB's API Read Access
+Token, is what identifies films:
+
+```bash
+docker compose exec reelbarrow reelbarrow plan    # every manifest's plan
+```
 
 ## Development
 
@@ -34,6 +39,17 @@ devenv shell                   # Python, uv, ffmpeg, chromaprint
 devenv test                    # every hook over every file, as CI runs it
 reelbarrow serve               # the web UI on :8000, in dry-run mode
 ```
+
+The secrets it reads are declared in [`secretspec.toml`](secretspec.toml), and
+kept in your system keyring rather than a file. Store each once, then give it
+only to the command that needs it:
+
+```bash
+secretspec set REELBARROW_TMDB_TOKEN               # prompts; not echoed
+secretspec run -- reelbarrow plan path/to/manifest.json
+```
+
+The tests need none of them.
 
 ## Licence
 
