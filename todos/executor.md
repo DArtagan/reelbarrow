@@ -2,9 +2,9 @@
 
 ## Opening prompt
 
-> Build reelbarrow's executor and ledger, and carry out
-> [single-manifest-plan](single-manifest-plan.md)'s plan for job 34, *Those
-> Daring Young Men…*, which files as *Monte Carlo or Bust! (1969)*: for real
+> Build reelbarrow's executor and ledger, and carry out `reelbarrow plan`'s
+> plan for job 34, *Those Daring Young Men…*, which files as *Monte Carlo or
+> Bust! (1969)* and whose fixture is `tests/fixtures/dvd-film-raw-unrecorded/`: for real
 > against a synthetic tree in the tests, and in dry run
 > against the share. Read `todos/executor.md`, then step 7 of *The service*,
 > *Target layout* and *Sidecars and embedded metadata* in `docs/design.md`, and

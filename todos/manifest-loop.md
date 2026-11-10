@@ -23,7 +23,7 @@ arrive in is the property under test.
 ## Scope
 
 - **`reelbarrow plan`**, given no path, plans every manifest in
-  `REELBARROW_MANIFEST_DIR` ([single-manifest-plan](single-manifest-plan.md)).
+  `REELBARROW_MANIFEST_DIR` (*The service* in the design).
   It records nothing; the inbox is [plan-inbox](plan-inbox.md).
 - **The cases, simplest first**, each with its fixture captured as
   *The planner's fixtures, case by case* under *Testing*, layer 1, in the
@@ -57,7 +57,7 @@ arrive in is the property under test.
   featurette variants that share their clips. A Blu-ray without a map pairs by
   `analysis.bluray.Playlist.handbrake_duration`, the transcode's length
   predicted from its playlist and clips (E36).
-- **Identify films** as single-manifest-plan does. TV episodes are left
+- **Identify films** as `reelbarrow.plan` does already. TV episodes are left
   unresolved and planned as review.
 
 ## Bindings from the design that are easy to miss
