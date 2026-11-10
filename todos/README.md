@@ -21,8 +21,7 @@ Specs are referred to by name, not number, so finishing one renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 2 | [single-manifest-plan](single-manifest-plan.md) | One manifest, job 34's *Monte Carlo or Bust!*, planned and gated, executing nothing; `reelbarrow analyse` and the first fixture | — |
-| 3 | [executor](executor.md) | The executor and the ledger: that plan carried out on a test tree, and refused by dry run on the share | single-manifest-plan |
+| 3 | [executor](executor.md) | The executor and the ledger: that plan carried out on a test tree, and refused by dry run on the share | — |
 | 4 | [first-filing](first-filing.md) | *Monte Carlo or Bust!* filed for real by one deliberate run, its preconditions proven, then dry run back on | executor |
 | 5 | [manifest-loop](manifest-loop.md) | Every manifest planned, simplest case first, in any order: the whole fixtures table | executor |
 | 6 | [plan-inbox](plan-inbox.md) | The service: a plan and its basis per manifest in the inbox, replanned when the basis changes, listed in the web UI | manifest-loop |

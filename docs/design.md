@@ -884,9 +884,9 @@ The pipeline, per ARM job (and later per backlog folder):
 
 1. **Intake.** Read the manifest; locate the completed folder and the raw
    folder by the paths it records, never by name-matching, and check they are
-   there. Where it records no raw copy, the copy is the one the job made:
-   the MKVs ARM wrote into a folder of its `raw/` while the job ran, by
-   their modification time, which content then confirms (*Confidence*, a
+   there. Where it records no raw copy, the copy is the one the job made
+   (Will, 2026-11-10): the MKVs ARM wrote into a folder of its `raw/` while
+   the job ran, by their modification time, which content then confirms (*Confidence*, a
    transcode is raw title X). That finds each rip's own copy where re-rips
    of one disc share a label and a title, and a copy moved or rewritten since
    isn't found, so it is left unfiled rather than misfiled. MKVs written into
@@ -1440,6 +1440,7 @@ All read-only against the cluster and the share. Artefacts in
 | E36 | 10-28 | the `.clpi` EP maps of jobs 78, 79, 80 and 83 through `bluray.clips`, against ffprobe's keyframes and the 22 transcodes | every keyframe is an entry point, 2–5 ms early as the map's 5.7 ms steps store it; `Playlist.handbrake_duration` from playlists and EP maps alone is within −0.079 to +0.048 s of all 22, and each of job 79's variants is nearest its own playlist of 92, the next 1.4 s or more away |
 | E37 | 11-08 | ARM 2.24.4's `main.py`, `arm_ripper.py`, `utils.py`, `ProcessHandler.py`, `models/job.py` and the UI's JSON API, from GitHub | the final status is set after the last notification, and an abandoned job is never notified; the hook runs synchronously and its exit status is ignored; the UI's JSON API lists finished jobs only when authenticated, as strings and without tracks; `JSON_URL` carries no job id |
 | E38 | 11-10 | job 34's completed and raw folders through `reelbarrow analyse` in the pod, checked against a fresh listing and checksum there; ffprobe of job 18's transcode and raw MKV; MKVs under `raw/` by modification time against jobs 18, 34 and 35's runs; TMDB's and AFI's runtimes for both films | one folder of MKVs written during each job's run, and none from another job's; job 34's MKV and transcode both 7487.913 s, the MKV's 21st chapter 1.03 s before its end and dropped by HandBrake, the other 20 within 0.10 s; job 18's within 0.13 s; job 34 within 2.3% of TMDB's 122 min, job 18 −5.7% of its 165 min, the roadshow length AFI also gives |
+| E39 | 11-10 | `reelbarrow plan --json` on job 34's manifest in the deployed pod (0.4.0), against the share, beside the plan its fixture gives | identical, byte for byte, checksummed in the pod and after the copy: `automatic`, the same operations and basis. The pod mounts the share read-only, in dry run |
 
 ---
 
