@@ -21,7 +21,13 @@ plans from.
 
 - **The scan.** The service reads `REELBARROW_MANIFEST_DIR` on an interval and
   plans each manifest whose plan is missing or whose basis no longer matches
-  the share. A plan whose basis still matches is not remade.
+  the share. A plan whose basis still matches is not remade. It opens each
+  manifest, reads it whole and closes it, never holds one open, and opens
+  none more often than the mount's `closetimeo` across every process in the
+  pod. Otherwise the share serves it a replaced manifest's old copy
+  indefinitely (*Reading the manifests* in `docs/exporter.md`). Whether
+  mounting with `closetimeo=0` lifts the second rule is untested; it is a
+  deployment change if it does.
 - **The inbox**, in SQLite under `REELBARROW_DATA_DIR` beside the
   [executor](executor.md)'s ledger: each plan, its gate, its reasons and its
   basis. A replan replaces the plan it supersedes and keeps the history of

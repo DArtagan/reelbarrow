@@ -245,6 +245,13 @@ manifest*).
   repeat.** ARM sets `stage` once per job from the clock in hundredths of a
   second. It was unique across all 103 jobs, and the `stage` in every
   `arm-job.json` (*The raw copy's record*) matched its job's (2026-11-08).
+  ARM's web UI also writes its progress text into `stage` and commits it
+  (`json_api.process_makemkv_logfile`) while a browser shows an MKV-mode
+  rip. No job's was left that way (all 104, 2026-11-10), and such a value
+  fails the manifest id's pattern, so the exporter skips the job rather than
+  export it under a second id. In `backup` mode the same code raises
+  instead, shown as the job's stage: `Unknown - 'NoneType' object has no
+  attribute 'group'`.
 - **The track table is not a reliable raw↔transcode map.** For job 21,
   HandBrake's track *N* is MakeMKV's track *N−1*, and the final `title_K.mkv`
   names follow neither cleanly. Nothing links a MakeMKV row to a HandBrake one,
@@ -277,8 +284,9 @@ number HandBrake and ARM's moves know it by and the patch's key for it. The
 exporter translates the paths, drops that number, and checks the rest against
 the model; it is the one contract, and the deployment repository's ARM
 documentation describes how the patch keeps it. A site without the patch exports no `raw`, and
-its raw folders are paired by structure and fingerprint. **Not yet deployed;
-see [arm-manifest-export](../todos/arm-manifest-export.md).**
+its raw folders are paired by structure and fingerprint. On a real job (104,
+2026-11-09) the record appeared at the start of the rip with both checks
+`not_run`, and ended with both `passed` and each transcode at its path.
 
 Before the record, the patch wrote the same facts into each raw folder as
 `arm-job.json` (from job 76, and written afterwards for Blu-ray jobs 7, 8, 23,

@@ -7,3 +7,4 @@ request(s). It is the registry that stops a retired slug from being reused.
 |---|---|---|
 | release-pipeline | 2026-10-19 | #1, #2, #3 |
 | analysis | 2026-10-20 | #5 |
+| arm-manifest-export | 2026-11-10 | #11, #12, #14, #17 |
