@@ -19,12 +19,10 @@ git config --worktree core.hooksPath "$(git rev-parse --absolute-git-dir)/hooks"
 command -v prek >/dev/null 2>&1 && prek install -t pre-commit -t commit-msg || true
 """
 
-# The gitignored files a session relies on: CLAUDE.local.md, and the design
-# prototypes the specs point at. Linked rather than copied, so there is one copy
-# to keep current.
+# The gitignored files a session relies on: the design prototypes the specs
+# point at. Linked rather than copied, so there is one copy to keep current.
 local-files = """
 primary=$(git worktree list --porcelain | awk '/^worktree /{print substr($0, 10); exit}')
-[ -e "$primary/CLAUDE.local.md" ] && ln -sfn "$primary/CLAUDE.local.md" CLAUDE.local.md
 [ -d "$primary/captures/design" ] && mkdir -p captures && ln -sfn "$primary/captures/design" captures/design
 true
 """
