@@ -26,7 +26,7 @@ be measured from its files.
 - **Plans of conformance only**: the folder renamed to carry `{tmdb-N}`, the
   flat `raw/` split into `raw/<LABEL> [<identity>]/` with `disc.json` where the
   disc's identity can be measured, sidecars and ignore markers written, names
-  folded to Latin-1. No media is replaced or deleted here. A better copy
+  folded to ASCII. No media is replaced or deleted here. A better copy
   arriving is *Case 9*'s fold, through an ordinary manifest.
 - **The same gate.** A plan files automatically only when its identity meets
   the bar in *Confidence*; anything else is review. A misfiled entry is a bug.

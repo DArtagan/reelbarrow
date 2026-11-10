@@ -1,20 +1,38 @@
 import pytest
 
-from reelbarrow.names import LATIN1_END, UnwritableName, component, fold
+from reelbarrow.names import ASCII_END, UnwritableName, component, fold
 
 
-def test_providers_dashes_and_quotes_become_latin1():
+def test_providers_dashes_and_quotes_become_ascii():
     assert fold("Tweety (1995\N{EN DASH}2002)") == "Tweety (1995-2002)"
     assert fold("Ocean\N{RIGHT SINGLE QUOTATION MARK}s Eleven") == "Ocean's Eleven"
     assert fold("Wait\N{HORIZONTAL ELLIPSIS}") == "Wait..."
+    assert fold("A\N{NO-BREAK SPACE}B") == "A B"
 
 
-def test_latin1_is_kept_and_the_rest_keeps_its_base_letter():
-    # Mànran is in the library under its Latin-1 name.
-    assert fold("Mànran") == "Mànran"
-    assert fold("Pok\N{LATIN SMALL LETTER E WITH ACUTE}mon") == "Pokémon"
-    assert fold("Dvo\N{LATIN SMALL LETTER R WITH CARON}ák") == "Dvorák"
-    assert all(ord(c) < LATIN1_END for c in fold("Nausica\N{GREEK SMALL LETTER ALPHA}"))
+def test_an_accented_letter_keeps_its_base():
+    assert fold("Am\N{LATIN SMALL LETTER E WITH ACUTE}lie") == "Amelie"
+    assert fold("M\N{LATIN SMALL LETTER A WITH GRAVE}nran") == "Manran"
+    assert fold(
+        "Dvo\N{LATIN SMALL LETTER R WITH CARON}\N{LATIN SMALL LETTER A WITH ACUTE}k"
+    ) == ("Dvorak")
+
+
+def test_a_letter_with_no_base_is_spelled_out_not_lost():
+    assert fold("\N{LATIN CAPITAL LETTER AE}on Flux") == "AEon Flux"
+    assert fold("Stra\N{LATIN SMALL LETTER SHARP S}e") == "Strasse"
+    assert fold(
+        "Sm\N{LATIN SMALL LETTER O WITH STROKE}rrebr\N{LATIN SMALL LETTER O WITH STROKE}d"
+    ) == ("Smorrebrod")
+
+
+def test_nothing_above_ascii_survives():
+    for text in (
+        "Nausica\N{GREEK SMALL LETTER ALPHA}",
+        "\N{SNOWMAN} Day",
+        "Pok\N{LATIN SMALL LETTER E WITH ACUTE}mon",
+    ):
+        assert all(ord(c) < ASCII_END for c in fold(text))
 
 
 def test_a_colon_is_written_as_the_library_writes_it():

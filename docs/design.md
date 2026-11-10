@@ -132,6 +132,12 @@ Recorded verbatim where Will gave words, so they are not relitigated.
   is a deliberate act rather than a side effect of every merge. See
   [releasing.md](releasing.md).
 - **Dry run first** (2026-10-18), behind a flag; see *The service*.
+- **Library names are ASCII** (2026-11-10), not Latin-1, asked on reviewing
+  the first planner: *"Would/could this process be simpler and more portable if
+  we did ASCII names only (rather than Latin-1)?"* `media/video` held no
+  non-ASCII name when the charset migration was measured, and ASCII keeps it
+  so; the reasons are in `reelbarrow.names`. ARM's title hook in the deployment
+  folds to ASCII too, for consistency.
 
 ---
 
@@ -1444,11 +1450,11 @@ Projects in the deployment repository:
 - **disc-ripping** — produces what this consumes. Owns the raw copy (DVD to
   ISO, and the raw copy's record), D12 (misidentification) and the play-all
   observation.
-- **the filename-charset migration** — library names come from TMDB and will
-  contain curly apostrophes and en dashes, which the share currently rejects
-  with `EIO`. The service must fold names to Latin-1 the same way ARM's title
-  hook does until that migration lands, and must not assume a failed write is
-  anything but this.
+- **the filename-charset migration** — the share rejects any name above
+  U+00FF with `EIO`, and TMDB's names hold curly apostrophes and en dashes.
+  Library names are folded to ASCII (`reelbarrow.names`), so none is ever
+  rejected and the migration never has to convert one, and a failed write is
+  not to be taken for anything but this.
 - **backups** — `media/video` is snapshotted and replicated, which is what makes
   deleting leftovers acceptable; deleted data still occupies space
   until the snapshots holding it expire (monthlies are kept two years).
