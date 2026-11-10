@@ -1187,6 +1187,14 @@ from the share, so a fixture is that command's output.
   `kubectl exec` ran at 17.6 MB/s (E25) and truncated two fingerprints (E30).
   Compare a checksum of the output taken in the pod with one taken after the
   copy.
+- **Captured by the branch's code, before it is released**, since a case's
+  fixture lands with the rule that reads it. The pod's environment already
+  has reelbarrow's dependencies, so the branch's `src/reelbarrow` as a zipapp
+  (`python -m zipapp`, its `__main__` calling `reelbarrow.cli.main`) streamed
+  into the pod's `/tmp` with `kubectl exec -i … sh -c 'cat > /tmp/rb.pyz'`
+  runs as `python /tmp/rb.pyz analyse <manifest>`, read-only against the
+  share. Delete it afterwards. A dependency the image doesn't have yet can't
+  be used this way.
 - **Checked against a fresh listing** from the pod: its file count, sizes and
   durations. That catches a truncated capture.
 - **No Whisper transcripts** until [episode-matching](../todos/episode-matching.md),

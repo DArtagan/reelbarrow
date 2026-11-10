@@ -30,6 +30,12 @@ a new file first.
 
 - **`git diff --no-ext-diff`.** The global git config sends `git diff` through
   difftastic, whose side-by-side output is several times the size.
+- **Run a worktree's commands through its own environment**, with
+  `direnv exec . <command>` from the worktree. A shell started in another
+  checkout carries that checkout's devenv, whose venv installs *its* `src/`, so
+  `pytest` there quietly tests the wrong code.
+- **Edit files with the Edit tool**, not `sed` or a script. A bulk `sed` once
+  rewrote compiled `.pyc` files along with the source.
 - **Verify with `devenv test`, not by printing files back.**
 - **Filter noisy commands** down to the lines that carry the result.
 
@@ -77,8 +83,7 @@ reelbarrow's manifests and secrets, the exporter's sidecar in ARM's pod and the
 alert rules, and
 has its own spec for that half and its own rules for changing it. A spec here
 that needs a deployment change says what has to change, not how that repository
-is laid out. Where it is checked out is in `CLAUDE.local.md`, which is not
-committed.
+is laid out.
 
 ### Debugging captures
 
