@@ -15,9 +15,10 @@ The third of the steps in [README](README.md): the loop over every manifest.
 It is where *Any order* in the design has to be earned. Will: *"the rules
 should ensure that manifests can be processable in any order, with the library
 eventually being filled with the best results."* Each plan is still made from
-one manifest and the library as it stands. *The Hallelujah Trail* will already
-be filed by [first-filing](first-filing.md), so the plans of its failed jobs
-15–17 meet a library that holds it, which is the property under test.
+one manifest and the library as it stands. *Monte Carlo or Bust!* (job 34)
+will already be filed by [first-filing](first-filing.md), so the loop starts
+from a library that holds one of the table's films, and the order the rest
+arrive in is the property under test.
 
 ## Scope
 
@@ -25,11 +26,10 @@ be filed by [first-filing](first-filing.md), so the plans of its failed jobs
   `REELBARROW_MANIFEST_DIR` ([single-manifest-plan](single-manifest-plan.md)).
   It records nothing; the inbox is [plan-inbox](plan-inbox.md).
 - **The cases, simplest first**, each with its fixture captured as
-  [single-manifest-plan](single-manifest-plan.md)'s *Fixtures, case by case*
-  says, its row as a failing test, then the rule:
-  1. The other films the table files automatically: *Those Daring Young Men…*
-     job 34 (film only), *The Great Race* job 29 (film and one extra), *The
-     Polar Express* job 25 (film, three extras, and its raw paired by
+  *The planner's fixtures, case by case* under *Testing*, layer 1, in the
+  design says, its row as a failing test, then the rule:
+  1. The other films the table files automatically: *The Great Race* job 29
+     (film and one extra), *The Polar Express* job 25 (film, three extras, and its raw paired by
      fingerprint with the misnamed Mary-Kate folder, the 0.4 GB
      `raw/The-Polar-Express` a leftover).
   2. Manifests with nothing to file: failed jobs 15–17 beside job 18, and the
@@ -41,7 +41,8 @@ be filed by [first-filing](first-filing.md), so the plans of its failed jobs
      misidentified; *The Rescuers* jobs 5, 7, 8 and 23 beside job 27; Tweety
      job 33, byte-identical to job 22.
   4. The rows that go to review or hold, which must plan correctly even though
-     nothing files them yet: *Field of Dreams*, both *Robin Hood* jobs, *The
+     nothing files them yet: *The Hallelujah Trail* job 18 (its runtime, E38;
+     the plan already says review, and needs only its fixture), *Field of Dreams*, both *Robin Hood* jobs, *The
      Rescuers*' second film, *Shrek the Third*'s fold, *Around the World in 80
      Days* (hold until disc 2), and Tweety (review until
      [episode-matching](episode-matching.md)).

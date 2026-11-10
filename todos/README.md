@@ -21,12 +21,12 @@ Specs are referred to by name, not number, so finishing one renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 2 | [single-manifest-plan](single-manifest-plan.md) | One manifest, *The Hallelujah Trail*, planned and gated, executing nothing; `reelbarrow analyse` and the first fixture | — |
+| 2 | [single-manifest-plan](single-manifest-plan.md) | One manifest, job 34's *Monte Carlo or Bust!*, planned and gated, executing nothing; `reelbarrow analyse` and the first fixture | — |
 | 3 | [executor](executor.md) | The executor and the ledger: that plan carried out on a test tree, and refused by dry run on the share | single-manifest-plan |
-| 4 | [first-filing](first-filing.md) | *The Hallelujah Trail* filed for real by one deliberate run, its preconditions proven, then dry run back on | executor |
+| 4 | [first-filing](first-filing.md) | *Monte Carlo or Bust!* filed for real by one deliberate run, its preconditions proven, then dry run back on | executor |
 | 5 | [manifest-loop](manifest-loop.md) | Every manifest planned, simplest case first, in any order: the whole fixtures table | executor |
 | 6 | [plan-inbox](plan-inbox.md) | The service: a plan and its basis per manifest in the inbox, replanned when the basis changes, listed in the web UI | manifest-loop |
-| 7 | [automatic-filing](automatic-filing.md) | Dry run off: the service files what the gate passes, the table's other three films | plan-inbox, first-filing |
+| 7 | [automatic-filing](automatic-filing.md) | Dry run off: the service files what the gate passes, the table's other two films | plan-inbox, first-filing |
 | 8 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | automatic-filing |
 | 9 | [review-ui](review-ui.md) | Review page and Pushover for the inbox's review and hold plans: accept, correct, defer | automatic-filing |
 | 10 | [editions](editions.md) | Prove the editions naming in Plex, Jellyfin and Kodi before using it | — |
