@@ -36,7 +36,7 @@ def tmdb(requests: list[httpx.Request], status: int = 200) -> Client:
 
 def test_the_token_goes_in_a_header_never_the_url():
     requests: list[httpx.Request] = []
-    tmdb(requests).movies_for_imdb("tt0064688")
+    tmdb(requests).movie_ids_for_imdb("tt0064688")
     (request,) = requests
     assert request.headers["authorization"] == f"Bearer {TOKEN}"
     assert TOKEN not in str(request.url)
@@ -46,7 +46,7 @@ def test_the_token_goes_in_a_header_never_the_url():
 
 def test_a_film_by_its_imdb_id():
     client = tmdb([])
-    assert client.movies_for_imdb("tt0064688") == [38792]
+    assert client.movie_ids_for_imdb("tt0064688") == [38792]
     movie = client.movie(38792)
     assert movie == Movie(
         id=38792,
@@ -74,7 +74,7 @@ def test_a_recording_keeps_only_what_a_rule_reads():
 def test_a_recording_replays_as_the_service_would_have_read_it():
     recording = record(tmdb([]), "tt0064688")
     replayed = Recorded(recording)
-    assert replayed.movies_for_imdb("tt0064688") == [38792]
+    assert replayed.movie_ids_for_imdb("tt0064688") == [38792]
     assert replayed.movie(38792) == tmdb([]).movie(38792)
     with pytest.raises(TmdbError, match="no recorded reply"):
         replayed.movie(1)

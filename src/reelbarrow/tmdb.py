@@ -59,7 +59,7 @@ def _trim_movie(reply: Mapping[str, Any]) -> dict:
 
 
 class Tmdb(Protocol):
-    def movies_for_imdb(self, imdb_id: str) -> list[int]:
+    def movie_ids_for_imdb(self, imdb_id: str) -> list[int]:
         """TMDB's ids of the films with this IMDb id."""
         ...
 
@@ -75,7 +75,7 @@ class Replies:
     def get(self, request: str) -> Mapping[str, Any]:
         raise NotImplementedError
 
-    def movies_for_imdb(self, imdb_id: str) -> list[int]:
+    def movie_ids_for_imdb(self, imdb_id: str) -> list[int]:
         request = f"find/{imdb_id}"
         reply = _trim_find(self.get(request))
         self.recorded[request] = reply
@@ -134,7 +134,7 @@ class Recorded(Replies):
 
 def record(client: Replies, imdb_id: str) -> dict[str, dict]:
     """Ask what identify asks for one film, and return the replies."""
-    for tmdb_id in client.movies_for_imdb(imdb_id):
+    for tmdb_id in client.movie_ids_for_imdb(imdb_id):
         client.movie(tmdb_id)
     return dict(sorted(client.recorded.items()))
 

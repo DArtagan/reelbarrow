@@ -377,7 +377,7 @@ def _identify(job: Manifest, tmdb: Tmdb, check: _Checks) -> Movie | None:
     ):
         return None
     assert imdb.value is not None
-    ids = tmdb.movies_for_imdb(imdb.value)
+    ids = tmdb.movie_ids_for_imdb(imdb.value)
     if not check(
         "tmdb",
         len(ids) == 1,
