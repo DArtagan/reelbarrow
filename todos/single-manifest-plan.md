@@ -48,8 +48,9 @@ On the `single-manifest-plan` branch:
 
 - **Record TMDB's replies.** `tests/fixtures/dvd-film-raw-unrecorded/tmdb.json`
   was written by hand from TMDB's public page for `38792`, for want of a token.
-  Replace it with `python -m reelbarrow.tmdb tt0064688`'s output, and correct
-  the tests if the release date or anything else differs.
+  Replace it with `secretspec run -- python -m reelbarrow.tmdb tt0064688`'s
+  output, the token stored first with `secretspec set REELBARROW_TMDB_TOKEN`,
+  and correct the tests if the release date or anything else differs.
 - **Deploy**: the token filled in and the secret on `main` in the deployment
   repository; this branch merged and released (see
   [releasing.md](../docs/releasing.md)).

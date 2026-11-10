@@ -40,6 +40,17 @@ devenv test                    # every hook over every file, as CI runs it
 reelbarrow serve               # the web UI on :8000, in dry-run mode
 ```
 
+The secrets it reads are declared in [`secretspec.toml`](secretspec.toml), and
+kept in your system keyring rather than a file. Store each once, then give it
+only to the command that needs it:
+
+```bash
+secretspec set REELBARROW_TMDB_TOKEN               # prompts; not echoed
+secretspec run -- reelbarrow plan path/to/manifest.json
+```
+
+The tests need none of them.
+
 ## Licence
 
 MIT
