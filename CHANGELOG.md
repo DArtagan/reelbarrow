@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/DArtagan/reelbarrow/compare/v0.3.1...v0.4.0) (2026-11-10)
+
+
+### Features
+
+* **plan:** plan and gate one manifest, executing nothing ([#18](https://github.com/DArtagan/reelbarrow/issues/18)) ([16c53e2](https://github.com/DArtagan/reelbarrow/commit/16c53e2ae8dfa67d5aeb00fdcbe14ea531ee4d9a))
+
+
+### Documentation
+
+* **exporter:** record the exporter proven on the cluster and a real disc ([#17](https://github.com/DArtagan/reelbarrow/issues/17)) ([323ff37](https://github.com/DArtagan/reelbarrow/commit/323ff37a82be68e0fbe40c486265abf2cd68f0ef))
+* **todos:** build the pipeline from the smallest loop outward ([#15](https://github.com/DArtagan/reelbarrow/issues/15)) ([a43353d](https://github.com/DArtagan/reelbarrow/commit/a43353dff515ea952f7bd54598e006994ec9d957))
+
 ## [0.3.1](https://github.com/DArtagan/reelbarrow/compare/v0.3.0...v0.3.1) (2026-11-09)
 
 
