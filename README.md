@@ -25,7 +25,12 @@ VIDEO_ROOT=/path/to/video docker compose up -d
 ```
 
 `VIDEO_ROOT` holds ARM's output and the `movies/` and `shows/` libraries, on one
-filesystem. The web UI is on port 8000.
+filesystem. The web UI is on port 8000. `TMDB_TOKEN`, TMDB's API Read Access
+Token, is what identifies films:
+
+```bash
+docker compose exec reelbarrow reelbarrow plan    # every manifest's plan
+```
 
 ## Development
 

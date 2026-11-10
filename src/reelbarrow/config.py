@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,3 +19,20 @@ class Settings(BaseSettings):
     manifest_dir: Path = Path("/video/import/automatic-ripping-machine/manifests")
     # Job state and the ledger.
     data_dir: Path = Path("/data")
+
+    # The share's paths, from video_root, as a manifest's are. Where ARM puts
+    # its raw copies: intake looks here for a job's when its manifest records
+    # none.
+    arm_raw: str = "import/automatic-ripping-machine/raw"
+    # The film library Plex reads.
+    movies: str = "movies"
+
+    # TMDB's API Read Access Token, sent as a bearer header so it never
+    # appears in a URL that might be logged.
+    tmdb_token: SecretStr | None = None
+
+    @field_validator("tmdb_token", mode="before")
+    @classmethod
+    def _empty_is_unset(cls, value: object) -> object:
+        # compose.yaml passes an unset variable on as an empty string.
+        return None if value == "" else value

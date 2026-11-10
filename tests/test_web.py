@@ -24,3 +24,15 @@ def test_healthz_reports_mode():
 def test_index_states_dry_run():
     client = TestClient(create_app(Settings(dry_run=True)))
     assert "nothing on the share is changed" in client.get("/").text
+
+
+def test_an_empty_tmdb_token_is_none(monkeypatch):
+    monkeypatch.setenv("REELBARROW_TMDB_TOKEN", "")
+    assert Settings().tmdb_token is None
+
+
+def test_the_tmdb_token_is_kept_out_of_reprs(monkeypatch):
+    monkeypatch.setenv("REELBARROW_TMDB_TOKEN", "eyJ-secret")
+    settings = Settings()
+    assert settings.tmdb_token.get_secret_value() == "eyJ-secret"
+    assert "eyJ-secret" not in repr(settings)

@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "source": "arm",
+  "id": "34-178993082181",
+  "completed": {
+    "path": "import/automatic-ripping-machine/completed/movies/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969)",
+    "mtime": "2026-09-20T21:48:45.113643Z",
+    "folders": [],
+    "files": [
+      {
+        "path": "import/automatic-ripping-machine/completed/movies/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969)/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969).mkv",
+        "mtime": "2026-09-20T21:48:45.082030Z",
+        "size": 1821842964,
+        "video": {
+          "duration": 7487.913,
+          "chapters": [
+            0.0,
+            413.179,
+            914.614,
+            1213.546,
+            1482.982,
+            1803.969,
+            2267.198,
+            2550.481,
+            3033.364,
+            3475.806,
+            4113.276,
+            4752.915,
+            5179.307,
+            5359.821,
+            5751.98,
+            6026.888,
+            6345.873,
+            6560.087,
+            7066.526,
+            7394.053
+          ]
+        },
+        "error": null
+      }
+    ]
+  },
+  "raw": [
+    {
+      "path": "import/automatic-ripping-machine/raw/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies",
+      "mtime": "2026-09-20T19:11:23.586100Z",
+      "folders": [],
+      "files": [
+        {
+          "path": "import/automatic-ripping-machine/raw/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies/B1_t00.mkv",
+          "mtime": "2026-09-20T20:04:36.951216Z",
+          "size": 4331224636,
+          "video": {
+            "duration": 7487.913,
+            "chapters": [
+              0.0,
+              413.079333,
+              914.6137,
+              1213.545667,
+              1482.9815,
+              1803.968833,
+              2267.098167,
+              2550.381167,
+              3033.363667,
+              3475.805667,
+              4113.275833,
+              4752.914833,
+              5179.207367,
+              5359.721033,
+              5751.979567,
+              6026.887533,
+              6345.872867,
+              6560.086867,
+              7066.426033,
+              7393.953233,
+              7486.8794
+            ]
+          },
+          "error": null
+        }
+      ],
+      "found": "written_during_run"
+    }
+  ],
+  "missing": []
+}
