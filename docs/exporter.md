@@ -23,7 +23,10 @@ reelbarrow arm-export-manifests --db /root/db/arm.db --out /manifests \
 | `--once` | | one pass; exits 1 if it couldn't read the database or write the manifests |
 
 It runs from reelbarrow's image, so exporter and reader are always the same
-version. In Kubernetes it is a sidecar in ARM's pod, the only place ARM's
+version. The image's `CMD` is `reelbarrow serve` and it has no `ENTRYPOINT`,
+so a container running the exporter sets its command, `[reelbarrow]`, not
+only its arguments; with arguments alone it looks for an executable named
+`arm-export-manifests` and crash-loops. In Kubernetes it is a sidecar in ARM's pod, the only place ARM's
 database volume can be mounted beside ARM.
 
 ### `--arm-path`
@@ -67,8 +70,8 @@ unless its `TZ` is set. A deployment that sets ARM's `TZ` passes the same here.
 2. Builds each job's manifest and writes `manifest-arm-<job_id>-<stage>.json`
    only if it differs from the file there, by writing a hidden temporary file in
    the same directory and renaming it over the old one. A reader sees the old
-   file or the new one, whole, and an unchanged job's file keeps its
-   modification time.
+   file or the new one, whole (measured over SMB in *Reading the manifests*),
+   and an unchanged job's file keeps its modification time.
 3. Writes `exporter.json` last, the same way.
 
 It never creates the manifest directory or the database: a missing mount fails
@@ -104,6 +107,37 @@ manifest that changed, in UTC. A pass that failed doesn't rewrite it, so a
 which the service can't otherwise tell from no discs. `skipped_jobs` lists, by
 ARM's job id, the jobs the pass couldn't export. Intake reads only
 `manifest-*.json`.
+
+In the deployment, through a Blu-ray job of 10 h 41 min (job 104,
+2026-11-09), every `passed_at` fell on the same 30-second phase and the
+sidecar logged no failed pass. A pass that overran would have shifted every
+later one, as each sleeps only what is left of its interval. An older
+`passed_at` seen from another node is that node's stale read, below.
+
+## Reading the manifests
+
+Measured from reelbarrow's pod, a second SMB client on another node, while the
+sidecar replaced `exporter.json` every 30 seconds and job 104's manifest as the
+job moved (2026-11-09). The mount is SMB 3.1.1 with `cache=strict`,
+`actimeo=1` and `closetimeo=1`:
+
+- **Never partial, never missing**, in about 3,000 reads by a lone reader
+  opening, reading and closing every 1.5 to 2 seconds, which saw every
+  rewrite. Reads that far apart can't rule out a gap of milliseconds with no
+  file; none was seen.
+- **But stale, without limit, if the node keeps a handle on the file.** The
+  Linux client defers each close by `closetimeo` and reuses that handle when
+  the path is opened again, and nothing told it the file had been replaced.
+  One process holding the file open made every reader on the node see a
+  29-minute-old copy until it closed. Opening every 50 ms, or two readers each
+  every 1.5 s but 0.7 s apart, kept the old copy for the whole two-minute
+  run, and up to 110 s overnight.
+
+So a reader opens a manifest, reads it whole, and closes it, and the node
+opens each file no more often than once per `closetimeo`, counting every
+process on it. A mount with `closetimeo=0` should remove the second
+condition, but is untested. The reader that has to keep this is the
+service's scan ([plan-inbox](../todos/plan-inbox.md)).
 
 ## Mounts and permissions
 

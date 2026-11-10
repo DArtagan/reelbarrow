@@ -652,6 +652,23 @@ def test_a_job_that_cannot_be_exported_skips_only_itself(db, export, out, caplog
     assert json.loads((out / "exporter.json").read_text())["skipped_jobs"] == [2, 3]
 
 
+def test_a_stage_arms_ui_overwrote_skips_the_job_rather_than_renaming_it(
+    db, export, out
+):
+    # ARM's UI writes its progress text into `stage` while it shows an MKV-mode
+    # rip; exported, the job would reappear under a second id.
+    arm_db.insert(db, "job", arm_db.job(1))
+    export.run_pass()
+    arm_db.execute(
+        db,
+        "update job set stage = ? where job_id = 1",
+        "Track 1/5<br>Saving to MKV file",
+    )
+    export.run_pass()
+    assert manifests(out) == [NAME.format(1)]
+    assert json.loads((out / "exporter.json").read_text())["skipped_jobs"] == [1]
+
+
 def test_liveness_is_rewritten_each_pass(db, export, out):
     arm_db.insert(db, "job", arm_db.job(1))
     export.run_pass()

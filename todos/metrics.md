@@ -15,7 +15,8 @@ the deployment's rule for every workload:
 - A review untouched for 7 days.
 - The service's own liveness.
 - The manifest exporter's liveness: the time in its `exporter.json`
-  ([arm-manifest-export](arm-manifest-export.md)). Without it, a dead exporter
+  (*Liveness* in [`docs/exporter.md`](../docs/exporter.md)), read as
+  *Reading the manifests* there says. Without it, a dead exporter
   reads as no discs, and the first alert can't fire.
 
 ## Scope

@@ -101,8 +101,9 @@ be filed by [first-filing](first-filing.md), so the plans of its failed jobs
 
 ## Needs
 
-A manifest on the share for every job in the fixtures table, from
-[arm-manifest-export](arm-manifest-export.md).
+A manifest on the share for every job in the fixtures table, which the
+[exporter](../docs/exporter.md) has written for every ARM job since
+2026-11-09.
 
 ## Done when
 
