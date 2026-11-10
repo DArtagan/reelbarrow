@@ -401,7 +401,7 @@ evidence is in *The cases*. "Leftovers" means deleted once filing succeeds.
 | ARM output (under `completed/`) | jobs | expected outcome |
 |---|---|---|
 | `movies/The-Hallelujah-Trail (1965)_178824223068` | 18 ok; 15–17 failed | **review**: the feature runs 155.5 min against TMDB's 165 (`23194`), −5.7%, outside the runtime bar (E38). Otherwise film → `The Hallelujah Trail (1965) {tmdb-23194}`; raw `raw/The-Hallelujah-Trail/B1_t00.mkv`, its pairing within 0.13 s; leftovers: three empty sibling dirs and their `transcode/` twins |
-| `movies/Those-Daring-Young-Men-…-Jalopies (1969)` | 34 | **auto**: film only, → `Monte Carlo or Bust! (1969) {tmdb-38792}`, TMDB's English title, the disc's being the US release's; raw `raw/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies/B1_t00.mkv`; the job's emptied folders are leftovers (E38) |
+| `movies/Those-Daring-Young-Men-…-Jalopies (1969)` | 34 | **auto**: film only, → `Monte Carlo or Bust! (1969) {tmdb-38792}`, TMDB's English title, the disc's being the US release's (Will, 2026-11-10: *"Sure, I'll accept the English title on this one."*); raw `raw/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies/B1_t00.mkv`; the job's emptied folders are leftovers (E38) |
 | `movies/The-Great-Race (1965)` | 29 | **auto**: film + 1 extra |
 | `movies/The-Polar-Express (2004)` | 25 ok; 24 the same disc misidentified | **auto**: film + 3 extras. Raw pairs by fingerprint: the complete backup is `raw/The-Adventures-of-Mary-Kate-and-Ashley--…` (14.3 GB); `raw/The-Polar-Express` is a 0.4 GB partial and is a leftover |
 | `movies/Field-of-Dreams (1989)` | 30, 31 — **both failed**; file recovered by hand | **review**: no successful job vouches for the file. Two raw copies whose video hashes match (disc-ripping, 2026-09-20): keep one |
