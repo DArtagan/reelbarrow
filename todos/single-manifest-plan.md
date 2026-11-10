@@ -39,18 +39,14 @@ On the `single-manifest-plan` branch:
   checksums equal, and a fresh listing there agreeing on file count (one
   each), sizes and durations (7487.913 s each). `tests/test_plan.py` plans it
   automatic, with the row's film and raw, and sends each broken rule to
-  review.
+  review. Its `tmdb.json` is `python -m reelbarrow.tmdb tt0064688`'s
+  recording of TMDB's API, 2026-11-10.
 - The secret: `REELBARROW_TMDB_TOKEN` in `kubernetes/apps/reelbarrow/secrets.sops.yaml`
   in the deployment repository, taken by the Deployment with `envFrom`, on its
   `video-library-ingest` branch, its value a placeholder until filled in.
 
 ## Still to do
 
-- **Record TMDB's replies.** `tests/fixtures/dvd-film-raw-unrecorded/tmdb.json`
-  was written by hand from TMDB's public page for `38792`, for want of a token.
-  Replace it with `secretspec run -- python -m reelbarrow.tmdb tt0064688`'s
-  output, the token stored first with `secretspec set REELBARROW_TMDB_TOKEN`,
-  and correct the tests if the release date or anything else differs.
 - **Deploy**: the token filled in and the secret on `main` in the deployment
   repository; this branch merged and released (see
   [releasing.md](../docs/releasing.md)).
@@ -63,7 +59,7 @@ On the `single-manifest-plan` branch:
 
 - A layer-1 test plans job 34 from its fixture and asserts its row of the
   fixtures table: automatic, the film and its raw where the row puts them.
-  *Met, with TMDB's replies to be recorded.*
+  *Met.*
 - The fixture's file count and durations matched a fresh listing from the pod
   when it was captured. *Met.*
 - `reelbarrow plan` in the deployed pod, against the share, gives the same plan
