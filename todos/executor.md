@@ -44,10 +44,44 @@ code that does it is built while there is one plan to carry out.
   the same path, and hands each automatic plan to the executor. Review and
   hold plans are printed and left alone.
 
+## Decisions
+
+Will, 2026-11-10, asked while the executor was built:
+
+- **An operation that fails part way** (a rename meeting `EACCES` after the
+  film's folder was made): *"Stop, record it as incomplete"*, rather than
+  undoing what was done, which can fail too and is more code acting on the
+  share. Recorded in step 7 of *The service*.
+- **No fanart.tv key**: `reelbarrow file` refuses to run (exit 2), as `plan`
+  does without TMDB's token, rather than filing with TMDB's artwork only.
+  Without it a film would lack its logo, clear art, disc and landscape art,
+  and nothing would add them later.
+
+## Built (2026-11-10, branch `executor`)
+
+`reelbarrow.executor` (`Share`, the choke point, and `Executor`),
+`reelbarrow.ledger`, `reelbarrow.sidecars`, `reelbarrow.fanart`,
+`reelbarrow.plex`, TMDB's credits and images in `reelbarrow.tmdb`, and
+`reelbarrow file`. The write guard is `tests/test_write_guard.py`, static,
+and `tests/share_guard.py`, an audit hook every test that builds a share
+takes through the `guarded` fixture. The first two done-when conditions
+pass in the tests; the third needs a release.
+
+`disc.json` holds what the planner puts in it: the disc, the job, the raw
+form and which raw title became which file. Job 34 has no raw copy's
+record, so there are no backup checks to carry; a recorded raw copy isn't
+planned yet, and the spec that plans one adds them.
+
+What the deployment needs, for the third condition:
+
+- `REELBARROW_FANART_KEY` in reelbarrow's secret.
+- A release with this branch in it, and the pod on it.
+
 ## Secrets
 
 fanart.tv's key, added to reelbarrow's secret in the deployment repository.
-Plex's token is [first-filing](first-filing.md)'s.
+Plex's token, URL and paths are [first-filing](first-filing.md)'s: dry run
+neither scans nor needs them.
 
 ## Done when
 

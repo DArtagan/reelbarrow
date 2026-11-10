@@ -26,10 +26,13 @@ VIDEO_ROOT=/path/to/video docker compose up -d
 
 `VIDEO_ROOT` holds ARM's output and the `movies/` and `shows/` libraries, on one
 filesystem. The web UI is on port 8000. `TMDB_TOKEN`, TMDB's API Read Access
-Token, is what identifies films:
+Token, is what identifies films, and `FANART_KEY`, fanart.tv's personal API
+key, is what filing fetches artwork with:
 
 ```bash
 docker compose exec reelbarrow reelbarrow plan    # every manifest's plan
+docker compose exec reelbarrow reelbarrow file    # each automatic plan carried out;
+                                                  # in dry run, every change refused
 ```
 
 ## Development
@@ -46,6 +49,7 @@ only to the command that needs it:
 
 ```bash
 secretspec set REELBARROW_TMDB_TOKEN               # prompts; not echoed
+secretspec set REELBARROW_FANART_KEY
 secretspec run -- reelbarrow plan path/to/manifest.json
 ```
 

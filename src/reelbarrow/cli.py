@@ -69,6 +69,21 @@ def main() -> None:
     )
     plan_command.add_argument("--json", action="store_true", help="each plan as JSON")
 
+    file_command = commands.add_parser(
+        "file",
+        help="plan manifests as `plan` does, and carry out each automatic plan; "
+        "in dry run every change is refused and reported",
+    )
+    file_command.add_argument(
+        "path",
+        type=Path,
+        nargs="?",
+        help="a manifest, or a folder of them (default: REELBARROW_MANIFEST_DIR)",
+    )
+    file_command.add_argument(
+        "--json", action="store_true", help="each plan and its report as JSON"
+    )
+
     args = parser.parse_args()
     if args.command == "serve":
         import uvicorn
@@ -102,6 +117,8 @@ def main() -> None:
         raise SystemExit(_analyse(args.manifest))
     elif args.command == "plan":
         raise SystemExit(_plan(args.path, args.json))
+    elif args.command == "file":
+        raise SystemExit(_file(args.path, args.json))
 
 
 def _analyse(path: Path) -> int:
@@ -117,30 +134,30 @@ def _analyse(path: Path) -> int:
     return 0
 
 
-def _plan(path: Path | None, as_json: bool) -> int:
+def _missing(*names: str) -> int:
+    for name in names:
+        print(f"reelbarrow: {name} is not set", file=sys.stderr)
+    return 2
+
+
+def _planned(settings, tmdb, path: Path | None, as_json: bool):
+    """Each manifest's plan, as (manifest, plan); None for one that couldn't
+    be planned, which is reported here."""
     from pydantic import ValidationError
 
     from reelbarrow import intake, plan
     from reelbarrow.analyse import analyse
-    from reelbarrow.config import Settings
     from reelbarrow.manifest import State
-    from reelbarrow.tmdb import Client, TmdbError
+    from reelbarrow.tmdb import TmdbError
 
-    settings = Settings()
-    if settings.tmdb_token is None:
-        print("reelbarrow: REELBARROW_TMDB_TOKEN is not set", file=sys.stderr)
-        return 2
-    tmdb = Client(settings.tmdb_token.get_secret_value())
     index = intake.RawIndex(settings.video_root, settings.arm_raw)
     library = plan.ShareLibrary(settings.video_root, settings.movies)
-    failed = False
-    plans = []
     for manifest_path in intake.manifest_paths(path or settings.manifest_dir):
         try:
             job = intake.read(manifest_path)
         except (OSError, ValidationError) as error:
             print(f"{manifest_path.name}: unreadable: {error}", file=sys.stderr)
-            failed = True
+            yield None
             continue
         if job.state is State.RUNNING:
             if not as_json:
@@ -151,12 +168,114 @@ def _plan(path: Path | None, as_json: bool) -> int:
             made = plan.plan(job, analysis, tmdb, library, movies=settings.movies)
         except TmdbError as error:
             print(f"{job.source} {job.id}: {error}", file=sys.stderr)
+            yield None
+            continue
+        yield job, made
+
+
+def _plan(path: Path | None, as_json: bool) -> int:
+    from reelbarrow import plan
+    from reelbarrow.config import Settings
+    from reelbarrow.tmdb import Client
+
+    settings = Settings()
+    if settings.tmdb_token is None:
+        return _missing("REELBARROW_TMDB_TOKEN")
+    tmdb = Client(settings.tmdb_token.get_secret_value())
+    failed = False
+    plans = []
+    for planned in _planned(settings, tmdb, path, as_json):
+        if planned is None:
             failed = True
             continue
+        _, made = planned
         if as_json:
             plans.append(made.to_json())
         else:
             print(plan.render(made) + "\n")
     if as_json:
         print(json.dumps(plans, indent=2, ensure_ascii=False))
+    return 1 if failed else 0
+
+
+def _file(path: Path | None, as_json: bool) -> int:
+    from reelbarrow import executor, fanart, plan, sidecars
+    from reelbarrow.config import Settings
+    from reelbarrow.ledger import Ledger
+    from reelbarrow.plex import Plex
+    from reelbarrow.tmdb import Client
+
+    settings = Settings()
+    missing = [
+        name
+        for name, value in [
+            ("REELBARROW_TMDB_TOKEN", settings.tmdb_token),
+            ("REELBARROW_FANART_KEY", settings.fanart_key),
+        ]
+        if value is None
+    ]
+    # Only a live run scans, and a filing Plex never sees would go unnoticed.
+    if not settings.dry_run:
+        missing += [
+            name
+            for name, value in [
+                ("REELBARROW_PLEX_URL", settings.plex_url),
+                ("REELBARROW_PLEX_TOKEN", settings.plex_token),
+                ("REELBARROW_PLEX_PATHS", settings.plex_paths),
+            ]
+            if not value
+        ]
+    if missing:
+        return _missing(*missing)
+    assert settings.tmdb_token is not None and settings.fanart_key is not None
+    tmdb = Client(settings.tmdb_token.get_secret_value())
+    plex = None
+    if settings.plex_url is not None and settings.plex_token is not None:
+        plex = Plex(
+            str(settings.plex_url),
+            settings.plex_token.get_secret_value(),
+            settings.plex_paths,
+        )
+    carrying_out = executor.Executor(
+        share=executor.Share(settings.video_root, dry_run=settings.dry_run),
+        ledger=Ledger(settings.data_dir),
+        sources=sidecars.Sources(
+            tmdb=tmdb,
+            fanart=fanart.Client(settings.fanart_key.get_secret_value()),
+            images=sidecars.HttpImages(),
+        ),
+        libraries=[settings.movies],
+        plex=plex,
+    )
+    if not as_json:
+        print(
+            "Dry run: every change is refused.\n"
+            if settings.dry_run
+            else "Filing is live.\n"
+        )
+    failed = False
+    documents = []
+    for planned in _planned(settings, tmdb, path, as_json):
+        if planned is None:
+            failed = True
+            continue
+        job, made = planned
+        report = None
+        if made.gate is plan.Gate.AUTOMATIC:
+            report = carrying_out.carry_out(made, job)
+            failed = failed or not report.succeeded
+        if as_json:
+            documents.append(
+                {
+                    "plan": made.to_json(),
+                    "report": report.to_json() if report is not None else None,
+                }
+            )
+        elif report is None:
+            print(plan.render(made))
+            print(f"  left for {made.gate}\n")
+        else:
+            print(executor.render_report(report) + "\n")
+    if as_json:
+        print(json.dumps(documents, indent=2, ensure_ascii=False))
     return 1 if failed else 0

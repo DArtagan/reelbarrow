@@ -916,7 +916,17 @@ The pipeline, per ARM job (and later per backlog folder):
 7. **File.** Renames on the same filesystem, sidecars, then deletion of
    leftovers, then the ledger entry, in that order. Then a Plex partial scan of
    the touched folder (`/library/sections/{id}/refresh?path=…`). Plex's own
-   change detection cannot be relied on over a CIFS mount.
+   change detection cannot be relied on over a CIFS mount. Every sidecar is
+   rendered before the first operation, so a provider that can't be reached
+   stops the filing before anything moves. The ledger's entry is opened
+   before the first operation and updated after each, so a filing that dies
+   part way leaves a record of how far it got. An operation that fails stops
+   the rest, and the entry says `incomplete` with what was done; nothing is
+   undone automatically, and no scan follows (Will, 2026-11-10, choosing
+   *"Stop, record it as incomplete"* over undoing what was done, since
+   undoing can fail too and is more code acting on the share). The
+   executor, the ledger and the sidecars are `reelbarrow.executor`,
+   `reelbarrow.ledger` and `reelbarrow.sidecars`.
 8. **Notify.** Pushover to the brother: filed, or review needed, with a link.
 
 By hand, `reelbarrow analyse <manifest>` prints steps 1 and 2's result for one
@@ -925,6 +935,12 @@ manifest as JSON, the document a fixture is (*Testing*, layer 1), and
 folder of them, or by default every manifest in `REELBARROW_MANIFEST_DIR`.
 Neither records or changes anything. A rule the planner doesn't have yet
 fails a check, so a case it can't plan goes to review, never files itself.
+`reelbarrow file [path]` plans the same manifests and hands each automatic
+plan to the executor, which carries out step 7, and prints each review or
+hold plan and leaves it. In dry run it reports every change as refused, and
+writes neither the share nor the ledger. It needs fanart.tv's key as well as
+TMDB's token, so a film is never filed without the artwork only fanart.tv
+has (Will, 2026-11-10), and, when live, Plex's URL, token and paths.
 
 **Plans, their basis, and the inbox** (Will, 2026-11-09). A plan is what steps
 1–6 make of one manifest: every operation with its reasons, and the gate's
