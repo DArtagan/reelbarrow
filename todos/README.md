@@ -55,6 +55,12 @@ remains.
 - **Record why, not just what**, and record decisions Will made verbatim, so they
   are not relitigated.
 - **Point at the design rather than restating it.** Two copies drift.
+- **Show an example of each new thing the spec writes**, to the share or for a
+  person to read: a file's contents, a folder's layout, a report. Agree it with
+  Will before building it. On the executor, `disc.json`'s shape, the ledger and
+  the filing record were each redesigned once Will saw an example, after the
+  code was written; and once something is in the library, changing its format
+  is a migration.
 - **End with done-when conditions measured on the share or in Plex**, never
   inferred from the service's own report.
 - **Include the opening prompt.**

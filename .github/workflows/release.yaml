@@ -19,6 +19,33 @@ jobs:
       - id: release
         uses: googleapis/release-please-action@v5
 
+  # release-please leaves a commit it can't parse out of the changelog and
+  # succeeds, saying so only in its log: a pull request whose description
+  # mentioned the commit-override marker vanished from 0.5.0's notes that way.
+  # The log is the only place the failure is visible, so this reads it. Read
+  # from another job because a step can't see an earlier step's output.
+  commits-parsed:
+    needs: release-please
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+        run: |
+          job=$(gh api "$RUN/jobs" --jq '.jobs[] | select(.name == "release-please") | .id')
+          # A finished job's log can take a few seconds to be served.
+          for _ in 1 2 3 4 5 6; do
+            log=$(gh api "repos/${{ github.repository }}/actions/jobs/$job/logs") && break
+            sleep 10
+          done
+          test -n "$log"
+          if printf '%s\n' "$log" | grep -A1 'commit could not be parsed'; then
+            echo "::error::release-please couldn't parse a commit above, so it is missing from the release notes. Correct the merged pull request's title or its commit-override block, then rerun all of this workflow's jobs."
+            exit 1
+          fi
+
   # In this workflow rather than one triggered by the tag: a tag pushed with
   # GITHUB_TOKEN does not start other workflows.
   publish:

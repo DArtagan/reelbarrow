@@ -1,0 +1,1179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DArtagan/reelbarrow/blob/main/docs/filing.schema.json",
+  "$defs": {
+    "Analysis": {
+      "properties": {
+        "schema": {
+          "const": 1,
+          "title": "Schema",
+          "type": "integer"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "completed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Folder"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The completed folder. Null: none recorded, or not there."
+        },
+        "raw": {
+          "description": "Each raw folder intake found.",
+          "items": {
+            "$ref": "#/$defs/RawFolder"
+          },
+          "title": "Raw",
+          "type": "array"
+        },
+        "missing": {
+          "description": "Paths the manifest records that aren't on the share.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema",
+        "source",
+        "id",
+        "completed",
+        "raw",
+        "missing"
+      ],
+      "title": "Analysis",
+      "type": "object"
+    },
+    "Basis": {
+      "additionalProperties": false,
+      "description": "What the plan was made from: if any of it differs when the plan is\ncarried out, nothing is done and the manifest is planned again.",
+      "properties": {
+        "manifest_sha256": {
+          "title": "Manifest Sha256",
+          "type": "string"
+        },
+        "paths": {
+          "description": "Every path it reads, and every library path it writes, renames onto or deletes, absent ones included.",
+          "items": {
+            "$ref": "#/$defs/PathState"
+          },
+          "title": "Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "manifest_sha256",
+        "paths"
+      ],
+      "title": "Basis",
+      "type": "object"
+    },
+    "CheckState": {
+      "enum": [
+        "passed",
+        "failed",
+        "not_run"
+      ],
+      "title": "CheckState",
+      "type": "string"
+    },
+    "Claim": {
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "reason": {
+          "$ref": "#/$defs/IdentityReason"
+        }
+      },
+      "required": [
+        "value",
+        "reason"
+      ],
+      "title": "Claim",
+      "type": "object"
+    },
+    "Completed": {
+      "properties": {
+        "folder": {
+          "$ref": "#/$defs/ShareRef"
+        }
+      },
+      "required": [
+        "folder"
+      ],
+      "title": "Completed",
+      "type": "object"
+    },
+    "DeleteFolder": {
+      "additionalProperties": false,
+      "description": "A folder the operations before it have emptied.",
+      "properties": {
+        "op": {
+          "const": "delete_folder",
+          "default": "delete_folder",
+          "title": "Op",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "reason"
+      ],
+      "title": "DeleteFolder",
+      "type": "object"
+    },
+    "Disc": {
+      "properties": {
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "crc64": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{16}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A DVD's pydvdid CRC64; null for any other disc.",
+          "title": "Crc64"
+        }
+      },
+      "title": "Disc",
+      "type": "object"
+    },
+    "DiscKey": {
+      "description": "A title by the disc's own number for it: a DVD's title number, which\nopens it in the image, or a Blu-ray's playlist.",
+      "properties": {
+        "disc_title": {
+          "default": null,
+          "minimum": 1,
+          "title": "Disc Title",
+          "type": "integer"
+        },
+        "playlist": {
+          "default": null,
+          "pattern": "(?i)^\\d{5}\\.mpls$",
+          "title": "Playlist",
+          "type": "string"
+        }
+      },
+      "title": "DiscKey",
+      "type": "object"
+    },
+    "Entry": {
+      "properties": {
+        "path": {
+          "description": "From the share's root, as a manifest's.",
+          "title": "Path",
+          "type": "string"
+        },
+        "mtime": {
+          "format": "date-time",
+          "title": "Mtime",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "mtime"
+      ],
+      "title": "Entry",
+      "type": "object"
+    },
+    "File": {
+      "properties": {
+        "path": {
+          "description": "From the share's root, as a manifest's.",
+          "title": "Path",
+          "type": "string"
+        },
+        "mtime": {
+          "format": "date-time",
+          "title": "Mtime",
+          "type": "string"
+        },
+        "size": {
+          "title": "Size",
+          "type": "integer"
+        },
+        "video": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Video"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A video file's measurements. Null: not a video."
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Why a video couldn't be measured.",
+          "title": "Error"
+        }
+      },
+      "required": [
+        "path",
+        "mtime",
+        "size"
+      ],
+      "title": "File",
+      "type": "object"
+    },
+    "Folder": {
+      "properties": {
+        "path": {
+          "description": "From the share's root, as a manifest's.",
+          "title": "Path",
+          "type": "string"
+        },
+        "mtime": {
+          "format": "date-time",
+          "title": "Mtime",
+          "type": "string"
+        },
+        "folders": {
+          "description": "Every folder under it, at any depth.",
+          "items": {
+            "$ref": "#/$defs/Entry"
+          },
+          "title": "Folders",
+          "type": "array"
+        },
+        "files": {
+          "description": "Every file under it, at any depth.",
+          "items": {
+            "$ref": "#/$defs/File"
+          },
+          "title": "Files",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "mtime",
+        "folders",
+        "files"
+      ],
+      "title": "Folder",
+      "type": "object"
+    },
+    "Gate": {
+      "enum": [
+        "automatic",
+        "review",
+        "hold"
+      ],
+      "title": "Gate",
+      "type": "string"
+    },
+    "Identity": {
+      "description": "What the work is, each field with who supplied it.",
+      "properties": {
+        "title": {
+          "$ref": "#/$defs/Claim"
+        },
+        "year": {
+          "$ref": "#/$defs/Claim"
+        },
+        "imdb_id": {
+          "$ref": "#/$defs/Claim"
+        },
+        "kind": {
+          "$ref": "#/$defs/KindClaim"
+        }
+      },
+      "required": [
+        "title",
+        "year",
+        "imdb_id",
+        "kind"
+      ],
+      "title": "Identity",
+      "type": "object"
+    },
+    "IdentityReason": {
+      "enum": [
+        "set_by_person",
+        "lookup",
+        "copied_from_earlier_job",
+        "not_identified"
+      ],
+      "title": "IdentityReason",
+      "type": "string"
+    },
+    "KindClaim": {
+      "properties": {
+        "value": {
+          "anyOf": [
+            {
+              "enum": [
+                "movie",
+                "series"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        },
+        "reason": {
+          "$ref": "#/$defs/IdentityReason"
+        }
+      },
+      "required": [
+        "value",
+        "reason"
+      ],
+      "title": "KindClaim",
+      "type": "object"
+    },
+    "MakeFolder": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "make_folder",
+          "default": "make_folder",
+          "title": "Op",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "reason"
+      ],
+      "title": "MakeFolder",
+      "type": "object"
+    },
+    "Manifest": {
+      "description": "One unit of work to file. *The manifest*, in reelbarrow's design.",
+      "properties": {
+        "schema": {
+          "const": 1,
+          "title": "Schema",
+          "type": "integer"
+        },
+        "source": {
+          "pattern": "^[a-z0-9]+$",
+          "title": "Source",
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique within its source; ARM's is `<job_id>-<stage>`.",
+          "pattern": "^[A-Za-z0-9._-]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/State"
+        },
+        "start_time": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start Time"
+        },
+        "finish_time": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finish Time"
+        },
+        "errors": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Errors"
+        },
+        "disc": {
+          "$ref": "#/$defs/Disc",
+          "default": null
+        },
+        "identity": {
+          "$ref": "#/$defs/Identity",
+          "default": null
+        },
+        "completed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Completed"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Null: the producer made no output folder."
+        },
+        "raw": {
+          "$ref": "#/$defs/Raw",
+          "default": null,
+          "description": "Left out: not recorded."
+        },
+        "titles": {
+          "default": null,
+          "description": "Each title from the disc to its transcode, keyed by the disc's own number for it. Left out: not recorded.",
+          "items": {
+            "$ref": "#/$defs/Title"
+          },
+          "title": "Titles",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema",
+        "source",
+        "id",
+        "state"
+      ],
+      "title": "reelbarrow manifest",
+      "type": "object"
+    },
+    "Outcome": {
+      "enum": [
+        "done",
+        "refused",
+        "failed",
+        "not_run",
+        "skipped"
+      ],
+      "title": "Outcome",
+      "type": "string"
+    },
+    "Part": {
+      "properties": {
+        "disc_title": {
+          "default": null,
+          "minimum": 1,
+          "title": "Disc Title",
+          "type": "integer"
+        },
+        "playlist": {
+          "default": null,
+          "pattern": "(?i)^\\d{5}\\.mpls$",
+          "title": "Playlist",
+          "type": "string"
+        },
+        "start": {
+          "description": "The second of the whole at which the part begins, in the playback time its transcode's chapters keep.",
+          "minimum": 0,
+          "title": "Start",
+          "type": "number"
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "title": "Part",
+      "type": "object"
+    },
+    "PathState": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "present": {
+          "title": "Present",
+          "type": "boolean"
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Size"
+        },
+        "mtime": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mtime"
+        }
+      },
+      "required": [
+        "path",
+        "present"
+      ],
+      "title": "PathState",
+      "type": "object"
+    },
+    "Plan": {
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema",
+          "type": "integer"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "gate": {
+          "$ref": "#/$defs/Gate"
+        },
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/reelbarrow__plan__Check"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "operations": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "delete_folder": "#/$defs/DeleteFolder",
+                "make_folder": "#/$defs/MakeFolder",
+                "rename": "#/$defs/Rename",
+                "write": "#/$defs/Write"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/MakeFolder"
+              },
+              {
+                "$ref": "#/$defs/Rename"
+              },
+              {
+                "$ref": "#/$defs/Write"
+              },
+              {
+                "$ref": "#/$defs/DeleteFolder"
+              }
+            ]
+          },
+          "title": "Operations",
+          "type": "array"
+        },
+        "record": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Where the executor writes the filing's record: what it was given and what each operation did. Null: the plan has no place for one, so it is never carried out.",
+          "title": "Record"
+        },
+        "basis": {
+          "$ref": "#/$defs/Basis"
+        }
+      },
+      "required": [
+        "source",
+        "id",
+        "gate",
+        "checks",
+        "operations",
+        "basis"
+      ],
+      "title": "Plan",
+      "type": "object"
+    },
+    "Raw": {
+      "properties": {
+        "form": {
+          "$ref": "#/$defs/RawForm"
+        },
+        "folder": {
+          "$ref": "#/$defs/ShareRef"
+        },
+        "image": {
+          "$ref": "#/$defs/ShareRef",
+          "default": null,
+          "title": "Image"
+        },
+        "check": {
+          "$ref": "#/$defs/reelbarrow__manifest__Check"
+        },
+        "problems": {
+          "description": "Each check's failures.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Problems",
+          "type": "array"
+        },
+        "titles_compared": {
+          "const": true,
+          "default": null,
+          "description": "The titles were compared for those that repeat others, so a title that is no whole and has no reason repeats nothing. Left out: they weren't, and nothing is known either way.",
+          "title": "Titles Compared",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "form",
+        "folder",
+        "check",
+        "problems"
+      ],
+      "title": "Raw",
+      "type": "object"
+    },
+    "RawFolder": {
+      "properties": {
+        "path": {
+          "description": "From the share's root, as a manifest's.",
+          "title": "Path",
+          "type": "string"
+        },
+        "mtime": {
+          "format": "date-time",
+          "title": "Mtime",
+          "type": "string"
+        },
+        "folders": {
+          "description": "Every folder under it, at any depth.",
+          "items": {
+            "$ref": "#/$defs/Entry"
+          },
+          "title": "Folders",
+          "type": "array"
+        },
+        "files": {
+          "description": "Every file under it, at any depth.",
+          "items": {
+            "$ref": "#/$defs/File"
+          },
+          "title": "Files",
+          "type": "array"
+        },
+        "found": {
+          "$ref": "#/$defs/RawFound"
+        }
+      },
+      "required": [
+        "path",
+        "mtime",
+        "folders",
+        "files",
+        "found"
+      ],
+      "title": "RawFolder",
+      "type": "object"
+    },
+    "RawForm": {
+      "enum": [
+        "bluray-backup",
+        "dvd-image",
+        "mkv-titles"
+      ],
+      "title": "RawForm",
+      "type": "string"
+    },
+    "RawFound": {
+      "description": "How intake knows a raw folder is the job's.",
+      "enum": [
+        "recorded",
+        "written_during_run"
+      ],
+      "title": "RawFound",
+      "type": "string"
+    },
+    "Rename": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "rename",
+          "default": "rename",
+          "title": "Op",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "reason"
+      ],
+      "title": "Rename",
+      "type": "object"
+    },
+    "Replies": {
+      "additionalProperties": false,
+      "properties": {
+        "tmdb": {
+          "additionalProperties": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Tmdb",
+          "type": "object"
+        },
+        "fanart": {
+          "additionalProperties": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Fanart",
+          "type": "object"
+        }
+      },
+      "required": [
+        "tmdb",
+        "fanart"
+      ],
+      "title": "Replies",
+      "type": "object"
+    },
+    "ShareRef": {
+      "description": "A file or folder on the video share, by its path from the share's root.\n\nThe root is the share's, not any process's mount of it: reelbarrow, ARM and\nthe exporter each see a different slice at a different place, and a path in\na manifest has to mean the same file to all of them.",
+      "properties": {
+        "path": {
+          "description": "From the share's root: `/` separators, no leading `/`, no `.` or `..`, the name exactly as on the share.",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "ShareRef",
+      "type": "object"
+    },
+    "Sidecar": {
+      "enum": [
+        "movie_nfo",
+        "artwork",
+        "ignore_marker",
+        "disc_json"
+      ],
+      "title": "Sidecar",
+      "type": "string"
+    },
+    "State": {
+      "enum": [
+        "running",
+        "succeeded",
+        "failed"
+      ],
+      "title": "State",
+      "type": "string"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "step": {
+          "title": "Step",
+          "type": "string"
+        },
+        "subject": {
+          "title": "Subject",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/Outcome"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step",
+        "subject",
+        "outcome",
+        "detail"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Title": {
+      "properties": {
+        "disc_title": {
+          "default": null,
+          "minimum": 1,
+          "title": "Disc Title",
+          "type": "integer"
+        },
+        "playlist": {
+          "default": null,
+          "pattern": "(?i)^\\d{5}\\.mpls$",
+          "title": "Playlist",
+          "type": "string"
+        },
+        "extracted": {
+          "$ref": "#/$defs/ShareRef",
+          "default": null,
+          "description": "A DVD title's MKV, extracted from the image.",
+          "title": "Extracted"
+        },
+        "transcode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ShareRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Where the producer put its transcode. Null: none, and `reason` says why. Left out: not recorded."
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TitleReason"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "played_by": {
+          "$ref": "#/$defs/DiscKey",
+          "default": null,
+          "description": "The title kept that plays this one, where its own `parts` or a whole it is a part of don't say so: a copy, a shuffle, a title inside a whole.",
+          "title": "Played By"
+        },
+        "interleaved": {
+          "default": null,
+          "description": "A whole's parts are cut into one another.",
+          "title": "Interleaved",
+          "type": "boolean"
+        },
+        "parts": {
+          "default": null,
+          "description": "A whole's: the disjoint titles that play it between them, in order.",
+          "items": {
+            "$ref": "#/$defs/Part"
+          },
+          "minLength": 2,
+          "title": "Parts",
+          "type": "array"
+        }
+      },
+      "title": "Title",
+      "type": "object"
+    },
+    "TitleReason": {
+      "description": "Why a title has no transcode.",
+      "enum": [
+        "played_by_kept_titles",
+        "not_extracted"
+      ],
+      "title": "TitleReason",
+      "type": "string"
+    },
+    "Video": {
+      "properties": {
+        "duration": {
+          "description": "Seconds, the container's.",
+          "title": "Duration",
+          "type": "number"
+        },
+        "chapters": {
+          "description": "Each chapter's start, in seconds. Empty: none listed.",
+          "items": {
+            "type": "number"
+          },
+          "title": "Chapters",
+          "type": "array"
+        }
+      },
+      "required": [
+        "duration",
+        "chapters"
+      ],
+      "title": "Video",
+      "type": "object"
+    },
+    "Write": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "write",
+          "default": "write",
+          "title": "Op",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "sidecar": {
+          "$ref": "#/$defs/Sidecar"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "content": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "What it holds: a document written as it stands, or for a sidecar rendered from a source, which record. Null: an empty file.",
+          "title": "Content"
+        }
+      },
+      "required": [
+        "path",
+        "sidecar",
+        "reason"
+      ],
+      "title": "Write",
+      "type": "object"
+    },
+    "reelbarrow__manifest__Check": {
+      "description": "The backup's two checks. The copy is whole when both passed.",
+      "properties": {
+        "sizes": {
+          "$ref": "#/$defs/CheckState",
+          "description": "Every file against the disc's own record of its size."
+        },
+        "hashes": {
+          "$ref": "#/$defs/CheckState",
+          "description": "MakeMKV's check of each file against the disc's hashes, as it copied. Never rerun, so `not_run` on a copy checked afterwards."
+        }
+      },
+      "required": [
+        "sizes",
+        "hashes"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "reelbarrow__plan__Check": {
+      "additionalProperties": false,
+      "properties": {
+        "rule": {
+          "title": "Rule",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule",
+        "passed",
+        "detail"
+      ],
+      "title": "Check",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One filing, in its disc's folder beside `disc.json`: what the executor\nwas given and what each operation did. Written once, when the filing has\nfinished or stopped, and never rewritten. With `disc.json` it is what\nundoing a misfile, or making it a regression fixture, reads.\n\nIt holds everything the plan was made from, as it was then, so a misfile\ncan be replayed exactly, as a case in `tests/fixtures/`: the manifest, the\nanalysis of the job's files before they moved, and the providers' replies,\nwhich change over time and can't be asked again as they were.",
+  "properties": {
+    "schema": {
+      "const": 1,
+      "title": "Schema",
+      "type": "integer"
+    },
+    "source": {
+      "title": "Source",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "result": {
+      "enum": [
+        "filed",
+        "incomplete"
+      ],
+      "title": "Result",
+      "type": "string"
+    },
+    "started": {
+      "format": "date-time",
+      "title": "Started",
+      "type": "string"
+    },
+    "finished": {
+      "format": "date-time",
+      "title": "Finished",
+      "type": "string"
+    },
+    "version": {
+      "description": "reelbarrow's, that filed it.",
+      "title": "Version",
+      "type": "string"
+    },
+    "manifest": {
+      "$ref": "#/$defs/Manifest",
+      "description": "As it was when it was filed."
+    },
+    "analysis": {
+      "$ref": "#/$defs/Analysis",
+      "description": "`reelbarrow analyse`'s document."
+    },
+    "replies": {
+      "$ref": "#/$defs/Replies",
+      "description": "TMDB's and fanart.tv's, trimmed, by request, as a case's `tmdb.json` and `fanart.json` hold them."
+    },
+    "plan": {
+      "$ref": "#/$defs/Plan"
+    },
+    "steps": {
+      "description": "Each operation, in the plan's order.",
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "title": "Steps",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "source",
+    "id",
+    "result",
+    "started",
+    "finished",
+    "version",
+    "manifest",
+    "analysis",
+    "replies",
+    "plan",
+    "steps"
+  ],
+  "title": "reelbarrow filing record",
+  "type": "object"
+}

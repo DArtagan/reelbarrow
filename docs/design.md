@@ -960,7 +960,9 @@ The pipeline, per ARM job (and later per backlog folder):
    inspected"*): its manifest, analysis and replies are a case's files in
    `tests/fixtures/`, which plan again to the plan carried out. Providers'
    data changes, and files once moved can't be measured as they arrived, so
-   nothing else could rebuild it. Every folder is made before
+   nothing else could rebuild it. Its format is
+   [`filing.schema.json`](filing.schema.json), generated from
+   `reelbarrow.executor.FilingRecord`. Every folder is made before
    anything moves, so once anything has, the disc's folder is there for it.
 
    **An operation that fails stops the rest**, and the report and the
