@@ -81,6 +81,10 @@ Tagging what was filed before reelbarrow, the 2024 entries, is
   untagged"*). They're the disc's own bytes, kept so the disc can be played
   and transcoded again, and compared byte for byte across rips (E20).
   `disc.json` identifies them.
+- **Tags already in the file are kept.** `--tags global:<file>` replaces a
+  file's global tags with the file's (mkvpropedit's manual), so read what
+  HandBrake and ARM wrote first and write the union. A tag reelbarrow sets
+  wins over one already there.
 - **Track flags and chapter names**, the rest of the design's row. Measure
   what ARM's transcodes carry first, and plan a change only where one is
   wrong; chapter names have no source yet.
