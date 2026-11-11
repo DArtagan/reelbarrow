@@ -26,7 +26,19 @@ be measured from its files.
 - **Plans of conformance only**: the folder renamed to carry `{tmdb-N}`, the
   flat `raw/` split into `raw/<LABEL> [<identity>]/` with `disc.json` where the
   disc's identity can be measured, sidecars and ignore markers written, names
-  folded to ASCII. No media is replaced or deleted here. A better copy
+  folded to ASCII. No media is replaced or deleted here.
+- **Embedded tags** on each entry's transcodes, through
+  [embedded-tags](embedded-tags.md)'s operation, since the 2024 entries were
+  filed before reelbarrow tagged anything (Will, 2026-11-11, moving tagging
+  ahead of first-filing so this is the only retrofit). Raw copies stay
+  untagged.
+- **Extras out of `extras/`**, which Plex doesn't read: 44 MKVs in 14 film
+  folders, none shown by Plex as an extra (measured 2026-11-11). Each moves to
+  its kind folder, named by TheDiscDB where it knows the disc, otherwise to
+  `Other/`, as [extras](extras.md) settles. Proposed, not yet put to Will: a
+  2024 extra's file name may be all that's known of it, so where TheDiscDB
+  has nothing the name is kept rather than replaced by
+  `<disc label>_title_<n>`, unless the disc's number can be measured. A better copy
   arriving is *Case 9*'s fold, through an ordinary manifest.
 - **The same gate.** A plan files automatically only when its identity meets
   the bar in *Confidence*; anything else is review. A misfiled entry is a bug.

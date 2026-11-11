@@ -102,7 +102,20 @@ Recorded verbatim where Will gave words, so they are not relitigated.
 - **Unnamed extras are acceptable for now** (2026-10-04): *"moving them to an
   `extras/` folder is sufficient. As long as we're not losing opportunity to
   access information (e.g. while the original disc is in hand), then it's a
-  problem that can be solved down the road."*
+  problem that can be solved down the road."* The folder was wrong: Plex
+  doesn't read `extras/`, and of the 44 MKVs in the 2024 entries' `extras/`
+  it showed none (measured 2026-11-11, *Use local assets* on). See the next.
+- **Extras are named from TheDiscDB where it knows the disc, and filed by
+  kind** (2026-11-11): *"#3 where possible. When that doesn't work, #2 for
+  the filename and #1 for the embedded-tags. In the future, we might do #4
+  and maybe even contribute back to TheDiscDB."* Asked to choose among
+  TheDiscDB, the film's ids only, an honest generic title, the case photo, a
+  transcript, and the review UI. The layout is Plex's kind folders, `Other/`
+  for an unknown kind, and an unmatched extra's file is
+  `<disc label>_title_<n>.mkv`: *"We'll need to check for the case of two
+  discs having the same label (e.g. processing something like The Return of
+  the King where there's multiple discs being merged together, and they might
+  each have their own extra titles)"*. See *Extras* under *Target layout*.
 - **Third-party identification services are fine** (2026-10-03): *"I'm open
   using third party services to do media identification (Claude or others)."*
   Will has a Claude Pro subscription, not an API account.
@@ -413,7 +426,7 @@ evidence is in *The cases*. "Leftovers" means deleted once filing succeeds.
 | `movies/Field-of-Dreams (1989)` | 30, 31 — **both failed**; file recovered by hand | **review**: no successful job vouches for the file. Two raw copies whose video hashes match (disc-ripping, 2026-09-20): keep one |
 | `movies/Shrek-the-Third (2007)` | 28 | **fold** (case 9): ARM's AV1 transcode replaces the 2013 `.m4v`; the 2009 `.iso` is kept as raw and ARM's five per-title MKVs are leftovers, because the ISO is a decrypted superset of them (measured); the folder gains `{tmdb-N}` and fresh sidecars. Automatic only if every fold rule in *Confidence* holds |
 | `movies/Robin-Hood (2010)` | 35 | **review** for labels: two cuts, verified as one film (case 5) |
-| `movies/Robin-Hood (2010)_178999705941` | 36, different `crc_id` | **review**: a bonus disc whose 62.7-minute documentary ARM named `Robin-Hood (2010).mkv`; it and two featurettes → `extras/` of Robin Hood, and the documentary's three parts, also transcoded, are leftovers (*Title identity* 4) |
+| `movies/Robin-Hood (2010)_178999705941` | 36, different `crc_id` | **review**: a bonus disc whose 62.7-minute documentary ARM named `Robin-Hood (2010).mkv`; it and two featurettes → Robin Hood's extras, and the documentary's three parts, also transcoded, are leftovers (*Title identity* 4) |
 | `movies/The Rescuers (1977)_178961349896` | 27; 5, 7, 8, 23 earlier | two films on one disc (case 6), split: the feature, the raw disc and the three extras → *The Rescuers (1977)*; `title_71` → *The Rescuers Down Under (1990)* with a pointer file. ARM never identified the second film, so it files automatically only if its identity meets the bar (transcript + runtime), else review. The four other raw backups are the same disc and are leftovers |
 | `movies/Around-the-World-in-80-Days (1956)` | 39 ok; 40, 41 (disc 2) failed empty | **hold**: probably one film split across two discs (case 4); disc 2 not yet ripped |
 | `tv/The-Sylvester-and-Tweety-Mysteries (1995-2002)` (+ two `_<stage>` siblings) | 21 (D1), 22 (D2), 33 (D2 again) | **auto** if the episode matcher meets the bar, else review: S01E01–E13; both play-alls dropped; job 33's six files are byte-identical duplicates of job 22's |
@@ -1289,8 +1302,10 @@ movies/
   Robin Hood (2010) {tmdb-N}/
     <feature or edition files — see Editions>
     movie.nfo · poster.jpg · fanart.jpg · clearlogo.png · disc.png · …
-    extras/
-      title_1.mkv …                     unnamed for now (Future work)
+    Featurettes/                        extras by kind, as TheDiscDB names them — see Extras
+      <TheDiscDB's name for it>.mkv
+    Other/                              an extra TheDiscDB doesn't know
+      ROBIN_HOOD_title_17.mkv
     raw/
       .ignore · .nomedia                plus the library-wide .plexignore
       ROBIN_HOOD [dvd-4391d7e10469999f]/   one folder per disc
@@ -1380,7 +1395,7 @@ shows/
       The Sylvester & Tweety Mysteries - S01E01 - The Cat Who Knew Too Much.mkv
       The Sylvester & Tweety Mysteries - S01E01 - The Cat Who Knew Too Much.nfo
       …
-    extras/
+    Featurettes/ · Other/ …             extras, as for a film
     raw/
       SYLVESTER_TWEETY_MYSTERY_D1 [dvd-c27d6c87dc7dbea2]/
         THE SYLVESTER … DISC 1-B1_t00.mkv …    including the play-all
@@ -1391,6 +1406,28 @@ shows/
 The play-all's transcode, where ARM made one, is a leftover; its raw stays,
 because it is part of the disc. A job whose titles were compared
 (`raw.titles_compared`) has no play-all transcode.
+
+### Extras
+
+An extra is filed by its kind, in the folder Plex reads for it:
+`Behind The Scenes`, `Deleted Scenes`, `Featurettes`, `Interviews`, `Scenes`,
+`Shorts`, `Trailers`, or `Other` for a kind that isn't known
+(<https://support.plex.tv/articles/local-files-for-trailers-and-extras>).
+Jellyfin reads the same names, and `extras` too; Kodi v21 reads only
+`Extras` (<https://kodi.wiki/view/Video_extras>). No layout serves all three,
+so, like *Editions*, this is proven in the players before it is adopted.
+
+Where [TheDiscDB](https://thediscdb.com/about) maps the disc, an extra takes
+the name and kind it gives there, by the disc's own number for the title: a
+DVD's `disc_title`, a Blu-ray's playlist. TheDiscDB is a community map of
+disc titles to what they are (6,510 discs when read, 2026-11-11), so many
+discs won't be in it. An extra it doesn't know goes in `Other/` as
+`<disc label>_title_<n>.mkv`, by the disc's own number, which is the same on
+every rip of the disc as ARM's `title_N` isn't. Two discs of one film can
+share a label, a multi-disc set especially, and their names would then meet;
+that case is the [extras](../todos/extras.md) spec's to settle. The file's
+embedded tags carry its film's ids and a title made only of what is known
+(*Sidecars and embedded metadata*).
 
 ### Editions
 
@@ -1419,7 +1456,7 @@ For goal 4 and Will's portability requirement:
 | NFO per movie, show and episode, Kodi schema, with TMDB and IMDb IDs | the one format Kodi, Jellyfin, Emby and tinyMediaManager all read; the durable record of the identification decision |
 | artwork at Kodi-standard names (`poster`, `fanart`, `clearlogo`, `clearart`, `landscape`, `disc`, `season01-poster`) | read by all four; Plex can use it as a local asset |
 | `{tmdb-N}` in folder names | Plex; it is the existing convention |
-| inside each MKV: title and ID tags, track language/title/default/forced flags, chapter names | travels with the file through any rename |
+| inside each MKV: title and ID tags, track language/title/default/forced flags, chapter names; for an extra, its film's ids and, where TheDiscDB names it, its kind as `CONTENT_TYPE` | travels with the file through any rename. Raw copies aren't tagged: they are the disc's own bytes (Will, 2026-11-11) |
 | ignore markers in every `raw/`: `.plexignore` (exists), `.ignore`, `.nomedia` | keeps raw BDMV/VIDEO_TS out of every player — `.ignore` for Jellyfin and `.nomedia` for Kodi are believed, not verified |
 
 ---
@@ -1432,9 +1469,11 @@ Kept so it is not lost, each deliberately outside the specs in `todos/`:
   pipeline, with a human-supplied title where there is no manifest, and the 2024
   hand-filed films needing their raw reunited (e.g. the Alien and Dark Knight
   BDMVs).
-- **Naming extras** (featurette, deleted scene, trailer…) into Plex's extras
-  categories. The case photo already captures the disc's menu listing, so no
-  information is lost by deferring.
+- **Naming the extras TheDiscDB doesn't know**, from the case photo's listing
+  of them (Will, 2026-11-11: *"In the future, we might do #4"*), and
+  **contributing back to TheDiscDB** the discs ripped here that it lacks
+  (*"and maybe even contribute back to TheDiscDB"*). The photo already
+  captures the disc's listing, so nothing is lost by deferring.
 - **Text subtitles by OCR** of the DVD (VobSub) and Blu-ray (PGS) image subtitles,
   kept alongside the originals. Image subtitles force many Plex clients to
   transcode video to burn them in; text subtitles also strengthen episode

@@ -41,8 +41,9 @@ for the run can file nothing else.
   each library, by its path on the share (`{"movies": "/data/movies"}`, read
   from Plex's Deployment 2026-11-10). `reelbarrow file` refuses a live run
   without all three.
-- **Job 34's plan is still automatic** and unchanged from the one
-  [executor](executor.md) carried out in dry run.
+- **Job 34's plan is still automatic**, and holds the `tag` operation
+  [embedded-tags](embedded-tags.md) added, which was measured on a copy
+  before it was trusted with the library.
 - **Job 34's is the only automatic plan.** `reelbarrow plan` with no path, over
   every manifest, gates every other one review or hold. `reelbarrow file`
   defaults to every manifest, as `plan` does, so this is what keeps a run that
@@ -61,6 +62,9 @@ for the run can file nothing else.
 Measured on the share and in Plex:
 
 - *Monte Carlo or Bust!* is visible in Plex without a manual scan.
+- Its file carries its `TITLE`, `DATE_RELEASED`, `IMDB` and `TMDB` tags and
+  its segment title, read with ffprobe. Each stream's hash equals the one taken
+  before the run.
 - Its `raw/` holds the right disc, with `disc.json`.
 - `completed/movies/` holds nothing for job 34, nor `raw/` its old folder.
 - The ledger's record of it matches the share.

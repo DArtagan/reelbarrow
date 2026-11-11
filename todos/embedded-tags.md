@@ -4,8 +4,8 @@
 
 > Make each video reelbarrow files carry its identity inside the file, as
 > Matroska tags, so a file copied out of its folder still says what it is.
-> Tag at filing, through the executor's `Writer`, and tag *Monte Carlo or
-> Bust!*, filed before this existed. Read `todos/embedded-tags.md`, then
+> Tag at filing, through the executor's `Writer`, so that *Monte Carlo or
+> Bust!* is tagged when first-filing files it. Read `todos/embedded-tags.md`, then
 > *Sidecars and embedded metadata* and *Target layout* in `docs/design.md`,
 > and *Rules that protect the library* in `AGENTS.md`. Measure mkvpropedit on
 > a copy before it touches the library.
@@ -24,9 +24,13 @@ each MKV: title and ID tags"*, so it *"travels with the file through any
 rename"*. The executor's spec scoped sidecars to the NFO and artwork, so
 nothing writes the tags yet. Will: *"Yes please, add that to the specs."*
 
-It comes before [automatic-filing](automatic-filing.md): every film filed from
-then on is tagged as it is filed, and only what
-[first-filing](first-filing.md) filed needs tagging afterwards.
+It comes before [first-filing](first-filing.md) (Will, 2026-11-11, agreeing
+to move it there from after), so the first film filed is tagged as it is
+filed and nothing reelbarrow files ever needs tagging afterwards. The
+in-place edit is then proven in first-filing's deliberate, watched run, not
+met for the first time under [automatic-filing](automatic-filing.md).
+Tagging what was filed before reelbarrow, the 2024 entries, is
+[library-conformance](library-conformance.md)'s.
 
 ## Verified, 2026-11-11
 
@@ -69,8 +73,10 @@ then on is tagged as it is filed, and only what
   - A feature: `TITLE` (TMDB's own title, unfolded, since tags are UTF-8
     where names are ASCII), `DATE_RELEASED`, `IMDB` and `TMDB`, and the
     segment title.
-  - An extra: its film's ids, and a title saying what it is. It has no name
-    of its own yet (*Future work*), so this is for Will to decide.
+  - An extra: as [extras](extras.md) settles it (Will, 2026-11-11). Its
+    film's ids always; with a TheDiscDB match its name as `TITLE` and its
+    kind as `CONTENT_TYPE`; without one, a `TITLE` made only of what is known.
+    This spec makes the operation able to write either.
 - **Raw copies aren't tagged** (Will, 2026-11-11: *"Raw copies: leave
   untagged"*). They're the disc's own bytes, kept so the disc can be played
   and transcoded again, and compared byte for byte across rips (E20).
@@ -87,20 +93,16 @@ then on is tagged as it is filed, and only what
 - **MKVToolNix** goes in the image and in devenv, together; *devenv.nix*
   says a version difference between them is the usual reason a test passes
   locally and fails in the image.
-- **Tagging what was filed before.** *Monte Carlo or Bust!* gets a plan of
-  its own, with its identity taken from its `disc.json`, gated and carried
-  out like any other. The ledger holds one entry a unit, keyed by its
-  manifest, so a second action on a filed unit needs a place in it; decide
-  what that is here.
 
 ## Done when
 
-Measured on the share and in Plex:
-
-- *Monte Carlo or Bust!*'s file in the library carries its `TITLE`,
-  `DATE_RELEASED`, `IMDB` and `TMDB` tags and its segment title, read with
-  ffprobe. Each stream's hash equals the one taken before it was tagged.
-- In Plex it still plays, keeps its match and keeps any watched state.
+- The measurement on a copy is recorded here: each stream's hash equal
+  before and after, how much of the file was rewritten, and what an
+  interrupted run left.
+- `reelbarrow plan` on job 34's manifest, in the deployed pod, shows the
+  `tag` operation with job 34's tags. The tags reaching the library, and Plex
+  keeping its match and watched state, are [first-filing](first-filing.md)'s
+  to measure.
 - A test files a plan on a share of real MKVs, made by ffmpeg as
   `tests/test_cli.py`'s are, and its film comes out tagged; in dry run the tag
   operation is refused and the file is unchanged. (`cases.Case.build`'s files

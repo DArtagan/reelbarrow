@@ -31,7 +31,8 @@ arrive in is the property under test.
   1. The other films the table files automatically: *The Great Race* job 29
      (film and one extra), *The Polar Express* job 25 (film, three extras, and its raw paired by
      fingerprint with the misnamed Mary-Kate folder, the 0.4 GB
-     `raw/The-Polar-Express` a leftover).
+     `raw/The-Polar-Express` a leftover). Their extras are named and filed as
+     [extras](extras.md) settles.
   2. Manifests with nothing to file: failed jobs 15–17 beside job 18, and the
      empty skeletons (jobs 2, 3, 19, 38, 40, 41…), captured as directory
      listings, since the planner has to classify them as leftovers. The
