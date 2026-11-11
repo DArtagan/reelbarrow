@@ -46,12 +46,80 @@ Tagging what was filed before reelbarrow, the 2024 entries, is
   title=…`. MKVToolNix is in neither the image (`Dockerfile`'s `apt-get`
   installs ffmpeg, chromaprint's tools and lsdvd) nor devenv.
 
-**Not verified:**
-- How much of a file mkvpropedit rewrites when the new tags don't fit the
-  space already there.
-- What an interrupted run leaves behind, on CIFS or anywhere.
-- Whether ARM's transcodes already carry the track flags and languages the
-  design's table also lists.
+## Measured on a copy, 2026-11-11 (E41, E42)
+
+Job 34's transcode, 1,821,842,964 bytes, copied out of the pod and checked
+against the pod's checksum (`b82ce883…`): the first `kubectl exec cat` came
+out 3.7 MB short, as E30 warns, and the rest was fetched from the offset.
+Measured locally with mkvpropedit 102.0, then again in the built image with
+its 92.0.
+
+- **Streams.** Each of the four streams' hash (`-f streamhash`) is identical
+  before and after.
+- **What is rewritten.** HandBrake writes its tags at the head, directly
+  before the first cluster, with no padding after them, and the chapters and
+  cues at the tail. mkvpropedit moved the segment information into the
+  63-byte void before it, blanked the old tags, and appended the new ones:
+  983 bytes changed at the head, 502 appended, nothing between. It took
+  0.06 s, in 19 small writes in place, with no temporary file and no fsync.
+  Two runs give byte-identical files.
+- **Interrupted.** Killed before each of its 19 writes in turn (strace's
+  fault injection), the streams survived every time. The metadata didn't:
+  some states have no duration, or fail mkvinfo; a second run refuses 7 of
+  the 19 (*"corrupted and cannot be modified safely"*); after 2 it reports
+  success yet mkvinfo still finds fault, which ffprobe passes over in
+  silence; after 10 the file is sound but has lost HandBrake's per-track
+  tags, voided before the new ones were written. A remux by mkvmerge
+  rebuilds the worst of them, but with every stream's hash changed, so it is
+  no exact repair.
+- **Track flags.** On every DVD transcode ARM has made, the full English
+  subtitle track is both default and forced; job 34's is 1,790 closed
+  captions. That is [subtitle-flags](subtitle-flags.md)'s.
+
+**Not verified:** an interruption on CIFS itself. The pod mounts the share
+read-only, so the measurement was local; mkvpropedit makes the same calls
+either way.
+
+## Decided, 2026-11-11
+
+- **The tag goes first, on the transcode in `import/`, before anything
+  moves.** Will chose it, offered against tagging last in the library and
+  against keeping a copy of the bytes an edit can change: an edit that fails
+  stops the filing with the library untouched, and a damaged transcode stays
+  out of Plex's sight, its raw copy still there to transcode again. A filing
+  stopped before its record's folder is made writes no record; the report is
+  the account.
+- **The file is checked before and after**: mkvinfo exits 0, which catches
+  the damage ffprobe passes over; ffprobe reads back the segment title and
+  every tag; the duration and the chapters' starts are as they were.
+- **The tags pass to mkvpropedit in memory**, a `memfd` it opens by
+  `/proc/self/fd/<n>`: it can't read them from a pipe, and a temporary file
+  is a write the guard would have to allow. Will asked why a file at all.
+- **Subtitle flags are a separate spec**, done before first-filing, and ARM's
+  preset is fixed too (Will: *"Separate spec; fix ARM's preset too"*, and
+  *"Order it so we'll implement that spec before the first filing of job
+  34."*).
+- **The segment title and `TITLE` both**: the segment title names the file,
+  which most players show; `TITLE` at level 50 is the tagging system's
+  account of what the content is, beside the ids. For a feature they agree;
+  for an extra they can differ.
+
+The example Will agreed (*"Yes, now build it as shown."*), as `reelbarrow
+plan` renders job 34's first operation:
+
+```
+  tag          import/automatic-ripping-machine/completed/movies/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969)/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969).mkv
+               the feature's identity, inside the file
+               segment title  Monte Carlo or Bust!
+               TITLE          Monte Carlo or Bust!
+               DATE_RELEASED  1969-04-28
+               IMDB           tt0064688
+               TMDB           movie/38792
+```
+
+and the file's tags afterwards, by `mkvextract`: HandBrake's four per-track
+`DURATION`s untouched, its `ENCODER` kept, and a tag at level 50, `MOVIE`,
+holding the four above.
 
 ## Scope
 
@@ -63,12 +131,11 @@ Tagging what was filed before reelbarrow, the 2024 entries, is
 - **A `tag` operation in the plan**, with the tags as its content, carried
   out by the `Writer`: the one place that changes the video root, refused in
   dry run like every other change.
-  - **Where it goes in the plan's order is to decide from the measurement.**
-    Tagging the transcode in `import/` before anything moves means a failed
-    tag stops the filing with nothing moved. Tagging it in the library means
-    the tagged file is the one Plex already has.
-  - **Its outcome checks the result**: ffprobe reads the tags back, and the
-    duration and chapters are unchanged.
+  - **It goes first**, on the transcode in `import/` (*Decided*, above).
+  - **Its outcome checks the result**: mkvinfo finds no fault, ffprobe
+    reads the tags back, and the duration and chapters are unchanged.
+  - **The planner gates on Matroska**: a feature that isn't an MKV can't
+    carry its tags, so its plan goes to review rather than filing untagged.
 - **What each file gets.**
   - A feature: `TITLE` (TMDB's own title, unfolded, since tags are UTF-8
     where names are ASCII), `DATE_RELEASED`, `IMDB` and `TMDB`, and the
@@ -89,24 +156,27 @@ Tagging what was filed before reelbarrow, the 2024 entries, is
   file's global tags with the file's (mkvpropedit's manual), so read what
   HandBrake and ARM wrote first and write the union. A tag reelbarrow sets
   wins over one already there.
-- **Track flags and chapter names**, the rest of the design's row. Measure
-  what ARM's transcodes carry first, and plan a change only where one is
-  wrong; chapter names have no source yet.
+- **Track flags and chapter names**, the rest of the design's row. ARM's
+  transcodes carry each track's language; their subtitle flags are wrong,
+  and [subtitle-flags](subtitle-flags.md)'s. Chapter names have no source
+  yet.
 - **The write guard.** mkvpropedit is a subprocess, whose writes neither
-  half of the guard sees (`tests/test_write_guard.py`). Extend the static
-  scan:
+  half of the guard sees (`tests/test_write_guard.py`), so both judge a tool
+  by its name:
   - only `reelbarrow/executor.py` runs a tool that writes;
-  - `analysis/tools.py` runs only tools that read (ffprobe, fpcalc, lsdvd);
+  - `analysis/tools.py` runs only tools that read (ffprobe, fpcalc, lsdvd,
+    and ffmpeg, whose command must end in `-`, its stdout);
   - a test fails when a module is made to run mkvpropedit.
 - **MKVToolNix** goes in the image and in devenv, together; *devenv.nix*
   says a version difference between them is the usual reason a test passes
-  locally and fails in the image.
+  locally and fails in the image. They differ: devenv's is 102.0, Debian
+  trixie's 92.0. The tag, guard, executor and CLI tests pass in the built
+  image too, and its `Writer.tag` on job 34's copy gives the same tags and
+  equal streams.
 
 ## Done when
 
-- The measurement on a copy is recorded here: each stream's hash equal
-  before and after, how much of the file was rewritten, and what an
-  interrupted run left.
+- ~~The measurement on a copy is recorded here~~: done, above.
 - `reelbarrow plan` on job 34's manifest, in the deployed pod, shows the
   `tag` operation with job 34's tags. The tags reaching the library, and Plex
   keeping its match and watched state, are [first-filing](first-filing.md)'s

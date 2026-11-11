@@ -8,6 +8,11 @@ source, and it is allowed only from `reelbarrow/executor.py`, or from a module
 given a folder of its own, as the exporter is given its `--out`. A change the
 tests make, building a share, is the world's and isn't judged.
 
+A tool's writes are its own process's, which no hook here sees, so a tool is
+judged by its name as it starts: one of reelbarrow's modules other than the
+executor, starting one that isn't among `READING_TOOLS` while a root is
+guarded, is a violation of every guard.
+
 The static half, `test_write_guard.py`, reads every module for the calls that
 write; this half catches the ones it can't see, such as a library writing on
 a module's behalf.
@@ -23,6 +28,11 @@ import reelbarrow
 
 SOURCE = Path(reelbarrow.__file__).resolve().parent
 EXECUTOR = SOURCE / "executor.py"
+
+# The tools a module other than the executor may run: the analysis's
+# measures, which read the files they are given. ffmpeg writes only to its
+# stdout, which `test_write_guard` holds where the command is written.
+READING_TOOLS = frozenset({"ffprobe", "ffmpeg", "fpcalc", "lsdvd"})
 
 _WRITE_FLAGS = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND
 # Events whose first argument is the path changed.
@@ -110,8 +120,36 @@ def _writer() -> Path | None:
     return None
 
 
+def _program(command: object) -> str:
+    if isinstance(command, str | bytes | os.PathLike):
+        # A shell's command line, or a program with no arguments.
+        words = os.fsdecode(command).split()
+        return os.path.basename(words[0]) if words else ""
+    first = next(iter(command), "")  # type: ignore[call-overload]
+    return os.path.basename(os.fsdecode(first))
+
+
+def _started(args: tuple) -> None:
+    """`subprocess.Popen`'s event: (executable, args, cwd, env)."""
+    program = _program(args[1])
+    if program in READING_TOOLS:
+        return
+    writer = _writer()
+    if writer is None or writer == EXECUTOR:
+        return
+    for guard in _guards:
+        guard.violations.append(f"{writer.name}: ran {program}")
+
+
 def _hook(event: str, args: tuple) -> None:
     if not _guards or getattr(_busy, "on", False):
+        return
+    if event == "subprocess.Popen":
+        _busy.on = True
+        try:
+            _started(args)
+        finally:
+            _busy.on = False
         return
     paths = _paths(event, args)
     if not paths:

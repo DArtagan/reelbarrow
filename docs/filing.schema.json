@@ -639,11 +639,15 @@
                 "delete_folder": "#/$defs/DeleteFolder",
                 "make_folder": "#/$defs/MakeFolder",
                 "rename": "#/$defs/Rename",
+                "tag": "#/$defs/Tag",
                 "write": "#/$defs/Write"
               },
               "propertyName": "op"
             },
             "oneOf": [
+              {
+                "$ref": "#/$defs/Tag"
+              },
               {
                 "$ref": "#/$defs/MakeFolder"
               },
@@ -907,6 +911,45 @@
         "detail"
       ],
       "title": "Step",
+      "type": "object"
+    },
+    "Tag": {
+      "additionalProperties": false,
+      "description": "A Matroska file's own record of what it is, set in place: its segment\ntitle, which most players show as its name, and global tags at target\ntype 50, MOVIE (*Sidecars and embedded metadata*). Global tags already in\nthe file are kept, but for one of the same name, which these replace.",
+      "properties": {
+        "op": {
+          "const": "tag",
+          "default": "tag",
+          "title": "Op",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "tags": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "object"
+        }
+      },
+      "required": [
+        "path",
+        "reason",
+        "title",
+        "tags"
+      ],
+      "title": "Tag",
       "type": "object"
     },
     "Title": {

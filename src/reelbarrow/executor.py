@@ -5,9 +5,9 @@ one place dry run is checked (*Rules that protect the library*, in
 `AGENTS.md`). While `dry_run` is true it refuses every change before touching
 the share, and the executor reports each as refused; the deployment also
 mounts the share read-only while dry run is on, so a bug here meets `EROFS`.
-No other module writes under the video root, which `tests/test_write_guard.py`
-holds; the manifest exporter, which never mounts the library, writes only in
-its own output directory.
+No other module writes under the video root, nor runs a tool that writes,
+which `tests/test_write_guard.py` holds; the manifest exporter, which never
+mounts the library, writes only in its own output directory.
 
 Carrying out a plan is step 7 of *The service*, in the design:
 
@@ -16,22 +16,26 @@ Carrying out a plan is step 7 of *The service*, in the design:
    record's path, absent, so a unit already filed is never filed again.
 2. Every sidecar is rendered, so a provider that can't be reached stops the
    filing before anything has moved.
-3. The operations, in the plan's order: folders, renames, sidecars, then
-   leftovers. If one fails, the rest aren't attempted, and nothing is undone
-   automatically: the report says what was done and what wasn't, so a person
-   can resolve it.
+3. The operations, in the plan's order: the feature's tags, folders,
+   renames, sidecars, then leftovers. If one fails, the rest aren't
+   attempted, and nothing is undone automatically: the report says what was
+   done and what wasn't, so a person can resolve it.
 4. The filing's record, the same account, is written into the disc's folder
    beside `disc.json` (`FilingRecord`), whether the filing finished or
-   stopped. It is the library's own history of the filing, kept with the film
-   and in the share's snapshots. A process that dies part way writes none,
-   and the next plan, finding the share part filed, goes to review.
+   stopped, once that folder has been made. It is the library's own history
+   of the filing, kept with the film and in the share's snapshots. A filing
+   that stops before the folder is made has put nothing in the library, and
+   its report alone says why. A process that dies part way writes none, and
+   the next plan, finding the share part filed, goes to review.
 5. Plex scans each film folder touched, since its own change detection can't
    be relied on over CIFS.
 """
 
 import os
 import stat
-from collections.abc import Callable, Sequence
+import subprocess
+import xml.etree.ElementTree as ET
+from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime
 from enum import StrEnum
 from importlib.metadata import version
@@ -41,6 +45,8 @@ from typing import Literal
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_serializer
 
 from reelbarrow.analyse import Analysis
+from reelbarrow.analysis.probe import Probe, probe
+from reelbarrow.analysis.tools import AnalysisError
 from reelbarrow.fanart import FanartError
 from reelbarrow.manifest import Manifest, ShareRef
 from reelbarrow.plan import (
@@ -53,6 +59,7 @@ from reelbarrow.plan import (
     Plan,
     Rename,
     ShareLibrary,
+    Tag,
     Write,
     manifest_sha256,
 )
@@ -69,10 +76,15 @@ class WriterError(Exception):
     """The share isn't as the operation needs it, so it isn't attempted."""
 
 
+# Matroska's tag levels: a feature's tags are the film's.
+MOVIE = ("50", "MOVIE")
+
+
 class Writer:
     """Every change under the video root: make a folder, rename, write a new
-    file, remove an emptied folder. Nothing is ever overwritten, copied or
-    removed with what it holds."""
+    file, tag a Matroska file, remove an emptied folder. Nothing is ever
+    overwritten, copied or removed with what it holds, and a tag changes a
+    file's metadata, never its streams."""
 
     def __init__(self, video_root: Path, *, dry_run: bool = True) -> None:
         self.video_root = video_root
@@ -142,6 +154,161 @@ class Writer:
         if not stat.S_ISDIR(os.lstat(folder).st_mode):
             raise WriterError(f"{path} isn't a folder")
         os.rmdir(folder)
+
+    def tag(self, path: str, title: str, tags: Mapping[str, str]) -> str:
+        """Sets a Matroska file's segment title, and its global tags at
+        target type 50, MOVIE, in place; returns what it kept and checked.
+
+        mkvpropedit rewrites only the file's metadata: on job 34's transcode,
+        983 bytes at its head and 502 appended, every stream's hash unchanged.
+        Killed part way, it can leave that metadata damaged, which a second
+        run can't always mend, so the file is checked before it is edited and
+        after: mkvinfo finds no fault, ffprobe reads back the title and every
+        tag, and the duration and chapters are as they were.
+
+        `--tags global:` replaces all of a file's global tags, so those
+        already there are written back with these, but for one of a name
+        these set, which these replace."""
+        self._refuse_in_dry_run()
+        file = self._path(path)
+        if not stat.S_ISREG(os.lstat(file).st_mode):
+            raise WriterError(f"{path} isn't a file")
+        _sound(file, path, "")
+        before = _probe(file, path)
+        kept, document = merged_tags(
+            _tool(["mkvextract", str(file), "tags", "-"]), tags
+        )
+
+        # mkvpropedit reads tags only from a file it can seek in, which a pipe
+        # isn't; a file in memory is one, and is written nowhere.
+        fd = os.memfd_create("tags.xml")
+        try:
+            view = memoryview(document)
+            while view:
+                view = view[os.write(fd, view) :]
+            result = subprocess.run(
+                [
+                    "mkvpropedit",
+                    str(file),
+                    "--tags",
+                    f"global:/proc/self/fd/{fd}",
+                    "--edit",
+                    "info",
+                    "--set",
+                    f"title={title}",
+                ],
+                pass_fds=(fd,),
+                capture_output=True,
+                check=False,
+            )
+        finally:
+            os.close(fd)
+        if result.returncode != 0:
+            raise WriterError(
+                f"{path}: mkvpropedit exited {result.returncode}: "
+                + _said(result.stdout + result.stderr)
+            )
+
+        edited = "was edited, but "
+        _sound(file, path, edited)
+        after = _probe(file, path)
+        wrong = [] if after.tags.get("title") == title else ["the segment title"]
+        wrong += [
+            name
+            for name, value in tags.items()
+            if after.tags.get(f"{MOVIE[1]}/{name}") != value
+        ]
+        if wrong:
+            raise WriterError(
+                f"{path} {edited}ffprobe doesn't read back {', '.join(wrong)}"
+            )
+        if after.duration != before.duration:
+            raise WriterError(
+                f"{path} {edited}its duration is {after.duration} s, "
+                f"not {before.duration} s"
+            )
+        if _starts(after) != _starts(before):
+            raise WriterError(f"{path} {edited}its chapters changed")
+        return (
+            (f"kept {', '.join(kept)}; " if kept else "")
+            + f"read back, {before.duration} s and {len(before.chapters)} "
+            + "chapters as before"
+        )
+
+
+def merged_tags(existing: bytes, tags: Mapping[str, str]) -> tuple[list[str], bytes]:
+    """The global tags to write: those in `existing`, mkvextract's XML, but
+    for any of a name `tags` sets, then `tags` at target type 50; and the
+    names kept.
+
+    A tag aimed at a track, an edition, a chapter or an attachment isn't
+    global, and `--tags global:` leaves it alone, so it is left out here."""
+    setting = {name.upper() for name in tags}
+    found = ET.fromstring(existing) if existing.strip() else ET.Element("Tags")
+    merged = ET.Element("Tags")
+    kept: list[str] = []
+    for tag in found.findall("Tag"):
+        targets = tag.find("Targets")
+        if targets is not None and any(t.tag.endswith("UID") for t in targets):
+            continue
+        for simple in tag.findall("Simple"):
+            name = simple.findtext("Name") or ""
+            if name.upper() in setting:
+                tag.remove(simple)
+            else:
+                kept.append(name)
+        if tag.find("Simple") is not None:
+            merged.append(tag)
+    ours = ET.SubElement(merged, "Tag")
+    targets = ET.SubElement(ours, "Targets")
+    ET.SubElement(targets, "TargetTypeValue").text = MOVIE[0]
+    ET.SubElement(targets, "TargetType").text = MOVIE[1]
+    for name, value in tags.items():
+        simple = ET.SubElement(ours, "Simple")
+        ET.SubElement(simple, "Name").text = name
+        ET.SubElement(simple, "String").text = value
+    return kept, ET.tostring(merged, encoding="utf-8", xml_declaration=True)
+
+
+def _tool(command: list[str]) -> bytes:
+    """One of MKVToolNix's readers: its output, or WriterError."""
+    result = subprocess.run(command, capture_output=True, check=False)
+    if result.returncode != 0:
+        raise WriterError(
+            f"{command[0]} exited {result.returncode}: "
+            + _said(result.stdout + result.stderr)
+        )
+    # mkvextract's XML starts with a byte-order mark.
+    return result.stdout.removeprefix(b"\xef\xbb\xbf")
+
+
+def _sound(file: Path, path: str, edited: str) -> None:
+    """mkvinfo exits 1 for a warning and 2 for an error: a fault in the
+    file's structure that ffprobe passes over in silence."""
+    result = subprocess.run(["mkvinfo", str(file)], capture_output=True, check=False)
+    if result.returncode != 0:
+        raise WriterError(
+            f"{path} {edited}mkvinfo finds fault with it: "
+            + _said(result.stdout + result.stderr)
+        )
+
+
+def _probe(file: Path, path: str) -> Probe:
+    try:
+        return probe(file)
+    except AnalysisError as error:
+        raise WriterError(f"{path}: {error}") from error
+
+
+def _starts(probed: Probe) -> list[float]:
+    return [chapter.start for chapter in probed.chapters]
+
+
+def _said(output: bytes) -> str:
+    """A tool's complaint: its warnings and errors, or its last line."""
+    lines = output.decode(errors="replace").strip().splitlines()
+    faults = [line for line in lines if line.startswith(("Warning:", "Error:"))]
+    return " ".join(faults or lines[-1:]) or "nothing said"
 
 
 class Outcome(StrEnum):
@@ -366,6 +533,25 @@ class Executor:
                 break
         steps += operations
 
+        # Stopped before the record's folder was made: nothing is in the
+        # library, so there is no history of a filing to keep there.
+        folder = str(PurePosixPath(plan.record).parent)
+        unmade = [
+            step.outcome is not Outcome.DONE
+            for op, step in zip(plan.operations, operations, strict=True)
+            if isinstance(op, MakeFolder) and op.path == folder
+        ]
+        if failed and any(unmade):
+            steps.append(
+                Step(
+                    step="record",
+                    subject=plan.record,
+                    outcome=Outcome.NOT_RUN,
+                    detail="the filing's record: nothing was filed",
+                )
+            )
+            return report(Result.INCOMPLETE)
+
         record = FilingRecord(
             schema=1,
             source=plan.source,
@@ -406,6 +592,8 @@ class Executor:
         detail = rendered.detail if rendered is not None else ""
         try:
             match op:
+                case Tag():
+                    return Outcome.DONE, self.writer.tag(op.path, op.title, op.tags)
                 case MakeFolder():
                     self.writer.make_folder(op.path)
                 case Rename():
