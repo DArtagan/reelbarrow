@@ -18,9 +18,12 @@ was filed by [first-filing](first-filing.md); this files the other two.
 
 ## Scope
 
-- **The basis check.** Immediately before a plan's first operation the
-  executor compares its basis with the share. If anything differs it executes
-  nothing, and the manifest is replanned into the inbox.
+- **The basis check.** The [executor](executor.md) compares a plan's basis
+  with the share immediately before its first operation, and when anything
+  differs executes nothing and reports `basis_changed`. What remains is the
+  service's half: such a report replans the manifest into the inbox.
+- **Every film filed is tagged**: the [embedded-tags](embedded-tags.md) spec's
+  `tag` operation is in every automatic plan.
 - **Automatic plans go to the executor** as the scan makes them. Review and
   hold plans stay in the inbox.
 - **Notify**: Pushover "filed", once [review-ui](review-ui.md) exists to link

@@ -23,19 +23,23 @@ Specs are referred to by name, not number, so finishing one renumbers nothing.
 |---|---|---|---|
 | 3 | [executor](executor.md) | The executor and the ledger: that plan carried out on a test tree, and refused by dry run on the share | — |
 | 4 | [first-filing](first-filing.md) | *Monte Carlo or Bust!* filed for real by one deliberate run, its preconditions proven, then dry run back on | executor |
-| 5 | [manifest-loop](manifest-loop.md) | Every manifest planned, simplest case first, in any order: the whole fixtures table | executor |
-| 6 | [plan-inbox](plan-inbox.md) | The service: a plan and its basis per manifest in the inbox, replanned when the basis changes, listed in the web UI | manifest-loop |
-| 7 | [automatic-filing](automatic-filing.md) | Dry run off: the service files what the gate passes, the table's other two films | plan-inbox, first-filing |
-| 8 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | automatic-filing |
-| 9 | [review-ui](review-ui.md) | Review page and Pushover for the inbox's review and hold plans: accept, correct, defer | automatic-filing |
-| 10 | [editions](editions.md) | Prove the editions naming in Plex, Jellyfin and Kodi before using it | — |
-| 11 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | automatic-filing, review-ui, editions |
-| 12 | [episode-matching](episode-matching.md) | Inspect harness, reference text, the LLM matcher; Tweety season 1 | automatic-filing, review-ui |
-| 13 | [case-photo](case-photo.md) | Photo at insert time, read by a vision model, used as evidence | review-ui, episode-matching |
-| 14 | [library-conformance](library-conformance.md) | The existing library, filed by hand years ago, brought to today's conventions | hard-movie-cases, editions |
-| 15 | [superseded-sources](superseded-sources.md) | Sources with no manifest that the library already holds better, deleted | hard-movie-cases |
+| 5 | [embedded-tags](embedded-tags.md) | Each filed video carries its identity as Matroska tags, so the file stands alone; *Monte Carlo or Bust!* tagged afterwards | first-filing |
+| 6 | [manifest-loop](manifest-loop.md) | Every manifest planned, simplest case first, in any order: the whole fixtures table | executor |
+| 7 | [plan-inbox](plan-inbox.md) | The service: a plan and its basis per manifest in the inbox, replanned when the basis changes, listed in the web UI | manifest-loop |
+| 8 | [automatic-filing](automatic-filing.md) | Dry run off: the service files what the gate passes, the table's other two films | plan-inbox, first-filing, embedded-tags |
+| 9 | [metrics](metrics.md) | What the service exports, so the cluster can alert on the absence of success | automatic-filing |
+| 10 | [review-ui](review-ui.md) | Review page and Pushover for the inbox's review and hold plans: accept, correct, defer | automatic-filing |
+| 11 | [editions](editions.md) | Prove the editions naming in Plex, Jellyfin and Kodi before using it | — |
+| 12 | [hard-movie-cases](hard-movie-cases.md) | Robin Hood, The Rescuers, Field of Dreams, Shrek the Third | automatic-filing, review-ui, editions |
+| 13 | [episode-matching](episode-matching.md) | Inspect harness, reference text, the LLM matcher; Tweety season 1 | automatic-filing, review-ui |
+| 14 | [case-photo](case-photo.md) | Photo at insert time, read by a vision model, used as evidence | review-ui, episode-matching |
+| 15 | [library-conformance](library-conformance.md) | The existing library, filed by hand years ago, brought to today's conventions | hard-movie-cases, editions |
+| 16 | [superseded-sources](superseded-sources.md) | Sources with no manifest that the library already holds better, deleted | hard-movie-cases |
 
 editions needs nothing else and can run whenever there is a free session.
+embedded-tags comes before automatic-filing, as proposed to Will and agreed
+(2026-11-11), so that only what first-filing filed has to be tagged
+afterwards.
 
 ## After these
 
