@@ -9,3 +9,4 @@ request(s). It is the registry that stops a retired slug from being reused.
 | analysis | 2026-10-20 | #5 |
 | arm-manifest-export | 2026-11-10 | #11, #12, #14, #17 |
 | single-manifest-plan | 2026-11-10 | #18, #19 |
+| executor | 2026-11-11 | #22, #24 |

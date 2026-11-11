@@ -21,8 +21,7 @@ Specs are referred to by name, not number, so finishing one renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 3 | [executor](executor.md) | The executor and the filing record it keeps in the library: that plan carried out on a test tree, and refused by dry run on the share | — |
-| 4 | [embedded-tags](embedded-tags.md) | Each filed video carries its identity as Matroska tags, so the file stands alone | executor |
+| 4 | [embedded-tags](embedded-tags.md) | Each filed video carries its identity as Matroska tags, so the file stands alone | — |
 | 5 | [first-filing](first-filing.md) | *Monte Carlo or Bust!* filed and tagged for real by one deliberate run, its preconditions proven, then dry run back on | embedded-tags |
 | 6 | [extras](extras.md) | Extras named from TheDiscDB, or `<disc label>_title_<n>`, in the kind folders Plex reads, proven in the players | embedded-tags |
 | 7 | [manifest-loop](manifest-loop.md) | Every manifest planned, simplest case first, in any order: the whole fixtures table | extras |

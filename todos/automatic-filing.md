@@ -18,7 +18,7 @@ was filed by [first-filing](first-filing.md); this files the other two.
 
 ## Scope
 
-- **The basis check.** The [executor](executor.md) compares a plan's basis
+- **The basis check.** The executor (step 7 of *The service*) compares a plan's basis
   with the share immediately before its first operation, and when anything
   differs executes nothing and reports `basis_changed`. What remains is the
   service's half: such a report replans the manifest into the inbox.
