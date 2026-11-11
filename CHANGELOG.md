@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.1](https://github.com/DArtagan/reelbarrow/compare/v0.5.0...v0.5.1) (2026-11-11)
+
+
+### Documentation
+
+* **agents:** quieten direnv, and run wt switch with --yes ([41eb1dd](https://github.com/DArtagan/reelbarrow/commit/41eb1ddb03fc10916b8fe7d0e64cbd1922aadc9e))
+* **executor:** give the filing record a JSON Schema, docs/filing.schema.json ([41eb1dd](https://github.com/DArtagan/reelbarrow/commit/41eb1ddb03fc10916b8fe7d0e64cbd1922aadc9e))
+* retire executor ([#24](https://github.com/DArtagan/reelbarrow/issues/24)) ([ae5cc94](https://github.com/DArtagan/reelbarrow/commit/ae5cc94e416bfdab52d3636079f64191e55167ad))
+* **todos:** a spec shows an example of each new thing it writes ([41eb1dd](https://github.com/DArtagan/reelbarrow/commit/41eb1ddb03fc10916b8fe7d0e64cbd1922aadc9e))
+
 ## [0.5.0](https://github.com/DArtagan/reelbarrow/compare/v0.4.0...v0.5.0) (2026-11-11)
 
 
