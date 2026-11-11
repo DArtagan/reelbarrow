@@ -49,6 +49,37 @@ A merge commit under a conventional title puts every change in the changelog
 twice. Retitle the pull request whenever the branch changes which kind it is;
 only the title at merge time counts.
 
+### Several notes from one squash
+
+A squash gives the changelog one line, its title. A pull request that adds
+several things a reader of the release notes would want to see apart lists
+them instead, in a block at the end of its body:
+
+```
+BEGIN_COMMIT_OVERRIDE
+feat(executor): carry out automatic plans through one Writer, which refuses every change while dry run is on
+feat(cli): `reelbarrow file` files each automatic plan, and leaves review and hold plans alone
+docs(todos): the embedded-tags and extras specs, ahead of first-filing and manifest-loop
+END_COMMIT_OVERRIDE
+```
+
+- **Each line is one Conventional Commit**, and becomes one changelog entry,
+  under its type's heading. The block replaces the title's entry rather than
+  adding to it, so the title's own change is listed too if it still belongs.
+- **It describes what the pull request leaves, not how it got there.** A branch
+  that built something and replaced it before merging lists only what remains;
+  merging its commits would put both in the notes.
+- **It is read from the merged pull request's body** each time release-please
+  runs, so it can be added or corrected after merging, until the release pull
+  request is merged.
+- **Its entries link to the squash commit**, not to the pull request's number.
+- The squash commit's body, which lists the branch's commits as bullets, adds
+  nothing to the changelog either way.
+
+Use it where a squash would undersell the pull request. A merge commit is for
+history that belongs on `main`, not for a fuller changelog: a branch's commits
+record its review, and say what changed along the way.
+
 ## How it reaches the cluster
 
 Flux deploys reelbarrow from the deployment repository (see *The deployment
