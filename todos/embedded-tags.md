@@ -77,6 +77,10 @@ Tagging what was filed before reelbarrow, the 2024 entries, is
     film's ids always; with a TheDiscDB match its name as `TITLE` and its
     kind as `CONTENT_TYPE`; without one, a `TITLE` made only of what is known.
     This spec makes the operation able to write either.
+- **No other tags.** `ORIGINAL_MEDIA_TYPE`, `DATE_DIGITIZED` and a custom
+  `_REELBARROW_DISC` linking the file to its disc were offered, with the
+  descriptive tags the NFO already holds, and declined (Will, 2026-11-11:
+  *"No thanks."*).
 - **Raw copies aren't tagged** (Will, 2026-11-11: *"Raw copies: leave
   untagged"*). They're the disc's own bytes, kept so the disc can be played
   and transcoded again, and compared byte for byte across rips (E20).
