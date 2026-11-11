@@ -7,8 +7,9 @@ and a change to its manifest goes to review. *Where did this file
 come from, and how is it undone?* Once a file has moved, the ledger and the
 library's `disc.json` are the only record of where it was (*The manifest*, in
 the design); the ledger keeps the whole plan, with every rename, write and
-deletion, which is what a revert or the investigation of a misfile reads. It
-is what FileBot's `history.xml` was to the 2024 filing.
+deletion, which is what a revert or the investigation of a misfile reads, and
+the manifest it was made from, as it was, since `disc.json` holds only what
+was filed. It is what FileBot's `history.xml` was to the 2024 filing.
 
 It is written as the filing goes rather than once at its end. Its entry is opened
 before the first operation and updated after each, so a filing that dies
@@ -29,6 +30,7 @@ from pathlib import Path
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict
 
+from reelbarrow.manifest import Manifest
 from reelbarrow.plan import Plan
 
 FILE = "reelbarrow.sqlite3"
@@ -42,6 +44,7 @@ CREATE TABLE filing (
     started TEXT NOT NULL,
     finished TEXT,
     version TEXT NOT NULL,
+    manifest TEXT NOT NULL,
     plan TEXT NOT NULL,
     outcomes TEXT NOT NULL,
     PRIMARY KEY (source, id)
@@ -66,6 +69,7 @@ class Entry(BaseModel):
     started: AwareDatetime
     finished: AwareDatetime | None
     version: str
+    manifest: dict
     plan: dict
     outcomes: list[dict]
 
@@ -105,8 +109,8 @@ class Ledger:
             return None
         with closing(self._connect(write=False)) as connection:
             row = connection.execute(
-                "SELECT source, id, state, started, finished, version, plan, outcomes"
-                " FROM filing WHERE source = ? AND id = ?",
+                "SELECT source, id, state, started, finished, version,"
+                " manifest, plan, outcomes FROM filing WHERE source = ? AND id = ?",
                 (source, id),
             ).fetchone()
         if row is None:
@@ -114,22 +118,32 @@ class Ledger:
         keys = ("source", "id", "state", "started", "finished", "version")
         return Entry(
             **dict(zip(keys, row[:6], strict=True)),
-            plan=json.loads(row[6]),
-            outcomes=json.loads(row[7]),
+            manifest=json.loads(row[6]),
+            plan=json.loads(row[7]),
+            outcomes=json.loads(row[8]),
         )
 
-    def begin(self, plan: Plan, started: datetime, outcomes: list[dict]) -> None:
+    def begin(
+        self,
+        manifest: Manifest,
+        plan: Plan,
+        started: datetime,
+        outcomes: list[dict],
+    ) -> None:
         """Opens a unit's entry; refused if it has one."""
+        if (manifest.source, manifest.id) != (plan.source, plan.id):
+            raise ValueError(f"{manifest.id}'s manifest, not {plan.id}'s")
         with closing(self._connect(write=True)) as connection:
             try:
                 connection.execute(
-                    "INSERT INTO filing VALUES (?, ?, ?, ?, NULL, ?, ?, ?)",
+                    "INSERT INTO filing VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?)",
                     (
                         plan.source,
                         plan.id,
                         State.STARTED.value,
                         started.isoformat(),
                         version("reelbarrow"),
+                        json.dumps(manifest.to_json(), ensure_ascii=False),
                         json.dumps(plan.to_json(), ensure_ascii=False),
                         json.dumps(outcomes, ensure_ascii=False),
                     ),

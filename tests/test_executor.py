@@ -6,7 +6,6 @@ only, its sidecars, `raw/` holding the disc's folder with `disc.json`, and
 nothing left behind of the job in `completed/` or `raw/`.
 """
 
-import json
 import os
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
@@ -17,6 +16,7 @@ import httpx
 import pytest
 
 from reelbarrow import fanart
+from reelbarrow.disc_record import DiscRecord
 from reelbarrow.executor import (
     Executor,
     Outcome,
@@ -202,9 +202,12 @@ def test_job_34_files_into_its_rows_layout(root, case, tmp_path, plex_server):
             assert found[path] == size, path
     # Renamed, not copied.
     assert (root / FILM).stat().st_ino == film_inode
-    assert json.loads((root / DISC / "disc.json").read_text())["titles"] == [
-        {"raw": "B1_t00.mkv", "file": "../../Monte Carlo or Bust! (1969).mkv"}
-    ]
+    # disc.json's paths are where the files are now, from the disc's folder.
+    record = DiscRecord.model_validate_json((root / DISC / "disc.json").read_bytes())
+    (title,) = record.titles
+    assert (root / DISC / title.extracted.path).resolve() == root / DISC / "B1_t00.mkv"
+    assert (root / DISC / title.transcode.path).resolve() == (root / FILM).resolve()
+    assert record.films[0].tmdb_id == 38792
     nfo = ET.parse(root / FOLDER / "movie.nfo").getroot()
     assert nfo.findtext("title") == "Monte Carlo or Bust!"
     assert nfo.find("uniqueid[@type='tmdb']").text == "38792"

@@ -14,6 +14,7 @@ import cases
 import pytest
 
 from reelbarrow.analyse import Analysis, File, Video
+from reelbarrow.disc_record import DiscRecord
 from reelbarrow.intake import RawFound
 from reelbarrow.manifest import IdentityReason, Manifest, State
 from reelbarrow.plan import (
@@ -111,17 +112,28 @@ def test_its_sidecars_are_planned_and_disc_json_says_what_became_what(case):
         assert writes[f"{FOLDER}/raw/{marker}"].content is None
     assert writes[f"{DISC}/disc.json"].content == {
         "schema": 1,
+        "from": {
+            "source": "arm",
+            "id": "34-178993082181",
+            "manifest_sha256": made.basis.manifest_sha256,
+        },
+        "films": [{"tmdb_id": 38792, "imdb_id": "tt0064688"}],
         "disc": {
             "type": "dvd",
             "label": "THOSE_DARING_YOUNG_MEN",
             "crc64": "ef68a3c769a42a4f",
         },
-        "job": {"source": "arm", "id": "34-178993082181"},
+        # The copy was never checked, so the record has no checks.
         "raw": {"form": "mkv-titles"},
+        # Paired by content, with no disc number: the job predates the record.
         "titles": [
-            {"raw": "B1_t00.mkv", "file": "../../Monte Carlo or Bust! (1969).mkv"}
+            {
+                "extracted": {"path": "B1_t00.mkv"},
+                "transcode": {"path": "../../Monte Carlo or Bust! (1969).mkv"},
+            }
         ],
     }
+    DiscRecord.model_validate(writes[f"{DISC}/disc.json"].content)
 
 
 def test_operations_run_folders_and_renames_then_sidecars_then_leftovers(case):

@@ -22,8 +22,16 @@ from typing import Annotated, Literal, Protocol
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
-from reelbarrow import names
+from reelbarrow import disc_record, names
 from reelbarrow.analyse import Analysis, File, Folder, Video
+from reelbarrow.disc_record import (
+    DiscRecord,
+    FiledFrom,
+    FiledRaw,
+    FiledRef,
+    FiledTitle,
+    Film,
+)
 from reelbarrow.intake import RawFound
 from reelbarrow.manifest import IdentityReason, Manifest, RawForm, ShareRef, State
 from reelbarrow.tmdb import Movie, Tmdb
@@ -549,14 +557,26 @@ def _operations(
                 path=disc, reason=f"disc {job.disc.label}, CRC64 {job.disc.crc64}"
             ),
         ]
-        moved = []
-        for source in raw_source:
-            moved.append(
-                {
-                    "raw": source.name,
-                    "file": f"../../{PurePosixPath(target).name}",
-                }
+        # Paired by content, so known by its MKV: a job from before the raw
+        # copy's record has no disc number for it.
+        filed = [
+            FiledTitle(
+                extracted=FiledRef(path=source.name),
+                transcode=FiledRef(path=f"../../{PurePosixPath(target).name}"),
             )
+            for source in raw_source
+        ]
+        record = DiscRecord(
+            schema=1,
+            from_=FiledFrom(
+                source=job.source, id=job.id, manifest_sha256=manifest_sha256(job)
+            ),
+            films=[Film(tmdb_id=movie.id, imdb_id=movie.imdb_id)],
+            disc=job.disc,
+            raw=FiledRaw(form=RawForm.MKV_TITLES),
+            titles=filed,
+        )
+        for source in raw_source:
             ops.append(
                 Rename(
                     source=source.path,
@@ -574,16 +594,11 @@ def _operations(
         ]
         sidecars.append(
             Write(
-                path=f"{disc}/disc.json",
+                path=f"{disc}/{disc_record.FILENAME}",
                 sidecar=Sidecar.DISC_JSON,
-                reason="the disc, the job, and which raw title became which file",
-                content={
-                    "schema": 1,
-                    "disc": job.disc.model_dump(mode="json"),
-                    "job": {"source": job.source, "id": job.id},
-                    "raw": {"form": RawForm.MKV_TITLES.value},
-                    "titles": moved,
-                },
+                reason="the disc, the film, the job, and which raw title became "
+                "which file",
+                content=record.to_json(),
             )
         )
         source_folder = PurePosixPath(raw_source[0].path).parent

@@ -1295,7 +1295,7 @@ movies/
       .ignore · .nomedia                plus the library-wide .plexignore
       ROBIN_HOOD [dvd-4391d7e10469999f]/   one folder per disc
         C1_t01.mkv  D2_t00.mkv
-        disc.json                       identity, ARM job, and raw file → library file
+        disc.json                       the manifest as filed: the disc, the film, raw → library file
       ROBIN_HOOD [dvd-d3c5ce89aef40f61]/   the bonus disc
 ```
 
@@ -1305,6 +1305,33 @@ split film has an obvious home. `disc.json` records which raw title became which
 library file, so a re-transcode or a menu-driven play of the raw copy (goal 2)
 never needs this pipeline again. The 2024 entries keep their flat `raw/`; they
 are not migrated.
+
+**`disc.json` is the manifest as filed** (Will, 2026-11-11, asking *"Do you
+think we could get to a place where simply copy the manifest to the library
+folder instead?"*). It uses the manifest's own models for the disc, its raw
+copy and its titles, so a reader of one reads the other, and
+[`disc.schema.json`](disc.schema.json) is generated from them
+(`reelbarrow.disc_record`). It isn't the manifest copied as it stands, which
+would be wrong in the library four ways:
+
+- **Its paths go stale at filing.** A manifest's point into `import/`.
+  `disc.json`'s are where the files are now, relative to the disc's folder,
+  so a renamed film folder leaves them right.
+- **Its identity is the producer's claim**, which can be wrong (job 34's is
+  the disc's US title; job 24 named The Polar Express as another film).
+  `disc.json` holds the identity decided, a TMDB id, and names the manifest it
+  was filed `from` by source, id and content hash. The ledger keeps the
+  manifest itself.
+- **It can be silent on what `disc.json` is for.** A job from before the raw
+  copy's record has no `titles`; which raw title became which file is known
+  only from the planner's pairing by content, recorded in the same shape, the
+  title known by its MKV since there is no disc number for it.
+- **It describes the job, not the folder**: the run's state and times, its
+  completed folder, and titles filed nowhere. Two films from one disc are two
+  folders.
+
+As in the manifest, absent means not recorded: a raw copy never checked has no
+`check`, rather than one that reads as passed.
 
 A DVD ripped to an image files as the image and `disc.json`. Its `titles/` is a
 leftover, by *Confidence*, and so is an `arm-job.json` left from before the raw

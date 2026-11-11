@@ -292,7 +292,7 @@ class Executor:
         live = not self.writer.dry_run
         if live:
             try:
-                self.ledger.begin(plan, self.clock(), outcomes())
+                self.ledger.begin(manifest, plan, self.clock(), outcomes())
             except (LedgerError, sqlite3.Error) as error:
                 steps.append(step("ledger", Outcome.FAILED, str(error)))
                 return report(Result.NOT_STARTED)

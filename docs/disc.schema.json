@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DArtagan/reelbarrow/blob/main/docs/disc.schema.json",
+  "$defs": {
+    "Check": {
+      "description": "The backup's two checks. The copy is whole when both passed.",
+      "properties": {
+        "sizes": {
+          "$ref": "#/$defs/CheckState",
+          "description": "Every file against the disc's own record of its size."
+        },
+        "hashes": {
+          "$ref": "#/$defs/CheckState",
+          "description": "MakeMKV's check of each file against the disc's hashes, as it copied. Never rerun, so `not_run` on a copy checked afterwards."
+        }
+      },
+      "required": [
+        "sizes",
+        "hashes"
+      ],
+      "title": "Check",
+      "type": "object"
+    },
+    "CheckState": {
+      "enum": [
+        "passed",
+        "failed",
+        "not_run"
+      ],
+      "title": "CheckState",
+      "type": "string"
+    },
+    "Disc": {
+      "properties": {
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Type"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "crc64": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{16}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A DVD's pydvdid CRC64; null for any other disc.",
+          "title": "Crc64"
+        }
+      },
+      "title": "Disc",
+      "type": "object"
+    },
+    "DiscKey": {
+      "description": "A title by the disc's own number for it: a DVD's title number, which\nopens it in the image, or a Blu-ray's playlist.",
+      "properties": {
+        "disc_title": {
+          "default": null,
+          "minimum": 1,
+          "title": "Disc Title",
+          "type": "integer"
+        },
+        "playlist": {
+          "default": null,
+          "pattern": "(?i)^\\d{5}\\.mpls$",
+          "title": "Playlist",
+          "type": "string"
+        }
+      },
+      "title": "DiscKey",
+      "type": "object"
+    },
+    "FiledFrom": {
+      "description": "The manifest the disc was filed from.",
+      "properties": {
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "manifest_sha256": {
+          "description": "Of its content, as the plan's basis has it.",
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Manifest Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "id",
+        "manifest_sha256"
+      ],
+      "title": "FiledFrom",
+      "type": "object"
+    },
+    "FiledRaw": {
+      "description": "The raw copy, as the manifest's `raw` records it, without its folder:\nthe record is in it.",
+      "properties": {
+        "form": {
+          "$ref": "#/$defs/RawForm"
+        },
+        "image": {
+          "$ref": "#/$defs/FiledRef",
+          "default": null,
+          "title": "Image"
+        },
+        "check": {
+          "$ref": "#/$defs/Check",
+          "default": null,
+          "description": "Left out: never checked."
+        },
+        "problems": {
+          "default": null,
+          "items": {
+            "type": "string"
+          },
+          "title": "Problems",
+          "type": "array"
+        },
+        "titles_compared": {
+          "const": true,
+          "default": null,
+          "title": "Titles Compared",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "form"
+      ],
+      "title": "FiledRaw",
+      "type": "object"
+    },
+    "FiledRef": {
+      "description": "A file, by its path from the disc's own folder in `raw/`.",
+      "properties": {
+        "path": {
+          "description": "`/` separators; `..` only to climb out of the disc's folder, before any name; no `.`; the name exactly as on disk.",
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "FiledRef",
+      "type": "object"
+    },
+    "FiledTitle": {
+      "description": "A title as filed: the manifest's title, its paths where its files are\nnow. A title from before the raw copy's record has no disc number, only\nits MKV.",
+      "properties": {
+        "disc_title": {
+          "default": null,
+          "minimum": 1,
+          "title": "Disc Title",
+          "type": "integer"
+        },
+        "playlist": {
+          "default": null,
+          "pattern": "(?i)^\\d{5}\\.mpls$",
+          "title": "Playlist",
+          "type": "string"
+        },
+        "extracted": {
+          "$ref": "#/$defs/FiledRef",
+          "default": null,
+          "description": "The title's own MKV, kept in the raw copy.",
+          "title": "Extracted"
+        },
+        "transcode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FiledRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The library file it became. Null: none, and `reason` says why."
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TitleReason"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "played_by": {
+          "$ref": "#/$defs/DiscKey",
+          "default": null,
+          "title": "Played By"
+        },
+        "interleaved": {
+          "default": null,
+          "title": "Interleaved",
+          "type": "boolean"
+        },
+        "parts": {
+          "default": null,
+          "items": {
+            "$ref": "#/$defs/Part"
+          },
+          "minLength": 2,
+          "title": "Parts",
+          "type": "array"
+        }
+      },
+      "title": "FiledTitle",
+      "type": "object"
+    },
+    "Film": {
+      "properties": {
+        "tmdb_id": {
+          "title": "Tmdb Id",
+          "type": "integer"
+        },
+        "imdb_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Imdb Id"
+        }
+      },
+      "required": [
+        "tmdb_id"
+      ],
+      "title": "Film",
+      "type": "object"
+    },
+    "Part": {
+      "properties": {
+        "disc_title": {
+          "default": null,
+          "minimum": 1,
+          "title": "Disc Title",
+          "type": "integer"
+        },
+        "playlist": {
+          "default": null,
+          "pattern": "(?i)^\\d{5}\\.mpls$",
+          "title": "Playlist",
+          "type": "string"
+        },
+        "start": {
+          "description": "The second of the whole at which the part begins, in the playback time its transcode's chapters keep.",
+          "minimum": 0,
+          "title": "Start",
+          "type": "number"
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "title": "Part",
+      "type": "object"
+    },
+    "RawForm": {
+      "enum": [
+        "bluray-backup",
+        "dvd-image",
+        "mkv-titles"
+      ],
+      "title": "RawForm",
+      "type": "string"
+    },
+    "TitleReason": {
+      "description": "Why a title has no transcode.",
+      "enum": [
+        "played_by_kept_titles",
+        "not_extracted"
+      ],
+      "title": "TitleReason",
+      "type": "string"
+    }
+  },
+  "description": "`disc.json`. *Target layout*, in reelbarrow's design.",
+  "properties": {
+    "schema": {
+      "const": 1,
+      "title": "Schema",
+      "type": "integer"
+    },
+    "from": {
+      "$ref": "#/$defs/FiledFrom"
+    },
+    "films": {
+      "description": "What the disc holds, the first the film whose folder this is.",
+      "items": {
+        "$ref": "#/$defs/Film"
+      },
+      "minItems": 1,
+      "title": "Films",
+      "type": "array"
+    },
+    "disc": {
+      "$ref": "#/$defs/Disc"
+    },
+    "raw": {
+      "$ref": "#/$defs/FiledRaw"
+    },
+    "titles": {
+      "items": {
+        "$ref": "#/$defs/FiledTitle"
+      },
+      "minItems": 1,
+      "title": "Titles",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema",
+    "from",
+    "films",
+    "disc",
+    "raw",
+    "titles"
+  ],
+  "title": "reelbarrow disc.json",
+  "type": "object"
+}

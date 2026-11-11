@@ -67,10 +67,13 @@ and `tests/share_guard.py`, an audit hook every test that builds a share
 takes through the `guarded` fixture. The first two done-when conditions
 pass in the tests; the third needs a release.
 
-`disc.json` holds what the planner puts in it: the disc, the job, the raw
-form and which raw title became which file. Job 34 has no raw copy's
-record, so there are no backup checks to carry; a recorded raw copy isn't
-planned yet, and the spec that plans one adds them.
+`disc.json` is the manifest as filed (Will, 2026-11-11), and its format is
+`reelbarrow.disc_record` and `docs/disc.schema.json`. *Target layout* in the
+design says why it isn't a verbatim copy of the manifest, which was the first
+thing asked. It has room for a recorded raw copy's backup checks, its
+`disc_title`s and its wholes; job 34 has none of them, since it predates the
+record. The spec that plans a recorded raw copy fills them in. The ledger
+also keeps each filed unit's manifest, as it was.
 
 What the deployment needs, for the third condition:
 

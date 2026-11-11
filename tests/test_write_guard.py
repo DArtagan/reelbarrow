@@ -34,8 +34,9 @@ WRITERS = {
 }
 # Single calls elsewhere, each landing outside the video root.
 EXCEPTIONS = {
-    # The schema file in docs/, by a developer's `python -m`.
+    # The schema files in docs/, by a developer's `python -m`.
     ("manifest.py", "write_text"),
+    ("disc_record.py", "write_text"),
     # A pipeline's stderr, in the system's temporary directory.
     ("analysis/tools.py", "tempfile.TemporaryFile"),
 }
