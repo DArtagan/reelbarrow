@@ -55,7 +55,13 @@ class Images:
 
 
 class PlexServer:
-    """Plex's two requests: its sections, and a partial scan."""
+    """Plex's two requests: its sections, and a partial scan.
+
+    Its locations are paths inside Plex's own container, not on the share:
+    the deployment's Plex mounts the share's `movies` at `/data/movies`. The
+    executor is told that mapping (`REELBARROW_PLEX_PATHS`), and these are
+    this test's copy of it.
+    """
 
     def __init__(self) -> None:
         self.scanned: list[httpx.Request] = []

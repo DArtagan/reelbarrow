@@ -2,10 +2,15 @@
 
 Plex's own change detection can't be relied on over the share's CIFS mount, so
 each filing ends with a partial scan of the film's folder
-(`/library/sections/{id}/refresh?path=…`). Plex mounts each library at a path
-of its own, which the share's path is translated to; the section is the one
-whose location holds that path, read from Plex rather than configured, so a
-section recreated in Plex needs no change here.
+(`/library/sections/{id}/refresh?path=…`).
+
+A section is what Plex's interface calls a library, Movies or TV Shows: one
+kind of media, one agent, and one or more folders (its locations) that Plex
+scans for it. Its API numbers each, and a scan is asked of a section by its
+number. Plex mounts each library at a path of its own, which the share's path
+is translated to; the section is the one whose location holds that path, read
+from Plex rather than configured, so a section recreated in Plex needs no
+change here.
 """
 
 from collections.abc import Mapping

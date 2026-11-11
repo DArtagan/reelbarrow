@@ -1,12 +1,19 @@
 """The ledger: what was filed, from which plan, and what each operation did.
 
-Once a file has moved, the ledger and the library's `disc.json` are the only
-record of where it came from (*The manifest*, in the design), so the ledger is
-written as the filing goes rather than once at its end. Its entry is opened
+It answers two questions nothing else can. *Was this unit filed?* A manifest
+stays on the share after its files have moved, so it can't say whether its
+unit was filed; a unit the ledger holds is never filed again by a fresh plan,
+and a change to its manifest goes to review. *Where did this file
+come from, and how is it undone?* Once a file has moved, the ledger and the
+library's `disc.json` are the only record of where it was (*The manifest*, in
+the design); the ledger keeps the whole plan, with every rename, write and
+deletion, which is what a revert or the investigation of a misfile reads. It
+is what FileBot's `history.xml` was to the 2024 filing.
+
+It is written as the filing goes rather than once at its end. Its entry is opened
 before the first operation and updated after each, so a filing that dies
 part way leaves an entry that says how far it got. An entry is keyed by its
-manifest's `source` and `id`, and there is one a unit: a unit with an entry
-is never filed again by a fresh plan.
+manifest's `source` and `id`, and there is one a unit.
 
 It is SQLite under `REELBARROW_DATA_DIR`, never on the share. Dry run doesn't
 write it: a unit nothing was done to isn't filed.

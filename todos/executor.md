@@ -80,8 +80,10 @@ What the deployment needs, for the third condition:
 ## Secrets
 
 fanart.tv's key, added to reelbarrow's secret in the deployment repository.
-Plex's token, URL and paths are [first-filing](first-filing.md)'s: dry run
-neither scans nor needs them.
+Plex's token goes in beside it, and its URL and paths in the Deployment
+(Will, 2026-11-11: *"let's add these plex keys to the deployment repo
+too"*), though dry run neither scans nor reads them;
+[first-filing](first-filing.md) checks Plex answers.
 
 ## Done when
 
