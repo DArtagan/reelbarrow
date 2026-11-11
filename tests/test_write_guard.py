@@ -5,9 +5,13 @@ Two halves. The static one reads every module in `src/reelbarrow` for the
 calls that write, rename or remove, and allows them only where the write is
 known to land outside the video root, or is the executor's own. The runtime
 one (`share_guard`, used by every test that builds a share) catches what
-reading can't see, such as a library writing on a module's behalf. Neither
-sees a subprocess's own writes: the media tools the analysis runs are given
-files to read.
+reading can't see, such as a library writing on a module's behalf.
+
+Neither sees a tool's own writes, which are its process's, so both judge a
+tool by its name. Only the executor runs one that writes, such as mkvpropedit.
+Only it and `analysis/tools.py` start a process at all, and every command
+the analysis gives `tools.py` is written out where it is given, naming one of
+`share_guard.READING_TOOLS`.
 """
 
 import ast
@@ -18,6 +22,8 @@ import pytest
 import share_guard
 
 from reelbarrow import manifest
+from reelbarrow.analysis import tools
+from reelbarrow.analysis.probe import probe
 from reelbarrow.executor import Writer
 
 SOURCE = share_guard.SOURCE
@@ -156,6 +162,95 @@ def writes(source: str) -> list[str]:
     return found
 
 
+# Functions that start a process.
+STARTING = {
+    "subprocess": frozenset(
+        {
+            "run",
+            "Popen",
+            "call",
+            "check_call",
+            "check_output",
+            "getoutput",
+            "getstatusoutput",
+        }
+    ),
+    "os": frozenset(
+        {
+            "system",
+            "popen",
+            "posix_spawn",
+            "posix_spawnp",
+            *(f"exec{s}" for s in ("l", "le", "lp", "lpe", "v", "ve", "vp", "vpe")),
+            *(f"spawn{s}" for s in ("l", "le", "lp", "lpe", "v", "ve", "vp", "vpe")),
+        }
+    ),
+    "asyncio": frozenset({"create_subprocess_exec", "create_subprocess_shell"}),
+    "pty": frozenset({"spawn"}),
+}
+# The analysis's own: `run` takes a command, `pipe` two.
+TOOLS = "reelbarrow.analysis.tools"
+WRAPPERS = frozenset({f"{TOOLS}.run", f"{TOOLS}.pipe"})
+# Modules that start a process themselves: the executor runs what it needs,
+# and tools.py what the analysis gives it.
+STARTERS = frozenset({"executor.py", "analysis/tools.py"})
+
+
+def _program(node: ast.expr) -> str:
+    """The tool a command written out names, or `?`."""
+    if not (
+        isinstance(node, ast.List | ast.Tuple)
+        and node.elts
+        and isinstance(node.elts[0], ast.Constant)
+        and isinstance(node.elts[0].value, str)
+    ):
+        return "?"
+    program = node.elts[0].value
+    last = node.elts[-1]
+    if program == "ffmpeg" and not (
+        isinstance(last, ast.Constant) and last.value == "-"
+    ):
+        return "ffmpeg, to a file"
+    return program
+
+
+def processes(source: str) -> list[tuple[str, str]]:
+    """Each call in a module's source that starts a process, or gives the
+    analysis's `run` or `pipe` a command: the function, and the tool each
+    command names."""
+    tree = ast.parse(source)
+    imported: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module:
+            for alias in node.names:
+                imported[alias.asname or alias.name] = f"{node.module}.{alias.name}"
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                imported[alias.asname or alias.name] = alias.name
+    found = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = _dotted(node.func)
+        if name is None:
+            continue
+        head, _, rest = name.partition(".")
+        full = imported.get(head, head) + (f".{rest}" if rest else "")
+        module, _, function = full.rpartition(".")
+        if full in WRAPPERS:
+            commands = node.args or [k.value for k in node.keywords]
+            found += [(full, _program(command)) for command in commands]
+        elif function in STARTING.get(module, ()):
+            command = next(
+                iter(
+                    [*node.args, *(k.value for k in node.keywords if k.arg == "args")]
+                ),
+                None,
+            )
+            found.append((full, "?" if command is None else _program(command)))
+    return found
+
+
 def modules() -> list[Path]:
     return sorted(SOURCE.rglob("*.py"))
 
@@ -170,6 +265,70 @@ def test_only_the_executor_and_the_named_writers_change_files():
             if (module, call) not in EXCEPTIONS:
                 found.append(f"{module}: {call}")
     assert found == []
+
+
+def test_only_the_executor_runs_a_tool_that_writes():
+    found = []
+    for path in modules():
+        module = path.relative_to(SOURCE).as_posix()
+        if module == "executor.py":
+            continue
+        for call, program in processes(path.read_text()):
+            if call in WRAPPERS:
+                if program not in share_guard.READING_TOOLS:
+                    found.append(f"{module}: {call} runs {program}")
+            elif module not in STARTERS:
+                found.append(f"{module}: {call}")
+    assert found == []
+
+
+def test_the_analysis_runs_tools_through_tools_py_and_the_executor_tags():
+    """The rule above holds over something: each half of it is in use."""
+    run = {
+        program
+        for path in modules()
+        for call, program in processes(path.read_text())
+        if call in WRAPPERS
+    }
+    assert run == {"ffprobe", "ffmpeg", "fpcalc", "lsdvd"}
+    executor = (SOURCE / "executor.py").read_text()
+    assert ("subprocess.run", "mkvpropedit") in processes(executor)
+
+
+@pytest.mark.parametrize(
+    ("source", "found"),
+    [
+        ("subprocess.run(['mkvpropedit', p])", [("subprocess.run", "mkvpropedit")]),
+        ("import subprocess as sp\nsp.Popen(command)", [("subprocess.Popen", "?")]),
+        (
+            "from subprocess import check_output\ncheck_output(c)",
+            [("subprocess.check_output", "?")],
+        ),
+        ("os.system('mkvpropedit f')", [("os.system", "?")]),
+        ("os.execvp('sh', ['sh'])", [("os.execvp", "?")]),
+        (
+            f"from {TOOLS} import run\nrun(['mkvpropedit', p])",
+            [(f"{TOOLS}.run", "mkvpropedit")],
+        ),
+        (
+            "from reelbarrow.analysis import tools\ntools.run(['lsdvd', p])",
+            [(f"{TOOLS}.run", "lsdvd")],
+        ),
+        (
+            f"from {TOOLS} import pipe\npipe(['ffmpeg', '-i', p, '-'], ['fpcalc', '-'])",
+            [(f"{TOOLS}.pipe", "ffmpeg"), (f"{TOOLS}.pipe", "fpcalc")],
+        ),
+        (
+            f"from {TOOLS} import run\nrun(['ffmpeg', '-i', p, 'out.mkv'])",
+            [(f"{TOOLS}.run", "ffmpeg, to a file")],
+        ),
+        (f"from {TOOLS} import run\nrun(command)", [(f"{TOOLS}.run", "?")]),
+        # Not a process: a name that only looks like one.
+        ("results.run(x)\nsystem(c)", []),
+    ],
+)
+def test_the_scan_finds_each_process_started(source, found):
+    assert processes(source) == found
 
 
 def test_every_exception_is_still_needed():
@@ -245,6 +404,29 @@ def test_the_same_write_outside_the_root_is_not(tmp_path, monkeypatch):
     made = share_guard.guard(root)
     try:
         manifest.write_schema()
+    finally:
+        assert share_guard.release(made) == []
+
+
+def test_a_module_made_to_run_mkvpropedit_is_caught(tmp_path, ffmpeg):
+    root = tmp_path / "video"
+    root.mkdir()
+    film = ffmpeg("video/film.mkv", "-f", "lavfi", "-i", "testsrc=d=1")
+    made = share_guard.guard(root)
+    try:
+        tools.run(["mkvpropedit", str(film), "--edit", "info", "--set", "title=x"])
+    finally:
+        violations = share_guard.release(made)
+    assert violations == ["tools.py: ran mkvpropedit"]
+
+
+def test_a_module_running_a_tool_that_reads_is_not(tmp_path, ffmpeg):
+    root = tmp_path / "video"
+    root.mkdir()
+    film = ffmpeg("video/film.mkv", "-f", "lavfi", "-i", "testsrc=d=1")
+    made = share_guard.guard(root)
+    try:
+        probe(film)
     finally:
         assert share_guard.release(made) == []
 

@@ -10,6 +10,7 @@ import httpx
 import pytest
 
 from reelbarrow import cli, fanart, plex, sidecars, tmdb
+from reelbarrow.analysis.probe import probe
 
 ARM = "import/automatic-ripping-machine"
 START = datetime(2026, 9, 20, 19, 0, 21, tzinfo=UTC)
@@ -127,7 +128,20 @@ def test_plan_with_no_path_plans_every_manifest_but_the_running(
     assert code == 0
     assert plan["id"] == "34-178993082181"
     assert plan["gate"] == "automatic", plan["checks"]
-    assert plan["operations"][0]["path"] == "movies/A Film (1969) {tmdb-38792}"
+    tag, folder = plan["operations"][:2]
+    assert tag == {
+        "op": "tag",
+        "path": f"{COMPLETED}/A-Film (1969).mkv",
+        "reason": "the feature's identity, inside the file",
+        "title": "A Film",
+        "tags": {
+            "TITLE": "A Film",
+            "DATE_RELEASED": "1969-04-28",
+            "IMDB": "tt0064688",
+            "TMDB": "movie/38792",
+        },
+    }
+    assert folder["path"] == "movies/A Film (1969) {tmdb-38792}"
 
 
 def test_plan_prints_each_plan_for_a_person(share, monkeypatch, capsys):
@@ -159,6 +173,7 @@ def test_file_in_dry_run_reports_every_change_refused(share, monkeypatch, capsys
     assert code == 0
     assert out.startswith("Dry run: every change is refused.")
     assert "arm 34-178993082181: dry_run" in out
+    assert f"refused  tag           {COMPLETED}/A-Film (1969).mkv" in out
     assert f"refused  make_folder   {FILM}" in out
     assert "refused  record" in out
     assert f"refused  plex_scan     {FILM}" in out
@@ -236,7 +251,19 @@ def test_file_live_files_the_film_and_scans_it(share, monkeypatch, capsys):
     assert code == 0, out
     assert out.startswith("Filing is live.")
     assert "arm 34-178993082181: filed" in out
-    assert (share / FILM / "A Film (1969).mkv").exists()
+    # The film carries its identity, set before it moved.
+    filed = probe(share / FILM / "A Film (1969).mkv")
+    assert filed.tags["title"] == "A Film"
+    assert {
+        name: filed.tags.get(f"MOVIE/{name}")
+        for name in ("TITLE", "DATE_RELEASED", "IMDB", "TMDB")
+    } == {
+        "TITLE": "A Film",
+        "DATE_RELEASED": "1969-04-28",
+        "IMDB": "tt0064688",
+        "TMDB": "movie/38792",
+    }
+    assert "done     tag " in out
     assert (share / FILM / "poster.jpg").exists()
     assert not (share / COMPLETED).exists()
     assert scanned == [f"/data/{FILM}"]

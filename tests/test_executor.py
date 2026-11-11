@@ -4,6 +4,10 @@ fixture (`cases.Case.build`), live and in dry run.
 The fixtures table's row: *Monte Carlo or Bust! (1969) {tmdb-38792}*, film
 only, its sidecars, `raw/` holding the disc's folder with `disc.json` and the
 filing's record, and nothing left behind of the job in `completed/` or `raw/`.
+
+The case's files are sparse placeholders, with nothing for mkvpropedit to
+edit, so the writer's tag is a stand-in here (`tagged`); `test_tag` and
+`test_cli` tag real MKVs.
 """
 
 import json
@@ -83,6 +87,30 @@ class PlexServer:
             self.scanned.append(request)
             return httpx.Response(200)
         return httpx.Response(404)
+
+
+FEATURE = f"{COMPLETED}/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969).mkv"
+TAGS = {
+    "TITLE": "Monte Carlo or Bust!",
+    "DATE_RELEASED": "1969-04-28",
+    "IMDB": "tt0064688",
+    "TMDB": "movie/38792",
+}
+
+
+@pytest.fixture(autouse=True)
+def tagged(monkeypatch) -> list[tuple[str, str, dict]]:
+    """The writer's tag, refused in dry run as the writer's own is, and
+    otherwise only recorded."""
+    calls = []
+
+    def tag(self, path, title, tags):
+        self._refuse_in_dry_run()
+        calls.append((path, title, dict(tags)))
+        return "read back"
+
+    monkeypatch.setattr(Writer, "tag", tag)
+    return calls
 
 
 @pytest.fixture
@@ -171,8 +199,8 @@ def planned(root: Path, case: cases.Case) -> Plan:
     return made
 
 
-def test_job_34_files_into_its_rows_layout(root, case, plex_server):
-    """The spec's first done-when, with dry run off."""
+def test_job_34_files_into_its_rows_layout(root, case, plex_server, tagged):
+    """The executor spec's first done-when, with dry run off."""
     film_inode = (root / COMPLETED / f"{COMPLETED.split('/')[-1]}.mkv").stat().st_ino
     made = planned(root, case)
 
@@ -181,6 +209,10 @@ def test_job_34_files_into_its_rows_layout(root, case, plex_server):
     )
 
     assert report.result is Result.FILED, render_report(report)
+    # Tagged where ARM left it, before anything moved.
+    assert tagged == [(FEATURE, "Monte Carlo or Bust!", TAGS)]
+    assert report.steps[1].step == "tag"
+    assert report.steps[1].outcome is Outcome.DONE
     artwork = {
         PurePosixPath(step.subject).name
         for step in report.steps
@@ -345,6 +377,7 @@ def test_dry_run_refuses_every_change_and_the_share_is_unchanged(
             {Outcome.REFUSED, Outcome.SKIPPED} if name == "write" else {Outcome.REFUSED}
         )
         assert set(seen) <= allowed, name
+    assert steps["tag"] == [Outcome.REFUSED]
     assert len(steps["record"]) == 1 and len(steps["plex_scan"]) == 1
     assert plex_server.scanned == []
 
@@ -448,13 +481,41 @@ def test_a_filing_that_stops_before_its_folders_are_made_says_so(
     report = executor(root, case, dry_run=False).carry_out(made, case.manifest)
 
     assert report.result is Result.INCOMPLETE
-    # Nothing was done, nothing could be recorded, and the report says both.
+    # The film was tagged, nothing was filed, and the report says both.
     outcomes = [step.outcome for step in report.steps[1:-1]]
-    assert outcomes[0] is Outcome.FAILED
-    assert set(outcomes[1:]) == {Outcome.NOT_RUN}
+    assert outcomes[:2] == [Outcome.DONE, Outcome.FAILED]
+    assert set(outcomes[2:]) == {Outcome.NOT_RUN}
     assert report.steps[-1].step == "record"
-    assert report.steps[-1].outcome is Outcome.FAILED
+    assert report.steps[-1].outcome is Outcome.NOT_RUN
+    assert "nothing was filed" in report.steps[-1].detail
     assert not (root / FOLDER).exists()
+
+
+def test_a_tag_that_fails_stops_the_filing_with_nothing_moved(
+    root, case, monkeypatch, plex_server
+):
+    made = planned(root, case)
+    before = tree(root)
+
+    def tag(self, path, title, tags):
+        raise WriterError(f"{path} was edited, but mkvinfo finds fault with it")
+
+    monkeypatch.setattr(Writer, "tag", tag)
+    report = executor(root, case, dry_run=False, plex_server=plex_server).carry_out(
+        made, case.manifest
+    )
+
+    assert report.result is Result.INCOMPLETE
+    basis, first, *rest, record = report.steps
+    assert basis.outcome is Outcome.DONE
+    assert (first.step, first.outcome) == ("tag", Outcome.FAILED)
+    assert "mkvinfo finds fault" in first.detail
+    assert {step.outcome for step in rest} == {Outcome.NOT_RUN}
+    # The library is untouched, so there is no record there: the report is
+    # the account.
+    assert (record.step, record.outcome) == ("record", Outcome.NOT_RUN)
+    assert tree(root) == before
+    assert plex_server.scanned == []
 
 
 def test_only_an_automatic_plan_is_carried_out(root, case):

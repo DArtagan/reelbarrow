@@ -25,6 +25,7 @@ from reelbarrow.plan import (
     Plan,
     Rename,
     Sidecar,
+    Tag,
     Write,
     pairing,
     plan,
@@ -136,11 +137,50 @@ def test_its_sidecars_are_planned_and_disc_json_says_what_became_what(case):
     DiscRecord.model_validate(writes[f"{DISC}/disc.json"].content)
 
 
-def test_operations_run_folders_and_renames_then_sidecars_then_leftovers(case):
+def test_the_feature_is_tagged_with_its_identity_where_arm_left_it(case):
+    made = planned(case)
+    (tag,) = [op for op in made.operations if isinstance(op, Tag)]
+
+    assert tag == made.operations[0]
+    assert tag.path == (
+        f"{COMPLETED}/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969).mkv"
+    )
+    assert tag.title == "Monte Carlo or Bust!"
+    assert tag.tags == {
+        "TITLE": "Monte Carlo or Bust!",
+        "DATE_RELEASED": "1969-04-28",
+        "IMDB": "tt0064688",
+        "TMDB": "movie/38792",
+    }
+
+
+def test_the_rendered_plan_shows_each_tag(case):
+    text = render(planned(case))
+    assert f"  tag          {COMPLETED}/" in text
+    assert "               segment title  Monte Carlo or Bust!" in text
+    assert "               TMDB           movie/38792" in text
+
+
+def test_a_feature_that_isnt_matroska_is_reviewed(case):
+    completed = case.analysis.completed
+    (feature,) = completed.files
+    mp4 = feature.model_copy(
+        update={"path": feature.path.removesuffix(".mkv") + ".mp4"}
+    )
+    analysis = case.analysis.model_copy(
+        update={"completed": completed.model_copy(update={"files": [mp4]})}
+    )
+    assert failed(planned(case, analysis=analysis)) == ["matroska"]
+
+
+def test_operations_run_the_tag_folders_and_renames_then_sidecars_then_leftovers(
+    case,
+):
     kinds = [type(op) for op in planned(case).operations]
     first_write = kinds.index(Write)
     first_delete = kinds.index(DeleteFolder)
-    assert all(k in (MakeFolder, Rename) for k in kinds[:first_write])
+    assert kinds[0] is Tag
+    assert all(k in (MakeFolder, Rename) for k in kinds[1:first_write])
     assert all(k is Write for k in kinds[first_write:first_delete])
     assert all(k is DeleteFolder for k in kinds[first_delete:])
 
@@ -158,7 +198,10 @@ def test_the_basis_holds_every_path_read_and_every_path_written(case):
     assert basis[COMPLETED].present and basis[RAW].present
     for op in made.operations:
         target = op.target if isinstance(op, Rename) else op.path
-        if not isinstance(op, DeleteFolder):
+        if isinstance(op, Tag):
+            # Read and changed in place: the feature, where ARM left it.
+            assert basis[target].present
+        elif not isinstance(op, DeleteFolder):
             assert basis[target].present is False
     # The filing's record too: its being there is what says it was filed.
     assert made.record == f"{DISC}/filing-arm-34-178993082181.json"
@@ -352,9 +395,12 @@ def test_a_name_with_nothing_writable_is_reviewed(case):
 def test_names_are_folded_for_the_share(case):
     made = planned(case, tmdb=with_movie(case, title="Monte Carlo: or Bust\u2026"))
     assert made.gate is Gate.AUTOMATIC
-    assert (
-        made.operations[0].path == "movies/Monte Carlo - or Bust... (1969) {tmdb-38792}"
-    )
+    folder = next(op for op in made.operations if isinstance(op, MakeFolder))
+    assert folder.path == "movies/Monte Carlo - or Bust... (1969) {tmdb-38792}"
+    # Tags are UTF-8, so the film's own title goes in unfolded.
+    tag = made.operations[0]
+    assert isinstance(tag, Tag)
+    assert tag.title == tag.tags["TITLE"] == "Monte Carlo: or Bust\u2026"
 
 
 def test_an_analysis_of_another_job_is_refused(case):
