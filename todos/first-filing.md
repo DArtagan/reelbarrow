@@ -32,13 +32,15 @@ for the run can file nothing else.
   adding a stateful workload has the options. A SQLite database with steady
   writes gets a dump.
 - **Plex answers reelbarrow.** Its token, URL and paths were added to the
-  deployment with the executor (Will, 2026-11-11), and nothing reads them
-  until a run is live, so they are untested. From the pod, list
-  `/library/sections` with the token and check that the section holding
-  `/data/movies` is the film library. The paths are where Plex's container
-  mounts each library, by its path on the share (`{"movies": "/data/movies"}`,
-  read from Plex's Deployment 2026-11-10). `reelbarrow file` refuses a live
-  run without all three.
+  deployment with the executor (Will, 2026-11-11). The token is reelbarrow's
+  own, from Plex's PIN flow (README, *Plex's token*). From the pod, on
+  2026-11-11, `/library/sections` with that token answered 200, and exactly
+  one section holds `/data/movies`: key 1, *Movies*, type `movie`. A scan
+  itself hasn't been asked for yet. Check again before the run if Plex's
+  libraries have changed since. The paths are where Plex's container mounts
+  each library, by its path on the share (`{"movies": "/data/movies"}`, read
+  from Plex's Deployment 2026-11-10). `reelbarrow file` refuses a live run
+  without all three.
 - **Job 34's plan is still automatic** and unchanged from the one
   [executor](executor.md) carried out in dry run.
 - **Job 34's is the only automatic plan.** `reelbarrow plan` with no path, over
