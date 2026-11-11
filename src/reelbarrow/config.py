@@ -19,7 +19,8 @@ class Settings(BaseSettings):
     # Where the exporter (`reelbarrow arm-export-manifests`) writes ARM's
     # manifests, one a job.
     manifest_dir: Path = Path("/video/import/automatic-ripping-machine/manifests")
-    # Job state and the ledger.
+    # The service's own state, never the library's history: what was filed,
+    # and how, is recorded in the library beside each disc.
     data_dir: Path = Path("/data")
 
     # The share's paths, from video_root, as a manifest's are. Where ARM puts

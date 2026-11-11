@@ -43,6 +43,6 @@ Measured on the share and in Plex:
 - Each `raw/` holds the right disc, with `disc.json`.
 - `completed/movies/` holds nothing for those jobs, and *The Polar Express*'
   0.4 GB partial raw, `raw/The-Polar-Express`, is gone.
-- The ledger's record of each matches the share.
+- Each one's filing record, beside its `disc.json`, matches the share.
 - A plan whose basis was changed between planning and execution, in a test,
   was replanned and not executed.

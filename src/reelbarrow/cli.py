@@ -201,7 +201,6 @@ def _plan(path: Path | None, as_json: bool) -> int:
 def _file(path: Path | None, as_json: bool) -> int:
     from reelbarrow import executor, fanart, plan, sidecars
     from reelbarrow.config import Settings
-    from reelbarrow.ledger import Ledger
     from reelbarrow.plex import Plex
     from reelbarrow.tmdb import Client
 
@@ -238,7 +237,6 @@ def _file(path: Path | None, as_json: bool) -> int:
         )
     carrying_out = executor.Executor(
         writer=executor.Writer(settings.video_root, dry_run=settings.dry_run),
-        ledger=Ledger(settings.data_dir),
         sources=sidecars.Sources(
             tmdb=tmdb,
             fanart=fanart.Client(settings.fanart_key.get_secret_value()),

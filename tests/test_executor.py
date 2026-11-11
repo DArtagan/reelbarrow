@@ -2,8 +2,8 @@
 fixture (`cases.Case.build`), live and in dry run.
 
 The fixtures table's row: *Monte Carlo or Bust! (1969) {tmdb-38792}*, film
-only, its sidecars, `raw/` holding the disc's folder with `disc.json`, and
-nothing left behind of the job in `completed/` or `raw/`.
+only, its sidecars, `raw/` holding the disc's folder with `disc.json` and the
+filing's record, and nothing left behind of the job in `completed/` or `raw/`.
 """
 
 import os
@@ -19,6 +19,7 @@ from reelbarrow import fanart
 from reelbarrow.disc_record import DiscRecord
 from reelbarrow.executor import (
     Executor,
+    FilingRecord,
     Outcome,
     Refused,
     Result,
@@ -26,7 +27,6 @@ from reelbarrow.executor import (
     WriterError,
     render_report,
 )
-from reelbarrow.ledger import Ledger, State
 from reelbarrow.plan import ARTWORK, Gate, Plan, ShareLibrary, plan
 from reelbarrow.plex import Plex
 from reelbarrow.sidecars import MAGIC, Sources
@@ -40,6 +40,7 @@ RAW = f"{ARM}/raw/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies"
 FOLDER = "movies/Monte Carlo or Bust! (1969) {tmdb-38792}"
 DISC = f"{FOLDER}/raw/THOSE_DARING_YOUNG_MEN [dvd-ef68a3c769a42a4f]"
 FILM = f"{FOLDER}/Monte Carlo or Bust! (1969).mkv"
+RECORD = f"{DISC}/filing-arm-34-178993082181.json"
 NOW = datetime(2026, 11, 10, 12, 0, tzinfo=UTC)
 
 
@@ -111,7 +112,6 @@ def plex_server() -> PlexServer:
 def executor(
     root: Path,
     case: cases.Case,
-    data: Path,
     *,
     dry_run: bool,
     plex_server: PlexServer | None = None,
@@ -125,7 +125,6 @@ def executor(
     )
     return Executor(
         writer=Writer(root, dry_run=dry_run),
-        ledger=Ledger(data),
         sources=Sources(
             tmdb=Recorded(case.tmdb_replies),
             fanart=fanart.Recorded(
@@ -144,21 +143,18 @@ def planned(root: Path, case: cases.Case) -> Plan:
         case.manifest, case.analysis, case.tmdb, ShareLibrary(root, "movies"), "movies"
     )
     assert made.gate is Gate.AUTOMATIC
+    assert made.record == RECORD
     return made
 
 
-def outcomes(report) -> dict[str, Outcome]:
-    return {f"{step.step} {step.subject}": step.outcome for step in report.steps}
-
-
-def test_job_34_files_into_its_rows_layout(root, case, tmp_path, plex_server):
+def test_job_34_files_into_its_rows_layout(root, case, plex_server):
     """The spec's first done-when, with dry run off."""
     film_inode = (root / COMPLETED / f"{COMPLETED.split('/')[-1]}.mkv").stat().st_ino
     made = planned(root, case)
 
-    report = executor(
-        root, case, tmp_path / "data", dry_run=False, plex_server=plex_server
-    ).carry_out(made, case.manifest)
+    report = executor(root, case, dry_run=False, plex_server=plex_server).carry_out(
+        made, case.manifest
+    )
 
     assert report.result is Result.FILED, render_report(report)
     artwork = {
@@ -183,6 +179,7 @@ def test_job_34_files_into_its_rows_layout(root, case, tmp_path, plex_server):
         f"{FOLDER}/raw/.nomedia": 0,
         f"{DISC}/B1_t00.mkv": 4331224636,
         f"{DISC}/disc.json": None,
+        RECORD: None,
     }
     expected_folders = {
         "import",
@@ -203,11 +200,11 @@ def test_job_34_files_into_its_rows_layout(root, case, tmp_path, plex_server):
     # Renamed, not copied.
     assert (root / FILM).stat().st_ino == film_inode
     # disc.json's paths are where the files are now, from the disc's folder.
-    record = DiscRecord.model_validate_json((root / DISC / "disc.json").read_bytes())
-    (title,) = record.titles
+    disc = DiscRecord.model_validate_json((root / DISC / "disc.json").read_bytes())
+    (title,) = disc.titles
     assert (root / DISC / title.extracted.path).resolve() == root / DISC / "B1_t00.mkv"
     assert (root / DISC / title.transcode.path).resolve() == (root / FILM).resolve()
-    assert record.films[0].tmdb_id == 38792
+    assert disc.films[0].tmdb_id == 38792
     nfo = ET.parse(root / FOLDER / "movie.nfo").getroot()
     assert nfo.findtext("title") == "Monte Carlo or Bust!"
     assert nfo.find("uniqueid[@type='tmdb']").text == "38792"
@@ -219,34 +216,35 @@ def test_job_34_files_into_its_rows_layout(root, case, tmp_path, plex_server):
     assert "plex-token" not in str(scan.url)
 
 
-def test_the_ledger_records_the_filing_and_what_each_operation_did(
-    root, case, tmp_path
-):
+def test_the_record_says_what_was_filed_from_what(root, case):
     made = planned(root, case)
-    executor(root, case, tmp_path / "data", dry_run=False).carry_out(
-        made, case.manifest
-    )
+    report = executor(root, case, dry_run=False).carry_out(made, case.manifest)
 
-    entry = Ledger(tmp_path / "data").entry("arm", "34-178993082181")
-    assert entry.state is State.FILED
-    assert (entry.started, entry.finished) == (NOW, NOW)
-    assert Plan.model_validate(entry.plan) == made
-    assert len(entry.outcomes) == len(made.operations)
-    assert {o["outcome"] for o in entry.outcomes} <= {"done", "skipped"}
+    record = FilingRecord.model_validate_json((root / RECORD).read_bytes())
+    assert record.result is Result.FILED
+    assert (record.started, record.finished) == (NOW, NOW)
+    # The manifest as it was, which disc.json doesn't keep, and the plan with
+    # the evidence its checks passed on.
+    assert record.manifest == case.manifest.to_json()
+    assert Plan.model_validate(record.plan) == made
+    assert len(record.steps) == len(made.operations)
+    assert {s.outcome for s in record.steps} <= {Outcome.DONE, Outcome.SKIPPED}
+    recorded = next(s for s in report.steps if s.step == "record")
+    assert recorded.outcome is Outcome.DONE
 
 
-def test_a_unit_in_the_ledger_is_not_filed_again(root, case, tmp_path):
+def test_a_unit_filed_is_not_filed_again(root, case):
     made = planned(root, case)
-    run = executor(root, case, tmp_path / "data", dry_run=False)
+    run = executor(root, case, dry_run=False)
     run.carry_out(made, case.manifest)
 
     again = run.carry_out(made, case.manifest)
-    assert again.result is Result.IN_LEDGER
-    assert [step.step for step in again.steps] == ["ledger"]
+    assert again.result is Result.BASIS_CHANGED
+    assert f"{RECORD} appeared" in again.steps[0].detail
 
 
 def test_dry_run_refuses_every_change_and_the_share_is_unchanged(
-    root, case, tmp_path, plex_server
+    root, case, plex_server
 ):
     before = {
         p.relative_to(root).as_posix(): (p.stat().st_mtime_ns, p.stat().st_size)
@@ -254,9 +252,9 @@ def test_dry_run_refuses_every_change_and_the_share_is_unchanged(
     }
     made = planned(root, case)
 
-    report = executor(
-        root, case, tmp_path / "data", dry_run=True, plex_server=plex_server
-    ).carry_out(made, case.manifest)
+    report = executor(root, case, dry_run=True, plex_server=plex_server).carry_out(
+        made, case.manifest
+    )
 
     assert report.result is Result.DRY_RUN, render_report(report)
     after = {
@@ -274,54 +272,45 @@ def test_dry_run_refuses_every_change_and_the_share_is_unchanged(
             {Outcome.REFUSED, Outcome.SKIPPED} if name == "write" else {Outcome.REFUSED}
         )
         assert set(seen) <= allowed, name
-    assert len(steps["ledger"]) == 1 and len(steps["plex_scan"]) == 1
-    # Nothing recorded, nothing asked of Plex.
-    assert not (tmp_path / "data").exists()
+    assert len(steps["record"]) == 1 and len(steps["plex_scan"]) == 1
     assert plex_server.scanned == []
 
 
-def test_a_basis_that_changed_does_nothing(root, case, tmp_path):
+def test_a_basis_that_changed_does_nothing(root, case):
     made = planned(root, case)
     raw = root / RAW / "B1_t00.mkv"
     os.utime(raw, ns=(0, 0))
 
-    report = executor(root, case, tmp_path / "data", dry_run=False).carry_out(
-        made, case.manifest
-    )
+    report = executor(root, case, dry_run=False).carry_out(made, case.manifest)
     assert report.result is Result.BASIS_CHANGED
     assert f"{RAW}/B1_t00.mkv changed" in report.steps[0].detail
     assert not (root / FOLDER).exists()
-    assert Ledger(tmp_path / "data").entry("arm", "34-178993082181") is None
 
 
-def test_a_target_that_appeared_since_planning_does_nothing(root, case, tmp_path):
+def test_a_target_that_appeared_since_planning_does_nothing(root, case):
     made = planned(root, case)
     (root / FOLDER).mkdir()
 
-    report = executor(root, case, tmp_path / "data", dry_run=False).carry_out(
-        made, case.manifest
-    )
+    report = executor(root, case, dry_run=False).carry_out(made, case.manifest)
     assert report.result is Result.BASIS_CHANGED
     assert f"{FOLDER} appeared" in report.steps[0].detail
 
 
-def test_a_changed_manifest_does_nothing(root, case, tmp_path):
+def test_a_changed_manifest_does_nothing(root, case):
     made = planned(root, case)
     changed = case.manifest.model_copy(update={"errors": "later"})
-    report = executor(root, case, tmp_path / "data", dry_run=False).carry_out(
-        made, changed
-    )
+    report = executor(root, case, dry_run=False).carry_out(made, changed)
     assert report.result is Result.BASIS_CHANGED
     assert "the manifest" in report.steps[0].detail
 
 
 def test_a_provider_that_cant_be_reached_stops_the_filing_before_anything_moves(
-    root, case, tmp_path
+    root, case
 ):
     made = planned(root, case)
     before = tree(root)
     report = executor(
-        root, case, tmp_path / "data", dry_run=False, fanart_replies={"movies/1": {}}
+        root, case, dry_run=False, fanart_replies={"movies/1": {}}
     ).carry_out(made, case.manifest)
 
     assert report.result is Result.NOT_RENDERED
@@ -329,8 +318,15 @@ def test_a_provider_that_cant_be_reached_stops_the_filing_before_anything_moves(
     assert tree(root) == before
 
 
-def test_an_operation_that_fails_stops_the_rest_and_leaves_the_entry_incomplete(
-    root, case, tmp_path, monkeypatch, plex_server
+def test_every_folder_is_made_before_anything_moves(root, case):
+    kinds = [op.op for op in planned(root, case).operations]
+    assert kinds.index("rename") > max(
+        i for i, kind in enumerate(kinds) if kind == "make_folder"
+    )
+
+
+def test_an_operation_that_fails_stops_the_rest_and_the_record_says_so(
+    root, case, monkeypatch, plex_server
 ):
     made = planned(root, case)
     renames = []
@@ -343,35 +339,65 @@ def test_an_operation_that_fails_stops_the_rest_and_leaves_the_entry_incomplete(
         original(self, source, target)
 
     monkeypatch.setattr(Writer, "rename", rename)
-    report = executor(
-        root, case, tmp_path / "data", dry_run=False, plex_server=plex_server
-    ).carry_out(made, case.manifest)
+    report = executor(root, case, dry_run=False, plex_server=plex_server).carry_out(
+        made, case.manifest
+    )
 
     assert report.result is Result.INCOMPLETE
-    seen = [step.outcome for step in report.steps if step.step != "basis"]
+    operations = [step for step in report.steps if step.step not in ("basis", "record")]
+    seen = [step.outcome for step in operations]
     failed = seen.index(Outcome.FAILED)
     assert set(seen[:failed]) == {Outcome.DONE}
-    assert set(seen[failed + 1 : -1]) == {Outcome.NOT_RUN}
-    assert report.steps[-1].step == "ledger"
+    assert set(seen[failed + 1 :]) == {Outcome.NOT_RUN}
+    assert "Permission denied" in operations[failed].detail
     # The film moved; its raw copy and everything after didn't.
     assert (root / FILM).exists() and (root / RAW / "B1_t00.mkv").exists()
     assert not (root / FOLDER / "movie.nfo").exists()
     assert plex_server.scanned == []
-    entry = Ledger(tmp_path / "data").entry("arm", "34-178993082181")
-    assert entry.state is State.INCOMPLETE
-    assert [o["outcome"] for o in entry.outcomes] == [s.value for s in seen[:-1]]
+    # The record, in the disc's folder made before anything moved, says the
+    # same.
+    assert report.steps[-1].step == "record"
+    assert report.steps[-1].outcome is Outcome.DONE
+    record = FilingRecord.model_validate_json((root / RECORD).read_bytes())
+    assert record.result is Result.INCOMPLETE
+    assert record.steps == operations
 
 
-def test_only_an_automatic_plan_is_carried_out(root, case, tmp_path):
+def test_a_filing_that_stops_before_its_folders_are_made_says_so(
+    root, case, monkeypatch
+):
+    made = planned(root, case)
+
+    def make_folder(self, path):
+        raise PermissionError(13, "Permission denied", path)
+
+    monkeypatch.setattr(Writer, "make_folder", make_folder)
+    report = executor(root, case, dry_run=False).carry_out(made, case.manifest)
+
+    assert report.result is Result.INCOMPLETE
+    # Nothing was done, nothing could be recorded, and the report says both.
+    outcomes = [step.outcome for step in report.steps[1:-1]]
+    assert outcomes[0] is Outcome.FAILED
+    assert set(outcomes[1:]) == {Outcome.NOT_RUN}
+    assert report.steps[-1].step == "record"
+    assert report.steps[-1].outcome is Outcome.FAILED
+    assert not (root / FOLDER).exists()
+
+
+def test_only_an_automatic_plan_is_carried_out(root, case):
     made = planned(root, case).model_copy(update={"gate": Gate.REVIEW})
     with pytest.raises(ValueError, match="review"):
-        executor(root, case, tmp_path / "data", dry_run=False).carry_out(
-            made, case.manifest
-        )
+        executor(root, case, dry_run=False).carry_out(made, case.manifest)
 
 
-def test_the_report_reads_for_a_person(root, case, tmp_path):
-    report = executor(root, case, tmp_path / "data", dry_run=True).carry_out(
+def test_a_plan_with_no_place_for_its_record_is_not_carried_out(root, case):
+    made = planned(root, case).model_copy(update={"record": None})
+    with pytest.raises(ValueError, match="record"):
+        executor(root, case, dry_run=False).carry_out(made, case.manifest)
+
+
+def test_the_report_reads_for_a_person(root, case):
+    report = executor(root, case, dry_run=True).carry_out(
         planned(root, case), case.manifest
     )
     text = render_report(report)

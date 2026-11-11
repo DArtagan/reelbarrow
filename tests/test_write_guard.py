@@ -29,8 +29,6 @@ WRITERS = {
     # The manifest exporter: a separate process that never mounts the library
     # and writes only in its own --out (docs/exporter.md).
     "exporter.py": "its --out",
-    # The ledger, in SQLite under REELBARROW_DATA_DIR.
-    "ledger.py": "REELBARROW_DATA_DIR",
 }
 # Single calls elsewhere, each landing outside the video root.
 EXCEPTIONS = {

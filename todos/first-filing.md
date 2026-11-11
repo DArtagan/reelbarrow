@@ -27,10 +27,6 @@ for the run can file nothing else.
   throwaway item.
 - **Snapshots are current** on `rpool/storage/media`. Deleting leftovers is
   acceptable only because of them (Will, 2026-10-04).
-- **The ledger's backup.** From the first real move, the ledger is the only
-  history of what was moved where. The deployment repository's guidance on
-  adding a stateful workload has the options. A SQLite database with steady
-  writes gets a dump.
 - **Plex answers reelbarrow.** Its token, URL and paths were added to the
   deployment with the executor (Will, 2026-11-11). The token is reelbarrow's
   own, from Plex's PIN flow (README, *Plex's token*). From the pod, on
@@ -67,5 +63,6 @@ Measured on the share and in Plex:
   before the run.
 - Its `raw/` holds the right disc, with `disc.json`.
 - `completed/movies/` holds nothing for job 34, nor `raw/` its old folder.
-- The ledger's record of it matches the share.
+- Its filing record, beside `disc.json`, says `filed`, and what it says each
+  operation did matches the share.
 - Dry run is back on, and the mount read-only.

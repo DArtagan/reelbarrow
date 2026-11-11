@@ -11,32 +11,36 @@ its own output directory.
 
 Carrying out a plan is step 7 of *The service*, in the design:
 
-1. The ledger is asked first: a unit it has an entry for is never filed again.
-2. The plan's basis is compared with the share. If anything differs, nothing
-   is done, and the manifest is planned again.
-3. Every sidecar is rendered, so a provider that can't be reached stops the
+1. The plan's basis is compared with the share. If anything differs, nothing
+   is done, and the manifest is planned again. The basis holds the filing
+   record's path, absent, so a unit already filed is never filed again.
+2. Every sidecar is rendered, so a provider that can't be reached stops the
    filing before anything has moved.
-4. The operations, in the plan's order: folders and renames, then sidecars,
-   then leftovers. The ledger's entry is opened before the first and updated
-   after each. If one fails, the rest aren't attempted and the entry says
-   `incomplete`, with what was done; nothing is undone automatically.
-5. The entry is closed as `filed`.
-6. Plex scans each film folder touched, since its own change detection can't
+3. The operations, in the plan's order: folders, renames, sidecars, then
+   leftovers. If one fails, the rest aren't attempted, and nothing is undone
+   automatically: the report says what was done and what wasn't, so a person
+   can resolve it.
+4. The filing's record, the same account, is written into the disc's folder
+   beside `disc.json` (`FilingRecord`), whether the filing finished or
+   stopped. It is the library's own history of the filing, kept with the film
+   and in the share's snapshots. A process that dies part way writes none,
+   and the next plan, finding the share part filed, goes to review.
+5. Plex scans each film folder touched, since its own change detection can't
    be relied on over CIFS.
 """
 
 import os
-import sqlite3
 import stat
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from enum import StrEnum
+from importlib.metadata import version
 from pathlib import Path, PurePosixPath
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 from reelbarrow.fanart import FanartError
-from reelbarrow.ledger import Ledger, LedgerError, State
 from reelbarrow.manifest import Manifest, ShareRef
 from reelbarrow.plan import (
     Basis,
@@ -154,16 +158,12 @@ class Result(StrEnum):
     FILED = "filed"
     # Dry run: every change refused, the share as it was.
     DRY_RUN = "dry_run"
-    # An operation failed part way; the ledger says what was done.
+    # An operation failed part way; each step says whether it was done.
     INCOMPLETE = "incomplete"
     # Nothing done, and the manifest is to be planned again.
     BASIS_CHANGED = "basis_changed"
     # A sidecar couldn't be rendered, so nothing was done.
     NOT_RENDERED = "not_rendered"
-    # The ledger has an entry for the unit, so nothing was done.
-    IN_LEDGER = "in_ledger"
-    # The ledger couldn't be opened for it, so nothing was done.
-    NOT_STARTED = "not_started"
 
 
 class Model(BaseModel):
@@ -191,6 +191,31 @@ class Report(Model):
         return self.result in (Result.FILED, Result.DRY_RUN) and not any(
             step.outcome is Outcome.FAILED for step in self.steps
         )
+
+
+class FilingRecord(Model):
+    """One filing, in its disc's folder beside `disc.json`: what the executor
+    was given and what each operation did. Written once, when the filing has
+    finished or stopped, and never rewritten. With `disc.json` it is what
+    undoing a misfile, or making it a regression fixture, reads: the manifest
+    as it was, the plan and the evidence its checks passed on, and what was
+    deleted."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, populate_by_name=True)
+
+    schema_: Literal[1] = Field(alias="schema")
+    source: str
+    id: str
+    result: Literal[Result.FILED, Result.INCOMPLETE]
+    started: AwareDatetime
+    finished: AwareDatetime
+    version: str
+    manifest: dict
+    plan: dict
+    steps: list[Step] = Field(description="Each operation, in the plan's order.")
+
+    def to_bytes(self) -> bytes:
+        return (self.model_dump_json(by_alias=True, indent=2) + "\n").encode()
 
 
 def differences(
@@ -224,14 +249,12 @@ class Executor:
     def __init__(
         self,
         writer: Writer,
-        ledger: Ledger,
         sources: Sources,
         libraries: Sequence[str],
         plex: Plex | None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         self.writer = writer
-        self.ledger = ledger
         self.sources = sources
         self.libraries = list(libraries)
         self.plex = plex
@@ -242,6 +265,8 @@ class Executor:
             raise ValueError(f"{plan.source} {plan.id} is for {plan.gate}")
         if (manifest.source, manifest.id) != (plan.source, plan.id):
             raise ValueError(f"{manifest.id}'s manifest, not {plan.id}'s")
+        if plan.record is None:
+            raise ValueError(f"{plan.id}'s plan has no place for its record")
 
         steps: list[Step] = []
 
@@ -250,12 +275,6 @@ class Executor:
 
         def step(name: str, outcome: Outcome, detail: str) -> Step:
             return Step(step=name, subject=plan.id, outcome=outcome, detail=detail)
-
-        entry = self.ledger.entry(plan.source, plan.id)
-        if entry is not None:
-            detail = f"entered as {entry.state} on {entry.started:%Y-%m-%d}"
-            steps.append(step("ledger", Outcome.NOT_RUN, detail))
-            return report(Result.IN_LEDGER)
 
         # The planner's own measure of a path, so the two compare exactly.
         stat_path = ShareLibrary(self.writer.video_root, "").stat
@@ -286,53 +305,54 @@ class Executor:
             for op in plan.operations
         ]
 
-        def outcomes() -> list[dict]:
-            return [operation.model_dump(mode="json") for operation in operations]
-
-        live = not self.writer.dry_run
-        if live:
-            try:
-                self.ledger.begin(manifest, plan, self.clock(), outcomes())
-            except (LedgerError, sqlite3.Error) as error:
-                steps.append(step("ledger", Outcome.FAILED, str(error)))
-                return report(Result.NOT_STARTED)
-
+        started = self.clock()
         failed = False
-        try:
-            for index, op in enumerate(plan.operations):
-                outcome, detail = self._apply(op, rendered.get(index))
-                planned = operations[index]
-                operations[index] = planned.model_copy(
-                    update={
-                        "outcome": outcome,
-                        "detail": f"{planned.detail}: {detail}"
-                        if detail
-                        else planned.detail,
-                    }
-                )
-                if live:
-                    self.ledger.update(plan.source, plan.id, outcomes())
-                if outcome is Outcome.FAILED:
-                    failed = True
-                    break
-            if live:
-                state = State.INCOMPLETE if failed else State.FILED
-                self.ledger.update(
-                    plan.source, plan.id, outcomes(), state, self.clock()
-                )
-                ledger = step("ledger", Outcome.DONE, f"entered as {state}")
-            else:
-                ledger = step("ledger", Outcome.REFUSED, "dry run")
-        except (LedgerError, sqlite3.Error) as error:
-            # Nothing more is done that the ledger can't record.
-            steps += [*operations, step("ledger", Outcome.FAILED, str(error))]
-            return report(Result.INCOMPLETE)
-        steps += [*operations, ledger]
+        for index, op in enumerate(plan.operations):
+            outcome, detail = self._apply(op, rendered.get(index))
+            planned = operations[index]
+            operations[index] = planned.model_copy(
+                update={
+                    "outcome": outcome,
+                    "detail": f"{planned.detail}: {detail}"
+                    if detail
+                    else planned.detail,
+                }
+            )
+            if outcome is Outcome.FAILED:
+                failed = True
+                break
+        steps += operations
+
+        record = FilingRecord(
+            schema=1,
+            source=plan.source,
+            id=plan.id,
+            result=Result.INCOMPLETE if failed else Result.FILED,
+            started=started,
+            finished=self.clock(),
+            version=version("reelbarrow"),
+            manifest=manifest.to_json(),
+            plan=plan.to_json(),
+            steps=operations,
+        )
+        steps.append(self._record(plan.record, record))
         if failed:
             return report(Result.INCOMPLETE)
 
         steps += [self._scan(folder) for folder in self._touched(plan)]
-        return report(Result.FILED if live else Result.DRY_RUN)
+        return report(Result.DRY_RUN if self.writer.dry_run else Result.FILED)
+
+    def _record(self, path: str, record: FilingRecord) -> Step:
+        def step(outcome: Outcome, detail: str) -> Step:
+            return Step(step="record", subject=path, outcome=outcome, detail=detail)
+
+        try:
+            self.writer.write(path, record.to_bytes())
+        except Refused:
+            return step(Outcome.REFUSED, "the filing's record")
+        except (WriterError, OSError, ValueError) as error:
+            return step(Outcome.FAILED, f"the filing's record: {error}")
+        return step(Outcome.DONE, f"the filing's record, as {record.result}")
 
     def _apply(self, op: Operation, rendered: Rendered | None) -> tuple[Outcome, str]:
         detail = rendered.detail if rendered is not None else ""

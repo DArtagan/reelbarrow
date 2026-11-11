@@ -151,6 +151,18 @@ Recorded verbatim where Will gave words, so they are not relitigated.
   non-ASCII name when the charset migration was measured, and ASCII keeps it
   so; the reasons are in `reelbarrow.names`. ARM's title hook in the deployment
   folds to ASCII too, for consistency.
+- **No ledger database: each filing's record is kept in the library**
+  (2026-11-11): *"let's go with this reelbarrow-log-in-library-folder
+  approach and jetison the database ledger."* A record of history is kept
+  for two things: undoing a misfile, which needs what was deleted, and
+  turning one into a regression fixture, which needs the evidence the gate
+  passed on. Whether a unit was filed, the share says. A filing that fails
+  part way stops and says what was and wasn't done: *"the most important
+  thing for us to do is stop and state clearly everything that was done and
+  everything that wasn't done. That way the user can resolve the situation.
+  This is also why we have so many checks before doing a Writer operation -
+  we're looking to minimize the chances of a partial filing."* See step 7 of
+  *The service*.
 
 ---
 
@@ -220,7 +232,7 @@ Asked on 2026-10-04 whether FileBot offers anything that cannot be built:
 | Lookups (TMDB, TheTVDB, AniDB, OMDb) | TMDB API (free personal key) covers film and TV; the library already keys on TMDB IDs. FileBot's licence does bundle TheTVDB access, which is otherwise paid — not needed. |
 | Naming formats | String formatting, plus `ffprobe` for technical fields |
 | Artwork, NFO | TMDB + fanart.tv (free personal key), and writing XML |
-| History / revert | The service's own ledger, which it needs anyway |
+| History / revert | A record of each filing, kept in the library beside the disc's `disc.json` |
 | Fuzzy matching of messy filenames | Its one real asset, and it matters only for the `youtube-dl` and legacy `import/` buckets. ARM supplies an IMDb ID, and TV needs content matching, which FileBot does not do. |
 
 Licence at the time: US$8/year or US$80 lifetime. Not bought.
@@ -727,7 +739,7 @@ I-picture times libbluray finds a mark by, so it needs no video read (E36).
      case photo │  │ Pushover: "review needed" / "filed", with a link
                 ▼  │
   ┌──────────────────────────── reelbarrow ──────────────────┐
-  │ web UI ── job state + ledger (SQLite on a PVC)           │
+  │ web UI ── job state (SQLite on a PVC)                    │
   │ worker: intake → analyse → identify → plan → gate → file │
   └──┬──────────────▲───────────────────────┬────────────────┘
      │ reads/moves  │ manifests             │ partial scan
@@ -843,13 +855,15 @@ why each field is as it is; the schema says exactly what it may hold.
 
 **After filing the manifest is out of date, and that is its nature.** It is the
 producer's account of what it made as of its last write, a delivery note.
-Filing moves the files, and from then on the ledger and the library's
-`disc.json` are authoritative; the service never moves or marks a manifest,
-whose directory is the exporter's. Intake takes every path as a claim and
-checks the file is there. The ledger, keyed by `source` and `id`, says whether a
-unit was filed; a manifest that changes after its unit was filed goes to
-review, never to a fresh plan, since its paths are stale and a title corrected
-in ARM afterwards is evidence the filing was wrong.
+Filing moves the files, and from then on the library's `disc.json` and the
+filing's record beside it are authoritative; the service never moves or marks
+a manifest, whose directory is the exporter's. Intake takes every path as a
+claim and checks the file is there. Whether a unit was filed, the share says:
+its manifest's files are gone, its film is in the library, and its filing
+record, named for its `source` and `id`, is in its disc's folder. A manifest
+that changes after its unit was filed goes to review, never to a fresh plan,
+since its paths are stale and a title corrected in ARM afterwards is evidence
+the filing was wrong.
 
 **ARM's manifests.** `reelbarrow arm-export-manifests`, shipped in reelbarrow's
 image and run beside ARM (a sidecar in ARM's pod), reads ARM's database
@@ -882,7 +896,8 @@ manifest for every job in the database.
 
 Python (ffmpeg, chromaprint and Whisper bindings all live there, as do ARM and
 beets), a server-rendered web UI (FastAPI + HTMX — phone-first, no SPA build),
-SQLite for job state and the ledger, one worker process. This repository's CI
+SQLite for job state, one worker process. The library's history isn't kept
+there: what was filed, and how, is recorded in the library. This repository's CI
 builds and releases the image; Flux deploys it from the deployment repository
 ([releasing.md](releasing.md)).
 
@@ -926,20 +941,30 @@ The pipeline, per ARM job (and later per backlog folder):
 6. **Gate.** Execute automatically only if every item in the plan meets the bar
    in *Confidence*; otherwise put the whole plan up for review. A plan is never
    half-executed.
-7. **File.** Renames on the same filesystem, sidecars, then deletion of
-   leftovers, then the ledger entry, in that order. Then a Plex partial scan of
-   the touched folder (`/library/sections/{id}/refresh?path=…`). Plex's own
-   change detection cannot be relied on over a CIFS mount. Every sidecar is
-   rendered before the first operation, so a provider that can't be reached
-   stops the filing before anything moves. The ledger's entry is opened
-   before the first operation and updated after each, so a filing that dies
-   part way leaves a record of how far it got. An operation that fails stops
-   the rest, and the entry says `incomplete` with what was done; nothing is
-   undone automatically, and no scan follows (Will, 2026-11-10, choosing
-   *"Stop, record it as incomplete"* over undoing what was done, since
-   undoing can fail too and is more code acting on the share). The
-   executor, the ledger and the sidecars are `reelbarrow.executor`,
-   `reelbarrow.ledger` and `reelbarrow.sidecars`.
+7. **File.** Folders, then renames on the same filesystem, sidecars, then
+   deletion of leftovers, then the filing's record, in that order. Then a
+   Plex partial scan of the touched folder
+   (`/library/sections/{id}/refresh?path=…`). Plex's own change detection
+   cannot be relied on over a CIFS mount. Every sidecar is rendered before
+   the first operation, so a provider that can't be reached stops the filing
+   before anything moves.
+
+   **The filing's record** is written into the disc's folder beside
+   `disc.json`, `filing-<source>-<id>.json`, once the operations have
+   finished or stopped: the manifest as it was, the plan with its checks,
+   and what each operation did. It is the library's own history, kept with
+   the film and in the share's snapshots, and it is what undoing a misfile
+   or making one a regression fixture reads. Every folder is made before
+   anything moves, so once anything has, the disc's folder is there for it.
+
+   **An operation that fails stops the rest**, and the report and the
+   record say what was done and what wasn't; nothing is undone
+   automatically, and no scan follows (Will, 2026-11-10, choosing *"Stop,
+   record it as incomplete"* over undoing what was done, since undoing can
+   fail too and is more code acting on the share). A process that dies part
+   way writes no record; the next plan finds the share part filed and goes
+   to review. The executor and the sidecars are `reelbarrow.executor` and
+   `reelbarrow.sidecars`.
 8. **Notify.** Pushover to the brother: filed, or review needed, with a link.
 
 By hand, `reelbarrow analyse <manifest>` prints steps 1 and 2's result for one
@@ -951,7 +976,7 @@ fails a check, so a case it can't plan goes to review, never files itself.
 `reelbarrow file [path]` plans the same manifests and hands each automatic
 plan to the executor, which carries out step 7, and prints each review or
 hold plan and leaves it. In dry run it reports every change as refused, and
-writes neither the share nor the ledger. It needs fanart.tv's key as well as
+changes nothing on the share. It needs fanart.tv's key as well as
 TMDB's token, so a film is never filed without the artwork only fanart.tv
 has (Will, 2026-11-10), and, when live, Plex's URL, token and paths.
 
@@ -1335,8 +1360,8 @@ would be wrong in the library four ways:
 - **Its identity is the producer's claim**, which can be wrong (job 34's is
   the disc's US title; job 24 named The Polar Express as another film).
   `disc.json` holds the identity decided, a TMDB id, and names the manifest it
-  was filed `from` by source, id and content hash. The ledger keeps the
-  manifest itself.
+  was filed `from` by source, id and content hash. The filing's record
+  beside it keeps the manifest itself.
 - **It can be silent on what `disc.json` is for.** A job from before the raw
   copy's record has no `titles`; which raw title became which file is known
   only from the planner's pairing by content, recorded in the same shape, the

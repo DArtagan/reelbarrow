@@ -160,6 +160,9 @@ def test_the_basis_holds_every_path_read_and_every_path_written(case):
         target = op.target if isinstance(op, Rename) else op.path
         if not isinstance(op, DeleteFolder):
             assert basis[target].present is False
+    # The filing's record too: its being there is what says it was filed.
+    assert made.record == f"{DISC}/filing-arm-34-178993082181.json"
+    assert basis[made.record].present is False
     assert re.fullmatch(r"[0-9a-f]{64}", made.basis.manifest_sha256)
 
 

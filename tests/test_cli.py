@@ -160,11 +160,10 @@ def test_file_in_dry_run_reports_every_change_refused(share, monkeypatch, capsys
     assert out.startswith("Dry run: every change is refused.")
     assert "arm 34-178993082181: dry_run" in out
     assert f"refused  make_folder   {FILM}" in out
-    assert "refused  ledger" in out
+    assert "refused  record" in out
     assert f"refused  plex_scan     {FILM}" in out
     assert "arm 35-1: running, not planned yet" in out
     assert listing(share) == before
-    assert not (share.parent / "data").exists()
 
 
 def test_file_as_json_gives_each_plan_and_its_report(share, monkeypatch, capsys):
@@ -240,8 +239,10 @@ def test_file_live_files_the_film_and_scans_it(share, monkeypatch, capsys):
     assert (share / FILM / "poster.jpg").exists()
     assert not (share / COMPLETED).exists()
     assert scanned == [f"/data/{FILM}"]
+    (record,) = (share / FILM / "raw").glob("*/filing-arm-34-178993082181.json")
+    assert json.loads(record.read_text())["result"] == "filed"
 
-    # A second run finds the unit in the ledger, its plan now for review
-    # since its files have moved.
+    # A second run finds the share says it was filed: its manifest's files
+    # have moved and its film is in the library, so its plan is for review.
     code, out, _ = run(monkeypatch, capsys, "file")
     assert "arm 34-178993082181: review" in out

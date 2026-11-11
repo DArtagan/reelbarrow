@@ -159,6 +159,12 @@ class Plan(Model):
     gate: Gate
     checks: list[Check]
     operations: list[Operation]
+    record: str | None = Field(
+        default=None,
+        description="Where the executor writes the filing's record: what it "
+        "was given and what each operation did. Null: the plan has no place "
+        "for one, so it is never carried out.",
+    )
     basis: Basis
 
     model_config = ConfigDict(extra="forbid", frozen=True, populate_by_name=True)
@@ -273,6 +279,7 @@ def plan(
         raise ValueError(f"{analysis.source} {analysis.id}'s analysis, not {job.id}'s")
     check = _Checks()
     operations: list[Operation] = []
+    filing_record: str | None = None
 
     check("state", job.state is State.SUCCEEDED, f"the job {job.state}")
     check(
@@ -335,7 +342,7 @@ def plan(
             check("name", False, str(error))
         else:
             check("name", True, f"{film!r}, from TMDB's {movie.title!r}")
-            operations, targets = _operations(
+            operations, targets, filing_record = _operations(
                 job, movie, film, movies, completed, feature, raw_source
             )
             states = [library.stat(path) for path in targets]
@@ -360,6 +367,7 @@ def plan(
         gate=gate,
         checks=check.checks,
         operations=operations,
+        record=filing_record,
         basis=Basis(manifest_sha256=manifest_sha256(job), paths=paths),
     )
 
@@ -508,15 +516,22 @@ def _operations(
     completed: Folder | None,
     feature: File,
     raw_source: list[File],
-) -> tuple[list[Operation], list[str]]:
-    """The operations, in the order the executor carries them out: folders
-    and renames, then sidecars, then leftovers."""
+) -> tuple[list[Operation], list[str], str | None]:
+    """The operations, in the order the executor carries them out: folders,
+    then renames, then sidecars, then leftovers; their target paths; and where
+    the filing's record goes.
+
+    Every folder is made before anything moves, so once anything has, the
+    disc's folder is there for the record of what was done."""
     assert job.disc is not None
     folder = f"{movies}/{film} {{tmdb-{movie.id}}}"
     target = f"{folder}/{film}{PurePosixPath(feature.path).suffix}"
     runtime = f"TMDB's {movie.runtime} min"
-    ops: list[Operation] = [
+    filing_record = None
+    folders: list[Operation] = [
         MakeFolder(path=folder, reason=f"{movie.title}'s folder, TMDB {movie.id}"),
+    ]
+    renames: list[Operation] = [
         Rename(
             source=feature.path,
             target=target,
@@ -551,7 +566,8 @@ def _operations(
         label = names.component(job.disc.label or "DVD")
         raw = f"{folder}/raw"
         disc = f"{raw}/{label} [dvd-{job.disc.crc64}]"
-        ops += [
+        filing_record = f"{disc}/{record_name(job.source, job.id)}"
+        folders += [
             MakeFolder(path=raw, reason="raw copies, one folder for each disc"),
             MakeFolder(
                 path=disc, reason=f"disc {job.disc.label}, CRC64 {job.disc.crc64}"
@@ -566,7 +582,7 @@ def _operations(
             )
             for source in raw_source
         ]
-        record = DiscRecord(
+        disc_json = DiscRecord(
             schema=1,
             from_=FiledFrom(
                 source=job.source, id=job.id, manifest_sha256=manifest_sha256(job)
@@ -577,7 +593,7 @@ def _operations(
             titles=filed,
         )
         for source in raw_source:
-            ops.append(
+            renames.append(
                 Rename(
                     source=source.path,
                     target=f"{disc}/{source.name}",
@@ -598,7 +614,7 @@ def _operations(
                 sidecar=Sidecar.DISC_JSON,
                 reason="the disc, the film, the job, and which raw title became "
                 "which file",
-                content=record.to_json(),
+                content=disc_json.to_json(),
             )
         )
         source_folder = PurePosixPath(raw_source[0].path).parent
@@ -607,7 +623,7 @@ def _operations(
                 path=str(source_folder), reason="the job's raw folder, emptied"
             )
         ]
-    operations = ops + sidecars + leftovers
+    operations = folders + renames + sidecars + leftovers
     targets = [
         path
         for op in operations
@@ -619,7 +635,15 @@ def _operations(
             else []
         )
     ]
-    return operations, targets
+    if filing_record is not None:
+        targets.append(filing_record)
+    return operations, targets, filing_record
+
+
+def record_name(source: str, id: str) -> str:
+    """The filing record's name: one a unit, so several units filed into one
+    disc's folder never meet."""
+    return f"filing-{source}-{id}.json"
 
 
 def _emptied(folder: Folder, what: str) -> list[DeleteFolder]:
