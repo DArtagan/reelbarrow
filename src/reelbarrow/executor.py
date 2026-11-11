@@ -40,6 +40,7 @@ from typing import Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
+from reelbarrow.analyse import Analysis
 from reelbarrow.fanart import FanartError
 from reelbarrow.manifest import Manifest, ShareRef
 from reelbarrow.plan import (
@@ -193,13 +194,21 @@ class Report(Model):
         )
 
 
+class Replies(Model):
+    tmdb: dict[str, dict]
+    fanart: dict[str, dict]
+
+
 class FilingRecord(Model):
     """One filing, in its disc's folder beside `disc.json`: what the executor
     was given and what each operation did. Written once, when the filing has
     finished or stopped, and never rewritten. With `disc.json` it is what
-    undoing a misfile, or making it a regression fixture, reads: the manifest
-    as it was, the plan and the evidence its checks passed on, and what was
-    deleted."""
+    undoing a misfile, or making it a regression fixture, reads.
+
+    It holds everything the plan was made from, as it was then, so a misfile
+    can be replayed exactly, as a case in `tests/fixtures/`: the manifest, the
+    analysis of the job's files before they moved, and the providers' replies,
+    which change over time and can't be asked again as they were."""
 
     model_config = ConfigDict(extra="forbid", frozen=True, populate_by_name=True)
 
@@ -211,6 +220,11 @@ class FilingRecord(Model):
     finished: AwareDatetime
     version: str
     manifest: dict
+    analysis: dict = Field(description="`reelbarrow analyse`'s document.")
+    replies: Replies = Field(
+        description="TMDB's and fanart.tv's, trimmed, by request, as a case's "
+        "`tmdb.json` and `fanart.json` hold them."
+    )
     plan: dict
     steps: list[Step] = Field(description="Each operation, in the plan's order.")
 
@@ -249,22 +263,27 @@ class Executor:
     def __init__(
         self,
         writer: Writer,
-        sources: Sources,
         libraries: Sequence[str],
         plex: Plex | None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         self.writer = writer
-        self.sources = sources
         self.libraries = list(libraries)
         self.plex = plex
         self.clock = clock
 
-    def carry_out(self, plan: Plan, manifest: Manifest) -> Report:
+    def carry_out(
+        self, plan: Plan, manifest: Manifest, analysis: Analysis, sources: Sources
+    ) -> Report:
+        """`sources` are the unit's own: what they recorded while it was
+        planned and filed goes into its record."""
         if plan.gate is not Gate.AUTOMATIC:
             raise ValueError(f"{plan.source} {plan.id} is for {plan.gate}")
-        if (manifest.source, manifest.id) != (plan.source, plan.id):
-            raise ValueError(f"{manifest.id}'s manifest, not {plan.id}'s")
+        for given in (manifest, analysis):
+            if (given.source, given.id) != (plan.source, plan.id):
+                raise ValueError(
+                    f"{given.id}'s {type(given).__name__}, not {plan.id}'s"
+                )
         if plan.record is None:
             raise ValueError(f"{plan.id}'s plan has no place for its record")
 
@@ -290,7 +309,7 @@ class Executor:
         try:
             for index, op in enumerate(plan.operations):
                 if isinstance(op, Write):
-                    rendered[index] = render(op, self.sources)
+                    rendered[index] = render(op, sources)
         except (SidecarError, TmdbError, FanartError) as error:
             steps.append(step("sidecars", Outcome.FAILED, str(error)))
             return report(Result.NOT_RENDERED)
@@ -332,6 +351,11 @@ class Executor:
             finished=self.clock(),
             version=version("reelbarrow"),
             manifest=manifest.to_json(),
+            analysis=analysis.to_json(),
+            replies=Replies(
+                tmdb=dict(sorted(sources.tmdb.recorded.items())),
+                fanart=dict(sorted(sources.fanart.recorded.items())),
+            ),
             plan=plan.to_json(),
             steps=operations,
         )

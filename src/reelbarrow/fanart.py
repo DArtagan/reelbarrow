@@ -63,6 +63,9 @@ def _trim(reply: Mapping[str, Any]) -> dict:
 
 
 class Fanart(Protocol):
+    # Every reply it gave, trimmed, by request.
+    recorded: dict[str, dict]
+
     def movie(self, tmdb_id: int) -> MovieArt: ...
 
 

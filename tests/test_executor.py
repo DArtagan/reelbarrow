@@ -6,6 +6,7 @@ only, its sidecars, `raw/` holding the disc's folder with `disc.json` and the
 filing's record, and nothing left behind of the job in `completed/` or `raw/`.
 """
 
+import json
 import os
 import xml.etree.ElementTree as ET
 from datetime import UTC, datetime
@@ -109,6 +110,26 @@ def plex_server() -> PlexServer:
     return PlexServer()
 
 
+class Run:
+    """The executor and one unit's sources, as the CLI makes them: the TMDB
+    client the unit is planned with is the one its filing uses, so its record
+    holds every reply either read."""
+
+    def __init__(self, executor: Executor, sources: Sources, root: Path, case):
+        self.executor = executor
+        self.sources = sources
+        self.root = root
+        self.case = case
+
+    def plan(self) -> Plan:
+        library = ShareLibrary(self.root, "movies")
+        case = self.case
+        return plan(case.manifest, case.analysis, self.sources.tmdb, library, "movies")
+
+    def carry_out(self, made: Plan, manifest):
+        return self.executor.carry_out(made, manifest, self.case.analysis, self.sources)
+
+
 def executor(
     root: Path,
     case: cases.Case,
@@ -116,26 +137,27 @@ def executor(
     dry_run: bool,
     plex_server: PlexServer | None = None,
     fanart_replies: dict | None = None,
-) -> Executor:
+) -> Run:
     plex = Plex(
         "http://plex:32400",
         "plex-token",
         {"movies": "/data/movies"},
         transport=httpx.MockTransport(plex_server or PlexServer()),
     )
-    return Executor(
-        writer=Writer(root, dry_run=dry_run),
-        sources=Sources(
-            tmdb=Recorded(case.tmdb_replies),
-            fanart=fanart.Recorded(
-                case.fanart_replies if fanart_replies is None else fanart_replies
-            ),
-            images=Images(),
+    sources = Sources(
+        tmdb=Recorded(case.tmdb_replies),
+        fanart=fanart.Recorded(
+            case.fanart_replies if fanart_replies is None else fanart_replies
         ),
+        images=Images(),
+    )
+    run = Executor(
+        writer=Writer(root, dry_run=dry_run),
         libraries=["movies"],
         plex=plex,
         clock=lambda: NOW,
     )
+    return Run(run, sources, root, case)
 
 
 def planned(root: Path, case: cases.Case) -> Plan:
@@ -217,8 +239,9 @@ def test_job_34_files_into_its_rows_layout(root, case, plex_server):
 
 
 def test_the_record_says_what_was_filed_from_what(root, case):
-    made = planned(root, case)
-    report = executor(root, case, dry_run=False).carry_out(made, case.manifest)
+    run = executor(root, case, dry_run=False)
+    made = run.plan()
+    report = run.carry_out(made, case.manifest)
 
     record = FilingRecord.model_validate_json((root / RECORD).read_bytes())
     assert record.result is Result.FILED
@@ -231,6 +254,40 @@ def test_the_record_says_what_was_filed_from_what(root, case):
     assert {s.outcome for s in record.steps} <= {Outcome.DONE, Outcome.SKIPPED}
     recorded = next(s for s in report.steps if s.step == "record")
     assert recorded.outcome is Outcome.DONE
+
+
+def test_the_record_holds_the_case_a_regression_fixture_is(root, case, tmp_path):
+    """Everything the plan was made from, as it was: written out as a case's
+    files, it loads and plans again to the plan that was carried out."""
+    run = executor(root, case, dry_run=False)
+    made = run.plan()
+    run.carry_out(made, case.manifest)
+    record = FilingRecord.model_validate_json((root / RECORD).read_bytes())
+
+    # Exactly the case's own files: TMDB's four replies, planning's and
+    # filing's both, and fanart.tv's one.
+    assert record.analysis == case.analysis.to_json()
+    assert record.replies.tmdb == case.tmdb_replies
+    assert record.replies.fanart == case.fanart_replies
+
+    rebuilt = tmp_path / "fixtures" / "from-the-record"
+    rebuilt.mkdir(parents=True)
+    for name, document in [
+        ("manifest.json", record.manifest),
+        ("analysis.json", record.analysis),
+        ("tmdb.json", record.replies.tmdb),
+        ("fanart.json", record.replies.fanart),
+    ]:
+        (rebuilt / name).write_text(json.dumps(document))
+    replayed = cases.load(rebuilt.name, fixtures=rebuilt.parent)
+    again = plan(
+        replayed.manifest,
+        replayed.analysis,
+        replayed.tmdb,
+        cases.Library(),
+        "movies",
+    )
+    assert again == Plan.model_validate(record.plan)
 
 
 def test_a_unit_filed_is_not_filed_again(root, case):

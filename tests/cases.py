@@ -84,8 +84,8 @@ def _ns(when: datetime) -> int:
     return (delta.days * 86_400 + delta.seconds) * 10**9 + delta.microseconds * 1000
 
 
-def load(name: str) -> Case:
-    folder = FIXTURES / name
+def load(name: str, fixtures: Path = FIXTURES) -> Case:
+    folder = fixtures / name
     analysis = Analysis.model_validate_json((folder / "analysis.json").read_bytes())
     fanart = folder / "fanart.json"
     return Case(

@@ -220,12 +220,13 @@ def test_file_live_files_the_film_and_scans_it(share, monkeypatch, capsys):
         scanned.append(request.url.params["path"])
         return httpx.Response(200)
 
-    real = plex.Plex
-    monkeypatch.setattr(
-        plex,
-        "Plex",
-        lambda *args: real(*args, transport=httpx.MockTransport(reply)),
-    )
+    # A subclass, not a function: the CLI imports the executor lazily, and a
+    # module first imported under this patch binds whatever `Plex` is then.
+    class FakePlex(plex.Plex):
+        def __init__(self, *args):
+            super().__init__(*args, transport=httpx.MockTransport(reply))
+
+    monkeypatch.setattr(plex, "Plex", FakePlex)
     monkeypatch.setenv("REELBARROW_DRY_RUN", "false")
     monkeypatch.setenv("REELBARROW_PLEX_URL", "http://plex:32400")
     monkeypatch.setenv("REELBARROW_PLEX_TOKEN", "not-a-real-token")
@@ -240,7 +241,11 @@ def test_file_live_files_the_film_and_scans_it(share, monkeypatch, capsys):
     assert not (share / COMPLETED).exists()
     assert scanned == [f"/data/{FILM}"]
     (record,) = (share / FILM / "raw").glob("*/filing-arm-34-178993082181.json")
-    assert json.loads(record.read_text())["result"] == "filed"
+    document = json.loads(record.read_text())
+    assert document["result"] == "filed"
+    # Planning's replies and filing's, from the unit's one client.
+    assert set(document["replies"]["tmdb"]) == set(REPLIES)
+    assert document["analysis"]["id"] == "34-178993082181"
 
     # A second run finds the share says it was filed: its manifest's files
     # have moved and its film is in the library, so its plan is for review.

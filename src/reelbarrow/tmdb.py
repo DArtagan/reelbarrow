@@ -163,7 +163,10 @@ class Tmdb(Protocol):
 
 
 class TmdbSidecars(Tmdb, Protocol):
-    """What filing asks TMDB besides what planning does."""
+    """What filing asks TMDB besides what planning does, and every reply it
+    gave, trimmed, by request: a unit's own client holds that unit's."""
+
+    recorded: dict[str, dict]
 
     def details(self, tmdb_id: int) -> Details: ...
 

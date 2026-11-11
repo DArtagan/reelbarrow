@@ -141,8 +141,9 @@ def _missing(*names: str) -> int:
 
 
 def _planned(settings, tmdb, path: Path | None, as_json: bool):
-    """Each manifest's plan, as (manifest, plan); None for one that couldn't
-    be planned, which is reported here."""
+    """Each manifest's plan, as (manifest, analysis, plan, the TMDB client it
+    was planned with); None for one that couldn't be planned, which is
+    reported here. `tmdb` makes a client."""
     from pydantic import ValidationError
 
     from reelbarrow import intake, plan
@@ -163,14 +164,17 @@ def _planned(settings, tmdb, path: Path | None, as_json: bool):
             if not as_json:
                 print(f"{job.source} {job.id}: running, not planned yet\n")
             continue
+        # A client of its own for each unit, so what it records is that
+        # unit's replies alone.
+        unit_tmdb = tmdb()
         try:
             analysis = analyse(job, settings.video_root, index)
-            made = plan.plan(job, analysis, tmdb, library, movies=settings.movies)
+            made = plan.plan(job, analysis, unit_tmdb, library, movies=settings.movies)
         except TmdbError as error:
             print(f"{job.source} {job.id}: {error}", file=sys.stderr)
             yield None
             continue
-        yield job, made
+        yield job, analysis, made, unit_tmdb
 
 
 def _plan(path: Path | None, as_json: bool) -> int:
@@ -181,14 +185,14 @@ def _plan(path: Path | None, as_json: bool) -> int:
     settings = Settings()
     if settings.tmdb_token is None:
         return _missing("REELBARROW_TMDB_TOKEN")
-    tmdb = Client(settings.tmdb_token.get_secret_value())
+    token = settings.tmdb_token.get_secret_value()
     failed = False
     plans = []
-    for planned in _planned(settings, tmdb, path, as_json):
+    for planned in _planned(settings, lambda: Client(token), path, as_json):
         if planned is None:
             failed = True
             continue
-        _, made = planned
+        _, _, made, _ = planned
         if as_json:
             plans.append(made.to_json())
         else:
@@ -227,7 +231,9 @@ def _file(path: Path | None, as_json: bool) -> int:
     if missing:
         return _missing(*missing)
     assert settings.tmdb_token is not None and settings.fanart_key is not None
-    tmdb = Client(settings.tmdb_token.get_secret_value())
+    token = settings.tmdb_token.get_secret_value()
+    fanart_key = settings.fanart_key.get_secret_value()
+    images = sidecars.HttpImages()
     plex = None
     if settings.plex_url is not None and settings.plex_token is not None:
         plex = Plex(
@@ -237,11 +243,6 @@ def _file(path: Path | None, as_json: bool) -> int:
         )
     carrying_out = executor.Executor(
         writer=executor.Writer(settings.video_root, dry_run=settings.dry_run),
-        sources=sidecars.Sources(
-            tmdb=tmdb,
-            fanart=fanart.Client(settings.fanart_key.get_secret_value()),
-            images=sidecars.HttpImages(),
-        ),
         libraries=[settings.movies],
         plex=plex,
     )
@@ -253,14 +254,17 @@ def _file(path: Path | None, as_json: bool) -> int:
         )
     failed = False
     documents = []
-    for planned in _planned(settings, tmdb, path, as_json):
+    for planned in _planned(settings, lambda: Client(token), path, as_json):
         if planned is None:
             failed = True
             continue
-        job, made = planned
+        job, analysis, made, unit_tmdb = planned
         report = None
         if made.gate is plan.Gate.AUTOMATIC:
-            report = carrying_out.carry_out(made, job)
+            sources = sidecars.Sources(
+                tmdb=unit_tmdb, fanart=fanart.Client(fanart_key), images=images
+            )
+            report = carrying_out.carry_out(made, job, analysis, sources)
             failed = failed or not report.succeeded
         if as_json:
             documents.append(

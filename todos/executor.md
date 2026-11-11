@@ -40,7 +40,8 @@ code that does it is built while there is one plan to carry out.
   carries whatever *Any order* in the design compares that can't be measured
   from the file, such as the raw copy's backup checks.
 - **The filing's record**, `filing-<source>-<id>.json` beside `disc.json`:
-  the manifest as it was, the plan, and what each operation did. This
+  the manifest as it was, the analysis, TMDB's and fanart.tv's replies, the
+  plan, and what each operation did: enough to replay a misfile as a case. This
   replaced a ledger in SQLite under `REELBARROW_DATA_DIR`, which was built
   first and dropped before anything was filed (below).
 - **`reelbarrow file [path]`** plans as `reelbarrow plan [path]` does, taking

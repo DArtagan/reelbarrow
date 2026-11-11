@@ -951,10 +951,16 @@ The pipeline, per ARM job (and later per backlog folder):
 
    **The filing's record** is written into the disc's folder beside
    `disc.json`, `filing-<source>-<id>.json`, once the operations have
-   finished or stopped: the manifest as it was, the plan with its checks,
-   and what each operation did. It is the library's own history, kept with
-   the film and in the share's snapshots, and it is what undoing a misfile
-   or making one a regression fixture reads. Every folder is made before
+   finished or stopped: the manifest as it was, the analysis of the job's
+   files before they moved, TMDB's and fanart.tv's replies as they were
+   then, the plan with its checks, and what each operation did. It is the
+   library's own history, kept with the film and in the share's snapshots,
+   and it is what undoing a misfile reads. It is also a misfile's regression
+   fixture, whole (Will, 2026-11-11: *"so that a regression can be fully
+   inspected"*): its manifest, analysis and replies are a case's files in
+   `tests/fixtures/`, which plan again to the plan carried out. Providers'
+   data changes, and files once moved can't be measured as they arrived, so
+   nothing else could rebuild it. Every folder is made before
    anything moves, so once anything has, the disc's folder is there for it.
 
    **An operation that fails stops the rest**, and the report and the
