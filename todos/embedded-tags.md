@@ -71,9 +71,10 @@ then on is tagged as it is filed, and only what
     segment title.
   - An extra: its film's ids, and a title saying what it is. It has no name
     of its own yet (*Future work*), so this is for Will to decide.
-- **Raw copies aren't tagged**, unless Will decides otherwise. They're the
-  disc's own bytes, kept so the disc can be played and transcoded again, and
-  compared byte for byte across rips (E20). `disc.json` identifies them.
+- **Raw copies aren't tagged** (Will, 2026-11-11: *"Raw copies: leave
+  untagged"*). They're the disc's own bytes, kept so the disc can be played
+  and transcoded again, and compared byte for byte across rips (E20).
+  `disc.json` identifies them.
 - **Track flags and chapter names**, the rest of the design's row. Measure
   what ARM's transcodes carry first, and plan a change only where one is
   wrong; chapter names have no source yet.
