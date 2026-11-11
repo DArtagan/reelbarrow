@@ -73,6 +73,11 @@ END_COMMIT_OVERRIDE
   runs, so it can be added or corrected after merging, until the release pull
   request is merged.
 - **Its entries link to the squash commit**, not to the pull request's number.
+- **The marker is only ever the block.** release-please reads everything after
+  it in the body as the override, so a description that mentions it in
+  passing, even in backticks, becomes an override that doesn't parse, and the
+  pull request drops out of the changelog without the run failing. Write "the
+  commit-override block" in prose instead.
 - The squash commit's body, which lists the branch's commits as bullets, adds
   nothing to the changelog either way.
 
