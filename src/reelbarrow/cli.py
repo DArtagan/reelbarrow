@@ -237,7 +237,7 @@ def _file(path: Path | None, as_json: bool) -> int:
             settings.plex_paths,
         )
     carrying_out = executor.Executor(
-        share=executor.Share(settings.video_root, dry_run=settings.dry_run),
+        writer=executor.Writer(settings.video_root, dry_run=settings.dry_run),
         ledger=Ledger(settings.data_dir),
         sources=sidecars.Sources(
             tmdb=tmdb,

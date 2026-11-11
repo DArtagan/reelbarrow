@@ -22,8 +22,8 @@ from reelbarrow.executor import (
     Outcome,
     Refused,
     Result,
-    Share,
-    ShareError,
+    Writer,
+    WriterError,
     render_report,
 )
 from reelbarrow.ledger import Ledger, State
@@ -124,7 +124,7 @@ def executor(
         transport=httpx.MockTransport(plex_server or PlexServer()),
     )
     return Executor(
-        share=Share(root, dry_run=dry_run),
+        writer=Writer(root, dry_run=dry_run),
         ledger=Ledger(data),
         sources=Sources(
             tmdb=Recorded(case.tmdb_replies),
@@ -331,7 +331,7 @@ def test_an_operation_that_fails_stops_the_rest_and_leaves_the_entry_incomplete(
 ):
     made = planned(root, case)
     renames = []
-    original = Share.rename
+    original = Writer.rename
 
     def rename(self, source, target):
         renames.append(source)
@@ -339,7 +339,7 @@ def test_an_operation_that_fails_stops_the_rest_and_leaves_the_entry_incomplete(
             raise PermissionError(13, "Permission denied", target)
         original(self, source, target)
 
-    monkeypatch.setattr(Share, "rename", rename)
+    monkeypatch.setattr(Writer, "rename", rename)
     report = executor(
         root, case, tmp_path / "data", dry_run=False, plex_server=plex_server
     ).carry_out(made, case.manifest)
@@ -376,11 +376,11 @@ def test_the_report_reads_for_a_person(root, case, tmp_path):
     assert f"refused  rename        {COMPLETED}" in text
 
 
-# The share's one choke point, on its own.
+# The writer, the share's one choke point, on its own.
 
 
 @pytest.fixture
-def share_root(tmp_path, guarded) -> Path:
+def root_a(tmp_path, guarded) -> Path:
     root = tmp_path / "video"
     (root / "a").mkdir(parents=True)
     (root / "a" / "file.mkv").write_bytes(b"film")
@@ -399,53 +399,51 @@ def share_root(tmp_path, guarded) -> Path:
         ("write", ("../outside", b"x")),
     ],
 )
-def test_dry_run_refuses_each_change_before_touching_the_share(
-    share_root, method, args
-):
-    before = tree(share_root)
+def test_dry_run_refuses_each_change_before_touching_the_share(root_a, method, args):
+    before = tree(root_a)
     with pytest.raises(Refused):
-        getattr(Share(share_root), method)(*args)
-    assert tree(share_root) == before
+        getattr(Writer(root_a), method)(*args)
+    assert tree(root_a) == before
 
 
 def test_dry_run_is_the_default():
-    assert Share(Path("/video")).dry_run is True
+    assert Writer(Path("/video")).dry_run is True
 
 
-def test_a_rename_never_lands_on_something(share_root):
-    (share_root / "a" / "other.mkv").write_bytes(b"other")
-    with pytest.raises(ShareError, match="already there"):
-        Share(share_root, dry_run=False).rename("a/file.mkv", "a/other.mkv")
-    assert (share_root / "a" / "other.mkv").read_bytes() == b"other"
+def test_a_rename_never_lands_on_something(root_a):
+    (root_a / "a" / "other.mkv").write_bytes(b"other")
+    with pytest.raises(WriterError, match="already there"):
+        Writer(root_a, dry_run=False).rename("a/file.mkv", "a/other.mkv")
+    assert (root_a / "a" / "other.mkv").read_bytes() == b"other"
 
 
-def test_a_write_never_replaces_a_file(share_root):
-    with pytest.raises(ShareError, match="already there"):
-        Share(share_root, dry_run=False).write("a/file.mkv", b"nfo")
-    assert (share_root / "a" / "file.mkv").read_bytes() == b"film"
+def test_a_write_never_replaces_a_file(root_a):
+    with pytest.raises(WriterError, match="already there"):
+        Writer(root_a, dry_run=False).write("a/file.mkv", b"nfo")
+    assert (root_a / "a" / "file.mkv").read_bytes() == b"film"
 
 
-def test_a_folder_holding_anything_is_not_deleted(share_root):
+def test_a_folder_holding_anything_is_not_deleted(root_a):
     with pytest.raises(OSError):
-        Share(share_root, dry_run=False).delete_folder("a")
-    assert (share_root / "a" / "file.mkv").exists()
+        Writer(root_a, dry_run=False).delete_folder("a")
+    assert (root_a / "a" / "file.mkv").exists()
 
 
-def test_a_path_out_of_the_share_is_refused(share_root, tmp_path):
+def test_a_path_out_of_the_share_is_refused(root_a, tmp_path):
     with pytest.raises(ValueError):
-        Share(share_root, dry_run=False).write("../outside", b"x")
+        Writer(root_a, dry_run=False).write("../outside", b"x")
     assert not (tmp_path / "outside").exists()
 
 
-def test_a_path_through_a_link_is_refused(share_root, tmp_path):
+def test_a_path_through_a_link_is_refused(root_a, tmp_path):
     (tmp_path / "elsewhere").mkdir()
-    (share_root / "link").symlink_to(tmp_path / "elsewhere")
-    with pytest.raises(ShareError, match="link"):
-        Share(share_root, dry_run=False).write("link/new.nfo", b"x")
+    (root_a / "link").symlink_to(tmp_path / "elsewhere")
+    with pytest.raises(WriterError, match="link"):
+        Writer(root_a, dry_run=False).write("link/new.nfo", b"x")
     assert list((tmp_path / "elsewhere").iterdir()) == []
 
 
-def test_a_link_is_never_renamed(share_root):
-    (share_root / "a" / "link.mkv").symlink_to(share_root / "a" / "file.mkv")
-    with pytest.raises(ShareError, match="neither"):
-        Share(share_root, dry_run=False).rename("a/link.mkv", "a/moved.mkv")
+def test_a_link_is_never_renamed(root_a):
+    (root_a / "a" / "link.mkv").symlink_to(root_a / "a" / "file.mkv")
+    with pytest.raises(WriterError, match="neither"):
+        Writer(root_a, dry_run=False).rename("a/link.mkv", "a/moved.mkv")

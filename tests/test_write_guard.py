@@ -18,7 +18,7 @@ import pytest
 import share_guard
 
 from reelbarrow import manifest
-from reelbarrow.executor import Share
+from reelbarrow.executor import Writer
 
 SOURCE = share_guard.SOURCE
 
@@ -254,9 +254,9 @@ def test_the_executor_writes_under_the_root(tmp_path, guarded):
     root = tmp_path / "video"
     root.mkdir()
     guarded(root)
-    share = Share(root, dry_run=False)
-    share.make_folder("movies")
-    share.write("movies/movie.nfo", b"<movie/>")
+    writer = Writer(root, dry_run=False)
+    writer.make_folder("movies")
+    writer.write("movies/movie.nfo", b"<movie/>")
     assert (root / "movies" / "movie.nfo").read_bytes() == b"<movie/>"
 
 

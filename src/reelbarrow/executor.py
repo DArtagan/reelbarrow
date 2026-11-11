@@ -1,6 +1,6 @@
 """The executor: an automatic plan carried out on the share, or refused.
 
-`Share` is the one place anything under the video root is changed, and the
+`Writer` is the one place anything under the video root is changed, and the
 one place dry run is checked (*Rules that protect the library*, in
 `AGENTS.md`). While `dry_run` is true it refuses every change before touching
 the share, and the executor reports each as refused; the deployment also
@@ -60,11 +60,11 @@ class Refused(Exception):
     """Dry run is on: nothing on the share is changed."""
 
 
-class ShareError(Exception):
+class WriterError(Exception):
     """The share isn't as the operation needs it, so it isn't attempted."""
 
 
-class Share:
+class Writer:
     """Every change under the video root: make a folder, rename, write a new
     file, remove an emptied folder. Nothing is ever overwritten, copied or
     removed with what it holds."""
@@ -84,7 +84,7 @@ class Share:
         root = self.video_root.resolve()
         parent = (root / share.parent).resolve()
         if parent != root / share.parent:
-            raise ShareError(f"{path}: a folder above it is a link")
+            raise WriterError(f"{path}: a folder above it is a link")
         return parent / share.name
 
     def make_folder(self, path: str) -> None:
@@ -92,7 +92,7 @@ class Share:
         try:
             os.mkdir(self._path(path))
         except FileExistsError as error:
-            raise ShareError(f"{path} is already there") from error
+            raise WriterError(f"{path} is already there") from error
 
     def rename(self, source: str, target: str) -> None:
         """Within the share's one filesystem, onto nothing."""
@@ -100,13 +100,13 @@ class Share:
         old, new = self._path(source), self._path(target)
         found = os.lstat(old)
         if not (stat.S_ISREG(found.st_mode) or stat.S_ISDIR(found.st_mode)):
-            raise ShareError(f"{source} is neither a file nor a folder")
+            raise WriterError(f"{source} is neither a file nor a folder")
         # rename() replaces a file silently. The basis was compared moments
         # ago and one worker files, so checking here, just before, is enough.
         if os.path.lexists(new):
-            raise ShareError(f"{target} is already there")
+            raise WriterError(f"{target} is already there")
         if os.lstat(new.parent).st_dev != found.st_dev:
-            raise ShareError(f"{source} and {target} are on different filesystems")
+            raise WriterError(f"{source} and {target} are on different filesystems")
         os.rename(old, new)
 
     def write(self, path: str, content: bytes) -> None:
@@ -117,7 +117,7 @@ class Share:
         try:
             fd = os.open(target, flags, 0o666)
         except FileExistsError as error:
-            raise ShareError(f"{path} is already there") from error
+            raise WriterError(f"{path} is already there") from error
         try:
             view = memoryview(content)
             while view:
@@ -135,7 +135,7 @@ class Share:
         self._refuse_in_dry_run()
         folder = self._path(path)
         if not stat.S_ISDIR(os.lstat(folder).st_mode):
-            raise ShareError(f"{path} isn't a folder")
+            raise WriterError(f"{path} isn't a folder")
         os.rmdir(folder)
 
 
@@ -223,14 +223,14 @@ def _subject(op: Operation) -> str:
 class Executor:
     def __init__(
         self,
-        share: Share,
+        writer: Writer,
         ledger: Ledger,
         sources: Sources,
         libraries: Sequence[str],
         plex: Plex | None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
-        self.share = share
+        self.writer = writer
         self.ledger = ledger
         self.sources = sources
         self.libraries = list(libraries)
@@ -258,7 +258,7 @@ class Executor:
             return report(Result.IN_LEDGER)
 
         # The planner's own measure of a path, so the two compare exactly.
-        stat_path = ShareLibrary(self.share.video_root, "").stat
+        stat_path = ShareLibrary(self.writer.video_root, "").stat
         changed = differences(plan.basis, manifest, stat_path)
         if changed:
             detail = f"changed since planned: {', '.join(changed)}"
@@ -289,7 +289,7 @@ class Executor:
         def outcomes() -> list[dict]:
             return [operation.model_dump(mode="json") for operation in operations]
 
-        live = not self.share.dry_run
+        live = not self.writer.dry_run
         if live:
             try:
                 self.ledger.begin(plan, self.clock(), outcomes())
@@ -339,19 +339,19 @@ class Executor:
         try:
             match op:
                 case MakeFolder():
-                    self.share.make_folder(op.path)
+                    self.writer.make_folder(op.path)
                 case Rename():
-                    self.share.rename(op.source, op.target)
+                    self.writer.rename(op.source, op.target)
                 case Write():
                     assert rendered is not None
                     if rendered.content is None:
                         return Outcome.SKIPPED, detail
-                    self.share.write(op.path, rendered.content)
+                    self.writer.write(op.path, rendered.content)
                 case DeleteFolder():
-                    self.share.delete_folder(op.path)
+                    self.writer.delete_folder(op.path)
         except Refused:
             return Outcome.REFUSED, detail
-        except (ShareError, OSError, ValueError) as error:
+        except (WriterError, OSError, ValueError) as error:
             return Outcome.FAILED, str(error)
         return Outcome.DONE, detail
 
@@ -374,7 +374,7 @@ class Executor:
                 step="plex_scan", subject=folder, outcome=outcome, detail=detail
             )
 
-        if self.share.dry_run:
+        if self.writer.dry_run:
             return step(Outcome.REFUSED, "dry run")
         if self.plex is None:
             return step(Outcome.FAILED, "Plex isn't configured")

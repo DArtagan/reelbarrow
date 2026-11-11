@@ -59,7 +59,7 @@ Will, 2026-11-10, asked while the executor was built:
 
 ## Built (2026-11-10, branch `executor`)
 
-`reelbarrow.executor` (`Share`, the choke point, and `Executor`),
+`reelbarrow.executor` (`Writer`, the choke point, and `Executor`),
 `reelbarrow.ledger`, `reelbarrow.sidecars`, `reelbarrow.fanart`,
 `reelbarrow.plex`, TMDB's credits and images in `reelbarrow.tmdb`, and
 `reelbarrow file`. The write guard is `tests/test_write_guard.py`, static,
