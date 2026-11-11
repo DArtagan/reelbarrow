@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.0](https://github.com/DArtagan/reelbarrow/compare/v0.4.0...v0.5.0) (2026-11-11)
+
+
+### Features
+
+* **cli:** `reelbarrow file` files each automatic plan, and leaves review and hold plans alone ([5838560](https://github.com/DArtagan/reelbarrow/commit/5838560b64b8fc8cbd4d6fed7b054a988e4fe477))
+* **disc-record:** file disc.json as the manifest as filed, with docs/disc.schema.json ([5838560](https://github.com/DArtagan/reelbarrow/commit/5838560b64b8fc8cbd4d6fed7b054a988e4fe477))
+* **executor:** carry out automatic plans through one Writer, which refuses every change while dry run is on ([5838560](https://github.com/DArtagan/reelbarrow/commit/5838560b64b8fc8cbd4d6fed7b054a988e4fe477))
+* **executor:** keep each filing's record beside disc.json, holding the case it was planned from ([5838560](https://github.com/DArtagan/reelbarrow/commit/5838560b64b8fc8cbd4d6fed7b054a988e4fe477))
+* **plex:** ask Plex to scan each filed film's folder ([5838560](https://github.com/DArtagan/reelbarrow/commit/5838560b64b8fc8cbd4d6fed7b054a988e4fe477))
+* **sidecars:** write movie.nfo from TMDB, and artwork from TMDB and fanart.tv ([5838560](https://github.com/DArtagan/reelbarrow/commit/5838560b64b8fc8cbd4d6fed7b054a988e4fe477))
+
+
+### Documentation
+
+* agent notes from single-manifest-plan, and no CLAUDE.local.md ([#21](https://github.com/DArtagan/reelbarrow/issues/21)) ([273c435](https://github.com/DArtagan/reelbarrow/commit/273c43593b1f96871e466406c355b5398847c664))
+* **releasing:** list several changelog notes from one squash ([b02cd08](https://github.com/DArtagan/reelbarrow/commit/b02cd089c87084eb70e60a680daf8c1c75024d00))
+* **releasing:** the commit-override marker is only ever the block ([baad413](https://github.com/DArtagan/reelbarrow/commit/baad413bf20ccb5634db116408986e375088f2f4))
+* retire single-manifest-plan ([#19](https://github.com/DArtagan/reelbarrow/issues/19)) ([e815480](https://github.com/DArtagan/reelbarrow/commit/e815480cdc108710414d1e195167542fe963d2c1))
+* **todos:** the embedded-tags and extras specs, ahead of first-filing and manifest-loop ([5838560](https://github.com/DArtagan/reelbarrow/commit/5838560b64b8fc8cbd4d6fed7b054a988e4fe477))
+
 ## [0.4.0](https://github.com/DArtagan/reelbarrow/compare/v0.3.1...v0.4.0) (2026-11-10)
 
 
