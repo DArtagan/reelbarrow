@@ -27,13 +27,19 @@ for the run can file nothing else.
   throwaway item.
 - **Snapshots are current** on `rpool/storage/media`. Deleting leftovers is
   acceptable only because of them (Will, 2026-10-04).
-- **The ledger's backup.** From the first real move, the ledger is the only
-  history of what was moved where. The deployment repository's guidance on
-  adding a stateful workload has the options. A SQLite database with steady
-  writes gets a dump.
-- **Plex's token** added to reelbarrow's secret in the deployment repository.
-- **Job 34's plan is still automatic** and unchanged from the one
-  [executor](executor.md) carried out in dry run.
+- **Plex answers reelbarrow.** Its token, URL and paths were added to the
+  deployment with the executor (Will, 2026-11-11). The token is reelbarrow's
+  own, from Plex's PIN flow (README, *Plex's token*). From the pod, on
+  2026-11-11, `/library/sections` with that token answered 200, and exactly
+  one section holds `/data/movies`: key 1, *Movies*, type `movie`. A scan
+  itself hasn't been asked for yet. Check again before the run if Plex's
+  libraries have changed since. The paths are where Plex's container mounts
+  each library, by its path on the share (`{"movies": "/data/movies"}`, read
+  from Plex's Deployment 2026-11-10). `reelbarrow file` refuses a live run
+  without all three.
+- **Job 34's plan is still automatic**, and holds the `tag` operation
+  [embedded-tags](embedded-tags.md) added, which was measured on a copy
+  before it was trusted with the library.
 - **Job 34's is the only automatic plan.** `reelbarrow plan` with no path, over
   every manifest, gates every other one review or hold. `reelbarrow file`
   defaults to every manifest, as `plan` does, so this is what keeps a run that
@@ -52,7 +58,11 @@ for the run can file nothing else.
 Measured on the share and in Plex:
 
 - *Monte Carlo or Bust!* is visible in Plex without a manual scan.
+- Its file carries its `TITLE`, `DATE_RELEASED`, `IMDB` and `TMDB` tags and
+  its segment title, read with ffprobe. Each stream's hash equals the one taken
+  before the run.
 - Its `raw/` holds the right disc, with `disc.json`.
 - `completed/movies/` holds nothing for job 34, nor `raw/` its old folder.
-- The ledger's record of it matches the share.
+- Its filing record, beside `disc.json`, says `filed`, and what it says each
+  operation did matches the share.
 - Dry run is back on, and the mount read-only.

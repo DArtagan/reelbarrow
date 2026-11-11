@@ -11,6 +11,144 @@
     "title": "Monte Carlo or Bust!",
     "release_date": "1969-04-28",
     "runtime": 122,
-    "imdb_id": "tt0064688"
+    "imdb_id": "tt0064688",
+    "original_title": "Monte Carlo or Bust!",
+    "overview": "Sequel to \"Those Magnificent Men In Their Flying Machines\". This time an international car rally from England to Monte Carlo provides the comedic farce.",
+    "tagline": "",
+    "genres": [
+      {
+        "name": "Adventure"
+      },
+      {
+        "name": "Comedy"
+      }
+    ],
+    "production_companies": [
+      {
+        "name": "Paramount Pictures"
+      }
+    ],
+    "production_countries": [
+      {
+        "name": "France"
+      },
+      {
+        "name": "Italy"
+      },
+      {
+        "name": "United Kingdom"
+      }
+    ]
+  },
+  "movie/38792/credits": {
+    "cast": [
+      {
+        "name": "Bourvil",
+        "character": "Monsieur Dupont",
+        "order": 0
+      },
+      {
+        "name": "Lando Buzzanca",
+        "character": "Marcello Agost",
+        "order": 1
+      },
+      {
+        "name": "Walter Chiari",
+        "character": "Angelo Pincelli",
+        "order": 2
+      },
+      {
+        "name": "Peter Cook",
+        "character": "Maj. Digby Dawlish",
+        "order": 3
+      },
+      {
+        "name": "Tony Curtis",
+        "character": "Chester Schofield",
+        "order": 4
+      },
+      {
+        "name": "Mireille Darc",
+        "character": "Marie-Claude",
+        "order": 5
+      },
+      {
+        "name": "Marie Dubois",
+        "character": "Pascale",
+        "order": 6
+      },
+      {
+        "name": "Gert Fr\u00f6be",
+        "character": "Willi Schickel & Horst Muller",
+        "order": 7
+      },
+      {
+        "name": "Susan Hampshire",
+        "character": "Betty",
+        "order": 8
+      },
+      {
+        "name": "Jack Hawkins",
+        "character": "Count Levinovitch",
+        "order": 9
+      }
+    ],
+    "crew": [
+      {
+        "name": "Jack Davies",
+        "job": "Screenplay"
+      },
+      {
+        "name": "Ken Annakin",
+        "job": "Director"
+      },
+      {
+        "name": "Ken Annakin",
+        "job": "Screenplay"
+      }
+    ]
+  },
+  "movie/38792/images": {
+    "posters": [
+      {
+        "file_path": "/10RJ70j2aZG4iboDoN6sbTTkI7v.jpg",
+        "iso_639_1": "en",
+        "vote_average": 0.5,
+        "vote_count": 5
+      },
+      {
+        "file_path": "/21mBl3ohfohEdvfbNcHEbxmXVkX.jpg",
+        "iso_639_1": "en",
+        "vote_average": 8.596,
+        "vote_count": 7
+      },
+      {
+        "file_path": "/nkZCuMsYNoJGG6jcs2M1RRtR0VY.jpg",
+        "iso_639_1": "en",
+        "vote_average": 3.334,
+        "vote_count": 2
+      },
+      {
+        "file_path": "/5cCeuaKAACpe5NxtujWgejhHtPZ.jpg",
+        "iso_639_1": "en",
+        "vote_average": 3.334,
+        "vote_count": 3
+      }
+    ],
+    "backdrops": [
+      {
+        "file_path": "/r7CCDKvb58DxC57v4XUZPe4k1TN.jpg",
+        "iso_639_1": null,
+        "vote_average": 3.334,
+        "vote_count": 1
+      },
+      {
+        "file_path": "/xyDjMvvCAbObFLg5COhH2KKR5xX.jpg",
+        "iso_639_1": null,
+        "vote_average": 0.166,
+        "vote_count": 1
+      }
+    ],
+    "logos": []
   }
 }

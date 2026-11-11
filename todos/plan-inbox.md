@@ -28,9 +28,9 @@ plans from.
   indefinitely (*Reading the manifests* in `docs/exporter.md`). Whether
   mounting with `closetimeo=0` lifts the second rule is untested; it is a
   deployment change if it does.
-- **The inbox**, in SQLite under `REELBARROW_DATA_DIR` beside the
-  [executor](executor.md)'s ledger: each plan, its gate, its reasons and its
-  basis. A replan replaces the plan it supersedes and keeps the history of
+- **The inbox**, in SQLite under `REELBARROW_DATA_DIR`: each plan, its gate,
+  its reasons and its basis. There is no ledger beside it: what was filed is
+  recorded in the library (step 7 of *The service*). A replan replaces the plan it supersedes and keeps the history of
   gates, which is the data the dry run collects.
 - **The basis** as the design defines it: the manifest's content, and the
   size and modification time of everything the plan reads and of every library
@@ -38,7 +38,8 @@ plans from.
   against the same size and time, so a rescan with nothing changed reads no
   media.
 - **A filed unit's manifest changing** goes to review, not to a fresh plan
-  (*The manifest*). The ledger says which units are filed.
+  (*The manifest*). The share says which units are filed: the filing record
+  in the disc's folder, named for the manifest's `source` and `id`.
 - **The web UI** lists the inbox read-only: each manifest, its gate, and its
   plan in plain language.
 

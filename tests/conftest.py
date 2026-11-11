@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+import share_guard
 
 from reelbarrow.analysis.fingerprint import Fingerprint
 
@@ -25,6 +26,22 @@ def fingerprints() -> dict[str, Fingerprint]:
         name: Fingerprint.from_text((directory / f"{name}.fp").read_text(), duration)
         for name, duration in durations.items()
     }
+
+
+@pytest.fixture
+def guarded():
+    """Guards a video root for the test: anything reelbarrow changes under it,
+    other than through the executor, fails the test (`share_guard`)."""
+    guards = []
+
+    def guard(root: Path) -> share_guard.Guard:
+        made = share_guard.guard(root)
+        guards.append(made)
+        return made
+
+    yield guard
+    violations = [v for made in guards for v in share_guard.release(made)]
+    assert not violations, "written under the video root: " + "; ".join(violations)
 
 
 @pytest.fixture

@@ -26,11 +26,48 @@ VIDEO_ROOT=/path/to/video docker compose up -d
 
 `VIDEO_ROOT` holds ARM's output and the `movies/` and `shows/` libraries, on one
 filesystem. The web UI is on port 8000. `TMDB_TOKEN`, TMDB's API Read Access
-Token, is what identifies films:
+Token, is what identifies films, and `FANART_KEY`, fanart.tv's personal API
+key, is what filing fetches artwork with:
 
 ```bash
 docker compose exec reelbarrow reelbarrow plan    # every manifest's plan
+docker compose exec reelbarrow reelbarrow file    # each automatic plan carried out;
+                                                  # in dry run, every change refused
 ```
+
+### Plex's token
+
+Filing live ends by asking Plex to scan the film's folder, which needs
+`PLEX_URL`, `PLEX_PATHS` and `PLEX_TOKEN`. Plex has no page that issues API
+keys: each app that signs in to an account gets a token of its own. So
+reelbarrow gets its own by signing in as a device named "reelbarrow", through
+Plex's PIN flow ([*Authenticating with
+Plex*](https://forums.plex.tv/t/authenticating-with-plex/609370)). It then
+appears under Plex Web's **Settings → Authorized Devices**, where it can be
+revoked without affecting any other app's token. Sign in as the account that
+owns the server, because a managed or home user can't start a scan.
+
+In bash, with `curl` and `jq`:
+
+```bash
+CLIENT=reelbarrow-$(uuidgen)
+read -r ID CODE < <(curl -s -X POST https://plex.tv/api/v2/pins \
+  -H 'Accept: application/json' \
+  -d strong=true -d X-Plex-Product=reelbarrow \
+  -d "X-Plex-Client-Identifier=$CLIENT" | jq -r '"\(.id) \(.code)"')
+echo "https://app.plex.tv/auth#?clientID=$CLIENT&code=$CODE&context%5Bdevice%5D%5Bproduct%5D=reelbarrow"
+
+# Open that link, sign in, then:
+curl -s "https://plex.tv/api/v2/pins/$ID" \
+  -H 'Accept: application/json' \
+  -H "X-Plex-Client-Identifier: $CLIENT" | jq -r .authToken
+```
+
+The last command prints the token. If it prints `null`, the sign-in hasn't
+completed yet. A PIN expires within minutes, and plex.tv then answers "Code not
+found or expired"; start again from the top in that case. Every step must run
+in the same shell, since the last one has to send the `CLIENT` the first one
+did.
 
 ## Development
 
@@ -46,6 +83,7 @@ only to the command that needs it:
 
 ```bash
 secretspec set REELBARROW_TMDB_TOKEN               # prompts; not echoed
+secretspec set REELBARROW_FANART_KEY
 secretspec run -- reelbarrow plan path/to/manifest.json
 ```
 

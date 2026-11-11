@@ -17,6 +17,14 @@ services:
       REELBARROW_DRY_RUN: "true"
       # TMDB's API Read Access Token, which identifying a film needs.
       REELBARROW_TMDB_TOKEN: ${TMDB_TOKEN:-}
+      # fanart.tv's personal API key, for the artwork `reelbarrow file` writes.
+      REELBARROW_FANART_KEY: ${FANART_KEY:-}
+      # Plex, which filing tells to scan each film's folder, needed once live:
+      # its URL, its token, and where its container mounts each library, by
+      # the library's path under VIDEO_ROOT, as JSON: {"movies": "/data/movies"}.
+      REELBARROW_PLEX_URL: ${PLEX_URL:-}
+      REELBARROW_PLEX_TOKEN: ${PLEX_TOKEN:-}
+      REELBARROW_PLEX_PATHS: ${PLEX_PATHS:-}
     volumes:
       - ${VIDEO_ROOT:?set VIDEO_ROOT to the video share}:/video:ro
       - data:/data

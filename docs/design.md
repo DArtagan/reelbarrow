@@ -102,7 +102,20 @@ Recorded verbatim where Will gave words, so they are not relitigated.
 - **Unnamed extras are acceptable for now** (2026-10-04): *"moving them to an
   `extras/` folder is sufficient. As long as we're not losing opportunity to
   access information (e.g. while the original disc is in hand), then it's a
-  problem that can be solved down the road."*
+  problem that can be solved down the road."* The folder was wrong: Plex
+  doesn't read `extras/`, and of the 44 MKVs in the 2024 entries' `extras/`
+  it showed none (measured 2026-11-11, *Use local assets* on). See the next.
+- **Extras are named from TheDiscDB where it knows the disc, and filed by
+  kind** (2026-11-11): *"#3 where possible. When that doesn't work, #2 for
+  the filename and #1 for the embedded-tags. In the future, we might do #4
+  and maybe even contribute back to TheDiscDB."* Asked to choose among
+  TheDiscDB, the film's ids only, an honest generic title, the case photo, a
+  transcript, and the review UI. The layout is Plex's kind folders, `Other/`
+  for an unknown kind, and an unmatched extra's file is
+  `<disc label>_title_<n>.mkv`: *"We'll need to check for the case of two
+  discs having the same label (e.g. processing something like The Return of
+  the King where there's multiple discs being merged together, and they might
+  each have their own extra titles)"*. See *Extras* under *Target layout*.
 - **Third-party identification services are fine** (2026-10-03): *"I'm open
   using third party services to do media identification (Claude or others)."*
   Will has a Claude Pro subscription, not an API account.
@@ -138,6 +151,18 @@ Recorded verbatim where Will gave words, so they are not relitigated.
   non-ASCII name when the charset migration was measured, and ASCII keeps it
   so; the reasons are in `reelbarrow.names`. ARM's title hook in the deployment
   folds to ASCII too, for consistency.
+- **No ledger database: each filing's record is kept in the library**
+  (2026-11-11): *"let's go with this reelbarrow-log-in-library-folder
+  approach and jetison the database ledger."* A record of history is kept
+  for two things: undoing a misfile, which needs what was deleted, and
+  turning one into a regression fixture, which needs the evidence the gate
+  passed on. Whether a unit was filed, the share says. A filing that fails
+  part way stops and says what was and wasn't done: *"the most important
+  thing for us to do is stop and state clearly everything that was done and
+  everything that wasn't done. That way the user can resolve the situation.
+  This is also why we have so many checks before doing a Writer operation -
+  we're looking to minimize the chances of a partial filing."* See step 7 of
+  *The service*.
 
 ---
 
@@ -207,7 +232,7 @@ Asked on 2026-10-04 whether FileBot offers anything that cannot be built:
 | Lookups (TMDB, TheTVDB, AniDB, OMDb) | TMDB API (free personal key) covers film and TV; the library already keys on TMDB IDs. FileBot's licence does bundle TheTVDB access, which is otherwise paid — not needed. |
 | Naming formats | String formatting, plus `ffprobe` for technical fields |
 | Artwork, NFO | TMDB + fanart.tv (free personal key), and writing XML |
-| History / revert | The service's own ledger, which it needs anyway |
+| History / revert | A record of each filing, kept in the library beside the disc's `disc.json` |
 | Fuzzy matching of messy filenames | Its one real asset, and it matters only for the `youtube-dl` and legacy `import/` buckets. ARM supplies an IMDb ID, and TV needs content matching, which FileBot does not do. |
 
 Licence at the time: US$8/year or US$80 lifetime. Not bought.
@@ -413,7 +438,7 @@ evidence is in *The cases*. "Leftovers" means deleted once filing succeeds.
 | `movies/Field-of-Dreams (1989)` | 30, 31 — **both failed**; file recovered by hand | **review**: no successful job vouches for the file. Two raw copies whose video hashes match (disc-ripping, 2026-09-20): keep one |
 | `movies/Shrek-the-Third (2007)` | 28 | **fold** (case 9): ARM's AV1 transcode replaces the 2013 `.m4v`; the 2009 `.iso` is kept as raw and ARM's five per-title MKVs are leftovers, because the ISO is a decrypted superset of them (measured); the folder gains `{tmdb-N}` and fresh sidecars. Automatic only if every fold rule in *Confidence* holds |
 | `movies/Robin-Hood (2010)` | 35 | **review** for labels: two cuts, verified as one film (case 5) |
-| `movies/Robin-Hood (2010)_178999705941` | 36, different `crc_id` | **review**: a bonus disc whose 62.7-minute documentary ARM named `Robin-Hood (2010).mkv`; it and two featurettes → `extras/` of Robin Hood, and the documentary's three parts, also transcoded, are leftovers (*Title identity* 4) |
+| `movies/Robin-Hood (2010)_178999705941` | 36, different `crc_id` | **review**: a bonus disc whose 62.7-minute documentary ARM named `Robin-Hood (2010).mkv`; it and two featurettes → Robin Hood's extras, and the documentary's three parts, also transcoded, are leftovers (*Title identity* 4) |
 | `movies/The Rescuers (1977)_178961349896` | 27; 5, 7, 8, 23 earlier | two films on one disc (case 6), split: the feature, the raw disc and the three extras → *The Rescuers (1977)*; `title_71` → *The Rescuers Down Under (1990)* with a pointer file. ARM never identified the second film, so it files automatically only if its identity meets the bar (transcript + runtime), else review. The four other raw backups are the same disc and are leftovers |
 | `movies/Around-the-World-in-80-Days (1956)` | 39 ok; 40, 41 (disc 2) failed empty | **hold**: probably one film split across two discs (case 4); disc 2 not yet ripped |
 | `tv/The-Sylvester-and-Tweety-Mysteries (1995-2002)` (+ two `_<stage>` siblings) | 21 (D1), 22 (D2), 33 (D2 again) | **auto** if the episode matcher meets the bar, else review: S01E01–E13; both play-alls dropped; job 33's six files are byte-identical duplicates of job 22's |
@@ -714,7 +739,7 @@ I-picture times libbluray finds a mark by, so it needs no video read (E36).
      case photo │  │ Pushover: "review needed" / "filed", with a link
                 ▼  │
   ┌──────────────────────────── reelbarrow ──────────────────┐
-  │ web UI ── job state + ledger (SQLite on a PVC)           │
+  │ web UI ── job state (SQLite on a PVC)                    │
   │ worker: intake → analyse → identify → plan → gate → file │
   └──┬──────────────▲───────────────────────┬────────────────┘
      │ reads/moves  │ manifests             │ partial scan
@@ -830,13 +855,15 @@ why each field is as it is; the schema says exactly what it may hold.
 
 **After filing the manifest is out of date, and that is its nature.** It is the
 producer's account of what it made as of its last write, a delivery note.
-Filing moves the files, and from then on the ledger and the library's
-`disc.json` are authoritative; the service never moves or marks a manifest,
-whose directory is the exporter's. Intake takes every path as a claim and
-checks the file is there. The ledger, keyed by `source` and `id`, says whether a
-unit was filed; a manifest that changes after its unit was filed goes to
-review, never to a fresh plan, since its paths are stale and a title corrected
-in ARM afterwards is evidence the filing was wrong.
+Filing moves the files, and from then on the library's `disc.json` and the
+filing's record beside it are authoritative; the service never moves or marks
+a manifest, whose directory is the exporter's. Intake takes every path as a
+claim and checks the file is there. Whether a unit was filed, the share says:
+its manifest's files are gone, its film is in the library, and its filing
+record, named for its `source` and `id`, is in its disc's folder. A manifest
+that changes after its unit was filed goes to review, never to a fresh plan,
+since its paths are stale and a title corrected in ARM afterwards is evidence
+the filing was wrong.
 
 **ARM's manifests.** `reelbarrow arm-export-manifests`, shipped in reelbarrow's
 image and run beside ARM (a sidecar in ARM's pod), reads ARM's database
@@ -869,7 +896,8 @@ manifest for every job in the database.
 
 Python (ffmpeg, chromaprint and Whisper bindings all live there, as do ARM and
 beets), a server-rendered web UI (FastAPI + HTMX — phone-first, no SPA build),
-SQLite for job state and the ledger, one worker process. This repository's CI
+SQLite for job state, one worker process. The library's history isn't kept
+there: what was filed, and how, is recorded in the library. This repository's CI
 builds and releases the image; Flux deploys it from the deployment repository
 ([releasing.md](releasing.md)).
 
@@ -913,10 +941,36 @@ The pipeline, per ARM job (and later per backlog folder):
 6. **Gate.** Execute automatically only if every item in the plan meets the bar
    in *Confidence*; otherwise put the whole plan up for review. A plan is never
    half-executed.
-7. **File.** Renames on the same filesystem, sidecars, then deletion of
-   leftovers, then the ledger entry, in that order. Then a Plex partial scan of
-   the touched folder (`/library/sections/{id}/refresh?path=…`). Plex's own
-   change detection cannot be relied on over a CIFS mount.
+7. **File.** Folders, then renames on the same filesystem, sidecars, then
+   deletion of leftovers, then the filing's record, in that order. Then a
+   Plex partial scan of the touched folder
+   (`/library/sections/{id}/refresh?path=…`). Plex's own change detection
+   cannot be relied on over a CIFS mount. Every sidecar is rendered before
+   the first operation, so a provider that can't be reached stops the filing
+   before anything moves.
+
+   **The filing's record** is written into the disc's folder beside
+   `disc.json`, `filing-<source>-<id>.json`, once the operations have
+   finished or stopped: the manifest as it was, the analysis of the job's
+   files before they moved, TMDB's and fanart.tv's replies as they were
+   then, the plan with its checks, and what each operation did. It is the
+   library's own history, kept with the film and in the share's snapshots,
+   and it is what undoing a misfile reads. It is also a misfile's regression
+   fixture, whole (Will, 2026-11-11: *"so that a regression can be fully
+   inspected"*): its manifest, analysis and replies are a case's files in
+   `tests/fixtures/`, which plan again to the plan carried out. Providers'
+   data changes, and files once moved can't be measured as they arrived, so
+   nothing else could rebuild it. Every folder is made before
+   anything moves, so once anything has, the disc's folder is there for it.
+
+   **An operation that fails stops the rest**, and the report and the
+   record say what was done and what wasn't; nothing is undone
+   automatically, and no scan follows (Will, 2026-11-10, choosing *"Stop,
+   record it as incomplete"* over undoing what was done, since undoing can
+   fail too and is more code acting on the share). A process that dies part
+   way writes no record; the next plan finds the share part filed and goes
+   to review. The executor and the sidecars are `reelbarrow.executor` and
+   `reelbarrow.sidecars`.
 8. **Notify.** Pushover to the brother: filed, or review needed, with a link.
 
 By hand, `reelbarrow analyse <manifest>` prints steps 1 and 2's result for one
@@ -925,6 +979,12 @@ manifest as JSON, the document a fixture is (*Testing*, layer 1), and
 folder of them, or by default every manifest in `REELBARROW_MANIFEST_DIR`.
 Neither records or changes anything. A rule the planner doesn't have yet
 fails a check, so a case it can't plan goes to review, never files itself.
+`reelbarrow file [path]` plans the same manifests and hands each automatic
+plan to the executor, which carries out step 7, and prints each review or
+hold plan and leaves it. In dry run it reports every change as refused, and
+changes nothing on the share. It needs fanart.tv's key as well as
+TMDB's token, so a film is never filed without the artwork only fanart.tv
+has (Will, 2026-11-10), and, when live, Plex's URL, token and paths.
 
 **Plans, their basis, and the inbox** (Will, 2026-11-09). A plan is what steps
 1–6 make of one manifest: every operation with its reasons, and the gate's
@@ -1273,13 +1333,15 @@ movies/
   Robin Hood (2010) {tmdb-N}/
     <feature or edition files — see Editions>
     movie.nfo · poster.jpg · fanart.jpg · clearlogo.png · disc.png · …
-    extras/
-      title_1.mkv …                     unnamed for now (Future work)
+    Featurettes/                        extras by kind, as TheDiscDB names them — see Extras
+      <TheDiscDB's name for it>.mkv
+    Other/                              an extra TheDiscDB doesn't know
+      ROBIN_HOOD_title_17.mkv
     raw/
       .ignore · .nomedia                plus the library-wide .plexignore
       ROBIN_HOOD [dvd-4391d7e10469999f]/   one folder per disc
         C1_t01.mkv  D2_t00.mkv
-        disc.json                       identity, ARM job, and raw file → library file
+        disc.json                       the manifest as filed: the disc, the film, raw → library file
       ROBIN_HOOD [dvd-d3c5ce89aef40f61]/   the bonus disc
 ```
 
@@ -1289,6 +1351,33 @@ split film has an obvious home. `disc.json` records which raw title became which
 library file, so a re-transcode or a menu-driven play of the raw copy (goal 2)
 never needs this pipeline again. The 2024 entries keep their flat `raw/`; they
 are not migrated.
+
+**`disc.json` is the manifest as filed** (Will, 2026-11-11, asking *"Do you
+think we could get to a place where simply copy the manifest to the library
+folder instead?"*). It uses the manifest's own models for the disc, its raw
+copy and its titles, so a reader of one reads the other, and
+[`disc.schema.json`](disc.schema.json) is generated from them
+(`reelbarrow.disc_record`). It isn't the manifest copied as it stands, which
+would be wrong in the library four ways:
+
+- **Its paths go stale at filing.** A manifest's point into `import/`.
+  `disc.json`'s are where the files are now, relative to the disc's folder,
+  so a renamed film folder leaves them right.
+- **Its identity is the producer's claim**, which can be wrong (job 34's is
+  the disc's US title; job 24 named The Polar Express as another film).
+  `disc.json` holds the identity decided, a TMDB id, and names the manifest it
+  was filed `from` by source, id and content hash. The filing's record
+  beside it keeps the manifest itself.
+- **It can be silent on what `disc.json` is for.** A job from before the raw
+  copy's record has no `titles`; which raw title became which file is known
+  only from the planner's pairing by content, recorded in the same shape, the
+  title known by its MKV since there is no disc number for it.
+- **It describes the job, not the folder**: the run's state and times, its
+  completed folder, and titles filed nowhere. Two films from one disc are two
+  folders.
+
+As in the manifest, absent means not recorded: a raw copy never checked has no
+`check`, rather than one that reads as passed.
 
 A DVD ripped to an image files as the image and `disc.json`. Its `titles/` is a
 leftover, by *Confidence*, and so is an `arm-job.json` left from before the raw
@@ -1337,7 +1426,7 @@ shows/
       The Sylvester & Tweety Mysteries - S01E01 - The Cat Who Knew Too Much.mkv
       The Sylvester & Tweety Mysteries - S01E01 - The Cat Who Knew Too Much.nfo
       …
-    extras/
+    Featurettes/ · Other/ …             extras, as for a film
     raw/
       SYLVESTER_TWEETY_MYSTERY_D1 [dvd-c27d6c87dc7dbea2]/
         THE SYLVESTER … DISC 1-B1_t00.mkv …    including the play-all
@@ -1348,6 +1437,28 @@ shows/
 The play-all's transcode, where ARM made one, is a leftover; its raw stays,
 because it is part of the disc. A job whose titles were compared
 (`raw.titles_compared`) has no play-all transcode.
+
+### Extras
+
+An extra is filed by its kind, in the folder Plex reads for it:
+`Behind The Scenes`, `Deleted Scenes`, `Featurettes`, `Interviews`, `Scenes`,
+`Shorts`, `Trailers`, or `Other` for a kind that isn't known
+(<https://support.plex.tv/articles/local-files-for-trailers-and-extras>).
+Jellyfin reads the same names, and `extras` too; Kodi v21 reads only
+`Extras` (<https://kodi.wiki/view/Video_extras>). No layout serves all three,
+so, like *Editions*, this is proven in the players before it is adopted.
+
+Where [TheDiscDB](https://thediscdb.com/about) maps the disc, an extra takes
+the name and kind it gives there, by the disc's own number for the title: a
+DVD's `disc_title`, a Blu-ray's playlist. TheDiscDB is a community map of
+disc titles to what they are (6,510 discs when read, 2026-11-11), so many
+discs won't be in it. An extra it doesn't know goes in `Other/` as
+`<disc label>_title_<n>.mkv`, by the disc's own number, which is the same on
+every rip of the disc as ARM's `title_N` isn't. Two discs of one film can
+share a label, a multi-disc set especially, and their names would then meet;
+that case is the [extras](../todos/extras.md) spec's to settle. The file's
+embedded tags carry its film's ids and a title made only of what is known
+(*Sidecars and embedded metadata*).
 
 ### Editions
 
@@ -1376,7 +1487,7 @@ For goal 4 and Will's portability requirement:
 | NFO per movie, show and episode, Kodi schema, with TMDB and IMDb IDs | the one format Kodi, Jellyfin, Emby and tinyMediaManager all read; the durable record of the identification decision |
 | artwork at Kodi-standard names (`poster`, `fanart`, `clearlogo`, `clearart`, `landscape`, `disc`, `season01-poster`) | read by all four; Plex can use it as a local asset |
 | `{tmdb-N}` in folder names | Plex; it is the existing convention |
-| inside each MKV: title and ID tags, track language/title/default/forced flags, chapter names | travels with the file through any rename |
+| inside each MKV: title and ID tags, track language/title/default/forced flags, chapter names; for an extra, its film's ids and, where TheDiscDB names it, its kind as `CONTENT_TYPE` | travels with the file through any rename. Raw copies aren't tagged: they are the disc's own bytes (Will, 2026-11-11) |
 | ignore markers in every `raw/`: `.plexignore` (exists), `.ignore`, `.nomedia` | keeps raw BDMV/VIDEO_TS out of every player — `.ignore` for Jellyfin and `.nomedia` for Kodi are believed, not verified |
 
 ---
@@ -1389,9 +1500,11 @@ Kept so it is not lost, each deliberately outside the specs in `todos/`:
   pipeline, with a human-supplied title where there is no manifest, and the 2024
   hand-filed films needing their raw reunited (e.g. the Alien and Dark Knight
   BDMVs).
-- **Naming extras** (featurette, deleted scene, trailer…) into Plex's extras
-  categories. The case photo already captures the disc's menu listing, so no
-  information is lost by deferring.
+- **Naming the extras TheDiscDB doesn't know**, from the case photo's listing
+  of them (Will, 2026-11-11: *"In the future, we might do #4"*), and
+  **contributing back to TheDiscDB** the discs ripped here that it lacks
+  (*"and maybe even contribute back to TheDiscDB"*). The photo already
+  captures the disc's listing, so nothing is lost by deferring.
 - **Text subtitles by OCR** of the DVD (VobSub) and Blu-ray (PGS) image subtitles,
   kept alongside the originals. Image subtitles force many Plex clients to
   transcode video to burn them in; text subtitles also strengthen episode
