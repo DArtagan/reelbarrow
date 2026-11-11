@@ -38,7 +38,7 @@ from importlib.metadata import version
 from pathlib import Path, PurePosixPath
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_serializer
 
 from reelbarrow.analyse import Analysis
 from reelbarrow.fanart import FanartError
@@ -210,7 +210,12 @@ class FilingRecord(Model):
     analysis of the job's files before they moved, and the providers' replies,
     which change over time and can't be asked again as they were."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True, populate_by_name=True)
+    model_config = ConfigDict(
+        extra="forbid",
+        frozen=True,
+        populate_by_name=True,
+        title="reelbarrow filing record",
+    )
 
     schema_: Literal[1] = Field(alias="schema")
     source: str
@@ -218,18 +223,37 @@ class FilingRecord(Model):
     result: Literal[Result.FILED, Result.INCOMPLETE]
     started: AwareDatetime
     finished: AwareDatetime
-    version: str
-    manifest: dict
-    analysis: dict = Field(description="`reelbarrow analyse`'s document.")
+    version: str = Field(description="reelbarrow's, that filed it.")
+    manifest: Manifest = Field(description="As it was when it was filed.")
+    analysis: Analysis = Field(description="`reelbarrow analyse`'s document.")
     replies: Replies = Field(
         description="TMDB's and fanart.tv's, trimmed, by request, as a case's "
         "`tmdb.json` and `fanart.json` hold them."
     )
-    plan: dict
+    plan: Plan
     steps: list[Step] = Field(description="Each operation, in the plan's order.")
+
+    @field_serializer("manifest")
+    def _manifest(self, manifest: Manifest) -> dict:
+        # Its own form, which leaves out what was never recorded.
+        return manifest.to_json()
 
     def to_bytes(self) -> bytes:
         return (self.model_dump_json(by_alias=True, indent=2) + "\n").encode()
+
+
+FILING_SCHEMA_FILE = Path(__file__).parents[2] / "docs" / "filing.schema.json"
+
+
+def filing_schema() -> dict:
+    """The filing record's JSON Schema, as `docs/filing.schema.json` holds it:
+    `python -m reelbarrow.executor` writes it."""
+    document = FilingRecord.model_json_schema(by_alias=True, mode="validation")
+    return {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://github.com/DArtagan/reelbarrow/blob/main/docs/filing.schema.json",
+        **document,
+    }
 
 
 def differences(
@@ -350,13 +374,13 @@ class Executor:
             started=started,
             finished=self.clock(),
             version=version("reelbarrow"),
-            manifest=manifest.to_json(),
-            analysis=analysis.to_json(),
+            manifest=manifest,
+            analysis=analysis,
             replies=Replies(
                 tmdb=dict(sorted(sources.tmdb.recorded.items())),
                 fanart=dict(sorted(sources.fanart.recorded.items())),
             ),
-            plan=plan.to_json(),
+            plan=plan,
             steps=operations,
         )
         steps.append(self._record(plan.record, record))
@@ -435,3 +459,10 @@ def render_report(report: Report) -> str:
         lines.append(f"  {step.outcome:<8} {step.step:<13} {step.subject}")
         lines.append(f"  {'':<8} {'':<13} {step.detail}")
     return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    import json
+
+    FILING_SCHEMA_FILE.write_text(json.dumps(filing_schema(), indent=2) + "\n")
+    print("docs/filing.schema.json")

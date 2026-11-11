@@ -76,8 +76,17 @@ END_COMMIT_OVERRIDE
 - **The marker is only ever the block.** release-please reads everything after
   it in the body as the override, so a description that mentions it in
   passing, even in backticks, becomes an override that doesn't parse, and the
-  pull request drops out of the changelog without the run failing. Write "the
-  commit-override block" in prose instead.
+  pull request drops out of the changelog. Write "the commit-override block" in
+  prose instead.
+
+release-please itself succeeds when it can't parse a commit, so the release
+workflow's `commits-parsed` job reads its log and fails a check on the open
+release pull request, *release notes: commits parsed*, before it is merged.
+When it does, correct the merged pull request's title or block, and rerun all
+of the workflow's jobs (`gh run rerun <run>`), not only the failed one, so
+that release-please reads them afresh; the check passes on that run. The check
+is not required, so a release pull request can still be merged past it, and a
+release merged so loses the entry for good.
 - The squash commit's body, which lists the branch's commits as bullets, adds
   nothing to the changelog either way.
 

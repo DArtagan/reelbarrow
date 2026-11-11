@@ -38,6 +38,12 @@ a new file first.
   rewrote compiled `.pyc` files along with the source.
 - **Verify with `devenv test`, not by printing files back.**
 - **Filter noisy commands** down to the lines that carry the result.
+  `DIRENV_LOG_FORMAT= direnv exec . <command>` drops direnv's own lines,
+  about 80 of every activation's 110; what remains is devenv's progress, each
+  line starting `•` or `✓`, which `grep -v '^[•✓]'` removes.
+- **`wt switch --create <slug> --yes`.** Without `--yes`, `wt` stops to ask
+  approval for the post-start commands in `.config/wt.toml`, and run by an
+  agent, with no terminal to ask in, it fails instead.
 
 ## Rules that protect the library
 

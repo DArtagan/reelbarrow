@@ -19,6 +19,7 @@ import pytest
 from reelbarrow import fanart
 from reelbarrow.disc_record import DiscRecord
 from reelbarrow.executor import (
+    FILING_SCHEMA_FILE,
     Executor,
     FilingRecord,
     Outcome,
@@ -26,6 +27,7 @@ from reelbarrow.executor import (
     Result,
     Writer,
     WriterError,
+    filing_schema,
     render_report,
 )
 from reelbarrow.plan import ARTWORK, Gate, Plan, ShareLibrary, plan
@@ -248,8 +250,8 @@ def test_the_record_says_what_was_filed_from_what(root, case):
     assert (record.started, record.finished) == (NOW, NOW)
     # The manifest as it was, which disc.json doesn't keep, and the plan with
     # the evidence its checks passed on.
-    assert record.manifest == case.manifest.to_json()
-    assert Plan.model_validate(record.plan) == made
+    assert record.manifest.to_json() == case.manifest.to_json()
+    assert record.plan == made
     assert len(record.steps) == len(made.operations)
     assert {s.outcome for s in record.steps} <= {Outcome.DONE, Outcome.SKIPPED}
     recorded = next(s for s in report.steps if s.step == "record")
@@ -266,15 +268,15 @@ def test_the_record_holds_the_case_a_regression_fixture_is(root, case, tmp_path)
 
     # Exactly the case's own files: TMDB's four replies, planning's and
     # filing's both, and fanart.tv's one.
-    assert record.analysis == case.analysis.to_json()
+    assert record.analysis == case.analysis
     assert record.replies.tmdb == case.tmdb_replies
     assert record.replies.fanart == case.fanart_replies
 
     rebuilt = tmp_path / "fixtures" / "from-the-record"
     rebuilt.mkdir(parents=True)
     for name, document in [
-        ("manifest.json", record.manifest),
-        ("analysis.json", record.analysis),
+        ("manifest.json", record.manifest.to_json()),
+        ("analysis.json", record.analysis.to_json()),
         ("tmdb.json", record.replies.tmdb),
         ("fanart.json", record.replies.fanart),
     ]:
@@ -287,7 +289,21 @@ def test_the_record_holds_the_case_a_regression_fixture_is(root, case, tmp_path)
         cases.Library(),
         "movies",
     )
-    assert again == Plan.model_validate(record.plan)
+    assert again == record.plan
+
+
+def test_the_record_keeps_the_manifest_in_its_own_form(root, case):
+    run = executor(root, case, dry_run=False)
+    run.carry_out(run.plan(), case.manifest)
+    written = json.loads((root / RECORD).read_bytes())
+    # Exactly as the manifest's own JSON: fields never recorded stay absent.
+    assert written["manifest"] == case.manifest.to_json()
+    assert "raw" not in written["manifest"]
+
+
+def test_the_filing_schema_file_is_current():
+    committed = json.loads(FILING_SCHEMA_FILE.read_text())
+    assert committed == filing_schema(), "run: python -m reelbarrow.executor"
 
 
 def test_a_unit_filed_is_not_filed_again(root, case):
