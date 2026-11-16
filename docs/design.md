@@ -941,7 +941,7 @@ The pipeline, per ARM job (and later per backlog folder):
 6. **Gate.** Execute automatically only if every item in the plan meets the bar
    in *Confidence*; otherwise put the whole plan up for review. A plan is never
    half-executed.
-7. **File.** The feature's tags, then folders, then renames on the same
+7. **File.** The feature's edit, then folders, then renames on the same
    filesystem, sidecars, then deletion of leftovers, then the filing's
    record, in that order. Then a
    Plex partial scan of the touched folder
@@ -950,18 +950,24 @@ The pipeline, per ARM job (and later per backlog folder):
    the first operation, so a provider that can't be reached stops the filing
    before anything moves.
 
-   **The feature is tagged first, where ARM left it** in `import/`, before
+   **The feature is edited first, where ARM left it** in `import/`, before
    anything moves (Will, 2026-11-11, against tagging last in the library and
-   against keeping a copy of the bytes an edit can change). mkvpropedit
-   rewrites only a file's metadata, but killed part way it can leave that
-   metadata damaged past a second run's mending (E41). Tagged first, a
-   failure stops the filing with the library untouched, the damaged file
-   out of Plex's sight and its raw copy still there to transcode again. A
-   filing that stops before its record's folder is made writes no record,
-   and its report is the account. The file is checked before the edit and
-   after: mkvinfo finds no fault, which catches damage ffprobe passes over
-   in silence; ffprobe reads back the segment title and every tag; the
-   duration and the chapters' starts are as they were. The tags reach
+   against keeping a copy of the bytes an edit can change). The `edit`
+   operation sets everything inside the file in one run of mkvpropedit: its
+   segment title, its tags and its subtitle tracks' flags (Will,
+   2026-11-16, choosing one edit over a second operation for the flags, so
+   the file has one window in which an interruption can damage it, not
+   two). mkvpropedit rewrites only a file's metadata, but killed part way it
+   can leave that metadata damaged past a second run's mending (E41). Edited
+   first, a failure stops the filing with the library untouched, the
+   damaged file out of Plex's sight and its raw copy still there to
+   transcode again. A filing that stops before its record's folder is made
+   writes no record, and its report is the account. The file is checked
+   before the edit and after: mkvinfo finds no fault, which catches damage
+   ffprobe passes over in silence; ffprobe reads back the segment title,
+   every tag and each subtitle flag set, and every other track's flags as
+   they were; the duration and the chapters' starts are as they were. The
+   tags reach
    mkvpropedit in memory, a `memfd` it opens by `/proc/self/fd/<n>`: it
    can't read them from a pipe, and a temporary file is a write the guard
    would have to allow. An interruption on CIFS itself isn't measured,
@@ -1510,7 +1516,7 @@ For goal 4 and Will's portability requirement:
 | NFO per movie, show and episode, Kodi schema, with TMDB and IMDb IDs | the one format Kodi, Jellyfin, Emby and tinyMediaManager all read; the durable record of the identification decision |
 | artwork at Kodi-standard names (`poster`, `fanart`, `clearlogo`, `clearart`, `landscape`, `disc`, `season01-poster`) | read by all four; Plex can use it as a local asset |
 | `{tmdb-N}` in folder names | Plex; it is the existing convention |
-| inside each MKV: title and ID tags, track language/title/default/forced flags, chapter names; for an extra, its film's ids and, where TheDiscDB names it, its kind as `CONTENT_TYPE` | travels with the file through any rename. Raw copies aren't tagged: they are the disc's own bytes (Will, 2026-11-11) |
+| inside each MKV: title and ID tags, a full subtitle track not forced (*Subtitle flags*), chapter names; for an extra, its film's ids and, where TheDiscDB names it, its kind as `CONTENT_TYPE` | travels with the file through any rename. Raw copies aren't tagged: they are the disc's own bytes (Will, 2026-11-11) |
 | ignore markers in every `raw/`: `.plexignore` (exists), `.ignore`, `.nomedia` | keeps raw BDMV/VIDEO_TS out of every player — `.ignore` for Jellyfin and `.nomedia` for Kodi are believed, not verified |
 
 The tags inside a file follow Matroska's tagging specification
@@ -1522,7 +1528,7 @@ The tags inside a file follow Matroska's tagging specification
   requires, all at target level 50, `MOVIE`. It also gets its segment title,
   which most players show as its name. For a feature the two titles agree;
   for an extra they can differ.
-- **Each tag's target level is in the plan** (`plan.Tag`, a list of groups,
+- **Each tag's target level is in the plan** (`plan.Edit`, a list of groups,
   each with its level, type and tags), so a filing record says where each
   tag went without the code that wrote it, and an episode's file can carry
   its show's tags at 70, `COLLECTION`, its season's at 60, `SEASON`, and its
@@ -1537,6 +1543,56 @@ The tags inside a file follow Matroska's tagging specification
 - **No other tags.** `ORIGINAL_MEDIA_TYPE`, `DATE_DIGITIZED`, a custom tag
   linking the file to its disc, and the descriptive tags the NFO already
   holds were offered and declined (Will, 2026-11-11: *"No thanks."*).
+
+### Subtitle flags
+
+Matroska gives each track two flags a player chooses subtitles by
+(<https://www.matroska.org/technical/notes.html>). **Default** makes a track
+*"eligible to be automatically selected as the default track for a given
+language"*, the regular track for when that language's subtitles are
+wanted; it doesn't ask for them to be shown. **Forced** asks the player to
+*"display this subtitle track, even if user preferences usually would not
+call for any subtitles"*, and is meant for a track holding only the lines a
+viewer needs whatever they chose, such as foreign dialogue. A full track
+forced puts the whole film's subtitles on screen: Plex's *"Shown with
+foreign audio"* mode, for one, turns on forced subtitles in the audio's
+language (reported on Plex's forum, not measured here).
+
+**ARM's DVD transcodes force their full track** (E42, E44). MakeMKV flags
+the first subtitle track default, and HandBrake keeps a source track's
+default flag. HandBrake's Matroska muxer then flags every default subtitle
+track forced as well, since `7e6a28f65` (2015, *"Makes 'default' do the
+right thing in plex"*), from when HandBrake had no way to force a track and
+its default was mainly the foreign-audio search's forced-only track. Its
+#8187, merged 2026-10-20 and in no release yet, stops that; ARM runs 1.11.2.
+Blu-ray transcodes, from the disc rather than MakeMKV's MKV, are neither.
+The foreign-audio search itself works: on Shrek the Third it made a
+forced-only track of one event.
+
+**The rule**, the planner's `subtitles` check on a feature's transcode:
+
+- **Only a forced track is judged.** Default is left as it is, since it is
+  right for a full track (Will, 2026-11-16, choosing *"Forced only, keep
+  default"*: subtitles stay off until asked for, a player set to show them
+  for foreign audio finds the regular track, and a forced-only track still
+  shows its lines by itself).
+- **A forced track of 5 events a minute or more is a full one**, and the
+  `edit` clears its forced flag. An event is a line of text or a picture
+  put on screen, counted by `reelbarrow analyse` for a completed folder's
+  videos (`Video.subtitles`). The full tracks of four DVD transcodes ran
+  7.5 to 16.7 a minute (E44).
+- **One of 1 a minute or fewer is forced-only**, and is left alone: Shrek's
+  ran 0.01.
+- **Anything between, or subtitles not counted, sends the plan to review.**
+  A forced-only track for a film in much foreign dialogue could run denser
+  than 1 a minute, and a sparse full track thinner than 5; a person tells
+  them apart.
+
+Other tools draw the same line: HandBrake's foreign-audio search takes a
+track with 10% or fewer of the busiest track's events as forced-only, a
+common rule of thumb puts forced-only tracks under 100 events against a
+full one's 1,000 and more, and Sublarr tells signs and forced tracks from
+dialogue by cues a minute and coverage, acting only when confident.
 
 ---
 
@@ -1614,6 +1670,7 @@ All read-only against the cluster and the share. Artefacts in
 | E41 | 11-11 | mkvpropedit 102.0 setting job 34's tags and segment title on a copy of its transcode, checksummed against the pod's, outside the library; killed before each of its 19 writes in turn; a second run, and mkvmerge, on each state left; the built image's `Writer.tag` (mkvpropedit 92.0) on another copy | every stream's hash unchanged; 983 bytes changed at the head and 502 appended, in 0.06 s, in place with no temporary file or fsync; interrupted, the streams always survive but the metadata can be left without a duration, failing mkvinfo, or with HandBrake's track tags lost, and a second run refuses 7 of the 19 states; mkvmerge rebuilds them with every stream's hash changed; the image's run gives the same tags |
 | E42 | 11-11 | ffprobe's stream flags over every MKV in ARM's `completed/` in the pod; subtitle event counts for job 34, Pale Rider, Field of Dreams and Shrek the Third; ARM's HandBrake preset | on every DVD transcode the full English subtitle track is default and forced (job 34's 1,790 closed captions; Pale Rider's 876; Field of Dreams' 1,703; Shrek's 1,092, beside a forced track of 1 event); Blu-ray transcodes' are neither; the preset has foreign-audio search on |
 | E43 | 11-16 | `reelbarrow plan` on job 34's manifest in the deployed pod (0.6.0), in dry run | `automatic`, all 16 checks passing, `matroska` among them; 18 operations, the first the tag of the transcode in `import/`: segment title *Monte Carlo or Bust!*, and at 50, `MOVIE`, `TITLE` the same, `DATE_RELEASED` 1969-04-28, `IMDB` tt0064688, `TMDB` movie/38792 |
+| E44 | 11-16 | ffprobe's subtitle flags on job 34's, Pale Rider's, Field of Dreams' and Shrek the Third's transcodes and the MKVs MakeMKV made of them, and each subtitle event's time on the transcodes, in the reelbarrow pod; HandBrake's source at 1.11.2 and its history; HandBrake 1.11.2 with ARM's preset on an MKV made by ffmpeg, its subtitle track default, with and without `--subtitle-default=none` | every MakeMKV MKV's first subtitle track default, none forced; on the transcodes that track default and forced, 876 to 1,790 events, 7.5 to 16.7 a minute, with events in every tenth of the film; Shrek's forced-only track 1 event, forced and not default; the muxer flags each default subtitle forced (`7e6a28f65`, removed by #8187 after 1.11.2); the transcode's track default and forced without the argument, neither with it |
 
 ---
 

@@ -37,10 +37,11 @@ for the run can file nothing else.
   each library, by its path on the share (`{"movies": "/data/movies"}`, read
   from Plex's Deployment 2026-11-10). `reelbarrow file` refuses a live run
   without all three.
-- **Job 34's plan is still automatic**, and holds the `tag` operation, which
-  was measured on a copy before it was trusted with the library (E41) and
-  is in the deployed pod's plan for job 34 (E43), and the correction to its caption
-  track's flags that [subtitle-flags](subtitle-flags.md) adds.
+- **Job 34's plan is still automatic**, and holds the `edit` operation (the
+  `tag` operation until subtitle-flags renamed it), which was measured on a
+  copy before it was trusted with the library (E41) and is in the deployed
+  pod's plan for job 34 (E43), with the correction to its caption track's
+  forced flag that [subtitle-flags](subtitle-flags.md) adds.
 - **Job 34's is the only automatic plan.** `reelbarrow plan` with no path, over
   every manifest, gates every other one review or hold. `reelbarrow file`
   defaults to every manifest, as `plan` does, so this is what keeps a run that
@@ -61,7 +62,8 @@ Measured on the share and in Plex:
 - *Monte Carlo or Bust!* is visible in Plex without a manual scan.
 - Its file carries its `TITLE`, `DATE_RELEASED`, `IMDB` and `TMDB` tags and
   its segment title, read with ffprobe. Each stream's hash equals the one taken
-  before the run. Its caption track is neither forced nor default.
+  before the run. Its caption track is not forced, and still default
+  (*Subtitle flags*, in the design).
 - Its `raw/` holds the right disc, with `disc.json`.
 - `completed/movies/` holds nothing for job 34, nor `raw/` its old folder.
 - Its filing record, beside `disc.json`, says `filed`, and what it says each

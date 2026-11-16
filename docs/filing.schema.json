@@ -214,6 +214,52 @@
       "title": "DiscKey",
       "type": "object"
     },
+    "Edit": {
+      "additionalProperties": false,
+      "description": "Everything reelbarrow sets inside one Matroska file, in place, by one\nedit of its metadata (*Sidecars and embedded metadata*): its segment\ntitle, which most players show as its name; its global tags, by level;\nand its subtitle tracks' flags.\n\nA global tag already in the file is kept unless one of these has the same\nname at the same level, which then replaces it. A track not named in\n`subtitles` is left as it is.",
+      "properties": {
+        "op": {
+          "const": "edit",
+          "default": "edit",
+          "title": "Op",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "tags": {
+          "items": {
+            "$ref": "#/$defs/TargetTags"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "subtitles": {
+          "items": {
+            "$ref": "#/$defs/SubtitleFlags"
+          },
+          "title": "Subtitles",
+          "type": "array"
+        }
+      },
+      "required": [
+        "path",
+        "reason",
+        "title",
+        "tags"
+      ],
+      "title": "Edit",
+      "type": "object"
+    },
     "Entry": {
       "properties": {
         "path": {
@@ -637,16 +683,16 @@
             "discriminator": {
               "mapping": {
                 "delete_folder": "#/$defs/DeleteFolder",
+                "edit": "#/$defs/Edit",
                 "make_folder": "#/$defs/MakeFolder",
                 "rename": "#/$defs/Rename",
-                "tag": "#/$defs/Tag",
                 "write": "#/$defs/Write"
               },
               "propertyName": "op"
             },
             "oneOf": [
               {
-                "$ref": "#/$defs/Tag"
+                "$ref": "#/$defs/Edit"
               },
               {
                 "$ref": "#/$defs/MakeFolder"
@@ -913,43 +959,79 @@
       "title": "Step",
       "type": "object"
     },
-    "Tag": {
-      "additionalProperties": false,
-      "description": "Every tag reelbarrow gives one Matroska file, set in place by one\nedit: its segment title, which most players show as its name, and its\nglobal tags, by level (*Sidecars and embedded metadata*).\n\nA global tag already in the file is kept unless one of these has the same\nname at the same level, which then replaces it.",
+    "Subtitle": {
       "properties": {
-        "op": {
-          "const": "tag",
-          "default": "tag",
-          "title": "Op",
-          "type": "string"
+        "codec": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Codec"
         },
-        "path": {
-          "title": "Path",
-          "type": "string"
+        "language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Language"
+        },
+        "default": {
+          "type": "boolean",
+          "title": "Default"
+        },
+        "forced": {
+          "title": "Forced",
+          "type": "boolean"
+        },
+        "events": {
+          "description": "Lines of text or pictures put on screen.",
+          "title": "Events",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "codec",
+        "language",
+        "default",
+        "forced",
+        "events"
+      ],
+      "title": "Subtitle",
+      "type": "object"
+    },
+    "SubtitleFlags": {
+      "additionalProperties": false,
+      "description": "A subtitle track's flags as they are to be. Only `forced` is set:\na track's default flag is left as it is (*Subtitle flags*).",
+      "properties": {
+        "track": {
+          "description": "Its place among the file's subtitle tracks, from 1: mkvpropedit's `track:s<n>`.",
+          "minimum": 1,
+          "title": "Track",
+          "type": "integer"
+        },
+        "forced": {
+          "title": "Forced",
+          "type": "boolean"
         },
         "reason": {
           "title": "Reason",
           "type": "string"
-        },
-        "title": {
-          "title": "Title",
-          "type": "string"
-        },
-        "tags": {
-          "items": {
-            "$ref": "#/$defs/TargetTags"
-          },
-          "title": "Tags",
-          "type": "array"
         }
       },
       "required": [
-        "path",
-        "reason",
-        "title",
-        "tags"
+        "track",
+        "forced",
+        "reason"
       ],
-      "title": "Tag",
+      "title": "SubtitleFlags",
       "type": "object"
     },
     "TargetTags": {
@@ -1081,6 +1163,22 @@
           },
           "title": "Chapters",
           "type": "array"
+        },
+        "subtitles": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Subtitle"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Each subtitle track, in the file's order. Null: not counted, as a raw copy's aren't: counting reads the whole file, and only a transcode's flags are edited.",
+          "title": "Subtitles"
         }
       },
       "required": [

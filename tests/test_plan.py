@@ -13,19 +13,20 @@ from datetime import UTC, datetime
 import cases
 import pytest
 
-from reelbarrow.analyse import Analysis, File, Video
+from reelbarrow.analyse import Analysis, File, Subtitle, Video
 from reelbarrow.disc_record import DiscRecord
 from reelbarrow.intake import RawFound
 from reelbarrow.manifest import IdentityReason, Manifest, State
 from reelbarrow.plan import (
     ARTWORK,
     DeleteFolder,
+    Edit,
     Gate,
     MakeFolder,
     Plan,
     Rename,
     Sidecar,
-    Tag,
+    SubtitleFlags,
     Write,
     pairing,
     plan,
@@ -139,14 +140,14 @@ def test_its_sidecars_are_planned_and_disc_json_says_what_became_what(case):
 
 def test_the_feature_is_tagged_with_its_identity_where_arm_left_it(case):
     made = planned(case)
-    (tag,) = [op for op in made.operations if isinstance(op, Tag)]
+    (edit,) = [op for op in made.operations if isinstance(op, Edit)]
 
-    assert tag == made.operations[0]
-    assert tag.path == (
+    assert edit == made.operations[0]
+    assert edit.path == (
         f"{COMPLETED}/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969).mkv"
     )
-    assert tag.title == "Monte Carlo or Bust!"
-    (film,) = tag.tags
+    assert edit.title == "Monte Carlo or Bust!"
+    (film,) = edit.tags
     assert (film.level, film.type) == (50, "MOVIE")
     assert film.simple == {
         "TITLE": "Monte Carlo or Bust!",
@@ -156,30 +157,133 @@ def test_the_feature_is_tagged_with_its_identity_where_arm_left_it(case):
     }
 
 
-def test_a_tag_operation_names_each_level_and_type_once():
-    def tag(*targets: tuple[int, str]) -> dict:
-        return {
-            "op": "tag",
-            "path": "x.mkv",
-            "reason": "",
-            "title": "x",
-            "tags": [
-                {"level": level, "type": type, "simple": {}} for level, type in targets
-            ],
-        }
+def edit(*targets: tuple[int, str], subtitles: tuple[int, ...] = ()) -> dict:
+    return {
+        "op": "edit",
+        "path": "x.mkv",
+        "reason": "",
+        "title": "x",
+        "tags": [
+            {"level": level, "type": type, "simple": {}} for level, type in targets
+        ],
+        "subtitles": [
+            {"track": track, "forced": False, "reason": ""} for track in subtitles
+        ],
+    }
 
-    Tag.model_validate(tag((70, "COLLECTION"), (50, "EPISODE")))
+
+def test_an_edit_names_each_level_and_type_once():
+    Edit.model_validate(edit((70, "COLLECTION"), (50, "EPISODE")))
     for twice in ([(50, "MOVIE"), (50, "EPISODE")], [(50, "X"), (70, "X")]):
         with pytest.raises(ValueError, match="each level and type"):
-            Tag.model_validate(tag(*twice))
+            Edit.model_validate(edit(*twice))
 
 
-def test_the_rendered_plan_shows_each_tag(case):
+def test_an_edit_names_each_subtitle_track_once():
+    Edit.model_validate(edit((50, "MOVIE"), subtitles=(1, 2)))
+    with pytest.raises(ValueError, match="each subtitle track"):
+        Edit.model_validate(edit((50, "MOVIE"), subtitles=(1, 1)))
+
+
+def test_the_rendered_plan_shows_each_tag_and_flag(case):
     text = render(planned(case))
-    assert f"  tag          {COMPLETED}/" in text
+    assert f"  edit         {COMPLETED}/" in text
     assert "               segment title  Monte Carlo or Bust!" in text
     assert "               50 MOVIE\n" in text
     assert "                 TMDB           movie/38792" in text
+    assert "               subtitle s1    not forced\n" in text
+    assert "                 a full track, forced: 1,790 events, 14.3 a minute" in text
+
+
+# Subtitle flags: a full track forced is forced no longer; a forced-only one
+# is left as it is.
+
+
+def with_subtitles(case: cases.Case, *tracks: Subtitle | None) -> Analysis:
+    """Job 34's analysis, its feature's subtitles as given; None: not
+    counted."""
+    completed = case.analysis.completed
+    (feature,) = completed.files
+    counted = None if tracks == (None,) else list(tracks)
+    video = feature.video.model_copy(update={"subtitles": counted})
+    feature = feature.model_copy(update={"video": video})
+    return case.analysis.model_copy(
+        update={"completed": completed.model_copy(update={"files": [feature]})}
+    )
+
+
+def subtitle(events: int, *, forced: bool = True, default: bool = False) -> Subtitle:
+    return Subtitle(
+        codec="dvd_subtitle",
+        language="eng",
+        default=default,
+        forced=forced,
+        events=events,
+    )
+
+
+def subtitle_flags(made: Plan) -> list[SubtitleFlags]:
+    edit = made.operations[0]
+    assert isinstance(edit, Edit)
+    return edit.subtitles
+
+
+def test_job_34s_captions_are_forced_no_longer(case):
+    made = planned(case)
+    assert made.gate is Gate.AUTOMATIC
+    (flags,) = subtitle_flags(made)
+    assert (flags.track, flags.forced) == (1, False)
+    assert made.operations[0].reason == (
+        "the feature's identity and its subtitles' flags, inside the file"
+    )
+    (check,) = [c for c in made.checks if c.rule == "subtitles"]
+    assert check.detail == (
+        "s1 eng subrip, 1,790 events, 14.3 a minute: a full track, forced"
+    )
+
+
+def test_a_forced_only_track_is_left_as_it_is_beside_a_full_one(case):
+    """Shrek the Third's: one event, forced, before a full track forced."""
+    analysis = with_subtitles(
+        case, subtitle(1), subtitle(1092, default=True), subtitle(971, forced=False)
+    )
+    made = planned(case, analysis=analysis)
+    assert made.gate is Gate.AUTOMATIC
+    assert [(f.track, f.forced) for f in subtitle_flags(made)] == [(2, False)]
+
+
+# Over job 34's feature, 124.799 minutes long.
+@pytest.mark.parametrize(
+    ("events", "gate", "cleared"),
+    [
+        (624, Gate.AUTOMATIC, [1]),  # 5.0001 a minute
+        (623, Gate.REVIEW, []),  # 4.992
+        (125, Gate.REVIEW, []),  # 1.0016
+        (124, Gate.AUTOMATIC, []),  # 0.9936
+    ],
+)
+def test_five_and_one_a_minute_are_the_edges(case, events, gate, cleared):
+    made = planned(case, analysis=with_subtitles(case, subtitle(events)))
+    assert made.gate is gate
+    assert [f.track for f in subtitle_flags(made)] == cleared
+    if gate is Gate.REVIEW:
+        assert failed(made) == ["subtitles"]
+
+
+def test_a_track_not_forced_is_not_judged(case):
+    """Default alone is right for a full track, and no rate is asked of one."""
+    tracks = (subtitle(375, forced=False, default=True),)
+    made = planned(case, analysis=with_subtitles(case, *tracks))
+    assert made.gate is Gate.AUTOMATIC
+    assert subtitle_flags(made) == []
+    assert made.operations[0].reason == "the feature's identity, inside the file"
+    (check,) = [c for c in made.checks if c.rule == "subtitles"]
+    assert check.detail == "1 subtitle track, none forced"
+
+
+def test_subtitles_not_counted_are_reviewed(case):
+    made = planned(case, analysis=with_subtitles(case, None))
+    assert failed(made) == ["subtitles"]
 
 
 def test_a_feature_that_isnt_matroska_is_reviewed(case):
@@ -194,13 +298,13 @@ def test_a_feature_that_isnt_matroska_is_reviewed(case):
     assert failed(planned(case, analysis=analysis)) == ["matroska"]
 
 
-def test_operations_run_the_tag_folders_and_renames_then_sidecars_then_leftovers(
+def test_operations_run_the_edit_folders_and_renames_then_sidecars_then_leftovers(
     case,
 ):
     kinds = [type(op) for op in planned(case).operations]
     first_write = kinds.index(Write)
     first_delete = kinds.index(DeleteFolder)
-    assert kinds[0] is Tag
+    assert kinds[0] is Edit
     assert all(k in (MakeFolder, Rename) for k in kinds[1:first_write])
     assert all(k is Write for k in kinds[first_write:first_delete])
     assert all(k is DeleteFolder for k in kinds[first_delete:])
@@ -219,7 +323,7 @@ def test_the_basis_holds_every_path_read_and_every_path_written(case):
     assert basis[COMPLETED].present and basis[RAW].present
     for op in made.operations:
         target = op.target if isinstance(op, Rename) else op.path
-        if isinstance(op, Tag):
+        if isinstance(op, Edit):
             # Read and changed in place: the feature, where ARM left it.
             assert basis[target].present
         elif not isinstance(op, DeleteFolder):
@@ -419,9 +523,9 @@ def test_names_are_folded_for_the_share(case):
     folder = next(op for op in made.operations if isinstance(op, MakeFolder))
     assert folder.path == "movies/Monte Carlo - or Bust... (1969) {tmdb-38792}"
     # Tags are UTF-8, so the film's own title goes in unfolded.
-    tag = made.operations[0]
-    assert isinstance(tag, Tag)
-    assert tag.title == tag.tags[0].simple["TITLE"] == "Monte Carlo: or Bust\u2026"
+    edit = made.operations[0]
+    assert isinstance(edit, Edit)
+    assert edit.title == edit.tags[0].simple["TITLE"] == "Monte Carlo: or Bust\u2026"
 
 
 def test_an_analysis_of_another_job_is_refused(case):

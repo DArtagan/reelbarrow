@@ -18,6 +18,11 @@ def test_arm_transcode(fixtures):
     first = probed.of_type("audio")[0]
     assert (first.index, first.channels, first.language) == (1, 2, "eng")
     assert first.duration == pytest.approx(8430.801)
+    # HandBrake's flags: its English subtitles default and, with them, forced.
+    assert [(s.language, s.default, s.forced) for s in probed.of_type("subtitle")] == [
+        ("eng", True, True),
+        *[(language, False, False) for language in ("spa", "fre", "spa", "fre")],
+    ]
     assert len(probed.chapters) == 20
     assert probed.chapters[0].end == pytest.approx(690.33)
     assert probed.chapters[0].title == "Chapter 1"

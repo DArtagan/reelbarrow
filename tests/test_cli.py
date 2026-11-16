@@ -60,15 +60,30 @@ class Images:
         return sidecars.MAGIC[".jpg"] + url.encode()
 
 
+# A line every 5 s, 12 a minute, and one line: a full subtitle track and a
+# forced-only one.
+FULL = "".join(
+    f"{n + 1}\n00:00:{n * 5:02},000 --> 00:00:{n * 5 + 2:02},000\nline {n}\n\n"
+    for n in range(12)
+)
+FORCED_ONLY = "1\n00:00:30,000 --> 00:00:31,000\nforeign\n\n"
+
+
 @pytest.fixture
 def share(tmp_path, ffmpeg, monkeypatch, guarded):
-    """A one-minute film, its raw copy written while its job ran, and its
-    manifest; the environment set as the deployment sets it."""
+    """A one-minute film, its subtitles flagged as HandBrake leaves a DVD's,
+    its raw copy written while its job ran, and its manifest; the
+    environment set as the deployment sets it."""
     root = tmp_path / "video"
     guarded(root)
+    (tmp_path / "full.srt").write_text(FULL)
+    (tmp_path / "forced.srt").write_text(FORCED_ONLY)
     film = ffmpeg(
         "film.mkv",
-        *("-f", "lavfi", "-i", "testsrc=d=60:s=32x24:r=1", "-c:v", "ffv1"),
+        *("-f", "lavfi", "-i", "testsrc=d=60:s=32x24:r=1"),
+        *("-i", str(tmp_path / "full.srt"), "-i", str(tmp_path / "forced.srt")),
+        *("-map", "0", "-map", "1", "-map", "2", "-c:v", "ffv1", "-c:s", "srt"),
+        *("-disposition:s:0", "default+forced", "-disposition:s:1", "forced"),
     )
     (root / COMPLETED).mkdir(parents=True)
     (root / COMPLETED / "A-Film (1969).mkv").write_bytes(film.read_bytes())
@@ -128,11 +143,11 @@ def test_plan_with_no_path_plans_every_manifest_but_the_running(
     assert code == 0
     assert plan["id"] == "34-178993082181"
     assert plan["gate"] == "automatic", plan["checks"]
-    tag, folder = plan["operations"][:2]
-    assert tag == {
-        "op": "tag",
+    edit, folder = plan["operations"][:2]
+    assert edit == {
+        "op": "edit",
         "path": f"{COMPLETED}/A-Film (1969).mkv",
-        "reason": "the feature's identity, inside the file",
+        "reason": "the feature's identity and its subtitles' flags, inside the file",
         "title": "A Film",
         "tags": [
             {
@@ -144,6 +159,13 @@ def test_plan_with_no_path_plans_every_manifest_but_the_running(
                     "IMDB": "tt0064688",
                     "TMDB": "movie/38792",
                 },
+            }
+        ],
+        "subtitles": [
+            {
+                "track": 1,
+                "forced": False,
+                "reason": "a full track, forced: 12 events, 12.0 a minute",
             }
         ],
     }
@@ -179,7 +201,7 @@ def test_file_in_dry_run_reports_every_change_refused(share, monkeypatch, capsys
     assert code == 0
     assert out.startswith("Dry run: every change is refused.")
     assert "arm 34-178993082181: dry_run" in out
-    assert f"refused  tag           {COMPLETED}/A-Film (1969).mkv" in out
+    assert f"refused  edit          {COMPLETED}/A-Film (1969).mkv" in out
     assert f"refused  make_folder   {FILM}" in out
     assert "refused  record" in out
     assert f"refused  plex_scan     {FILM}" in out
@@ -269,7 +291,13 @@ def test_file_live_files_the_film_and_scans_it(share, monkeypatch, capsys):
         "IMDB": "tt0064688",
         "TMDB": "movie/38792",
     }
-    assert "done     tag " in out
+    assert "done     edit " in out
+    # Its full subtitle track forced no longer, still default; the
+    # forced-only one as it was.
+    assert [(s.default, s.forced) for s in filed.of_type("subtitle")] == [
+        (True, False),
+        (False, True),
+    ]
     assert (share / FILM / "poster.jpg").exists()
     assert not (share / COMPLETED).exists()
     assert scanned == [f"/data/{FILM}"]

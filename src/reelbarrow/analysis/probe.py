@@ -16,6 +16,9 @@ class Stream:
     channels: int | None
     language: str | None
     title: str | None
+    # Matroska's track flags (*Subtitle flags*, in the design).
+    default: bool
+    forced: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +60,27 @@ def probe(path: Path) -> Probe:
     return parse_probe(json.loads(output))
 
 
+def subtitle_events(path: Path) -> list[int]:
+    """Each subtitle track's events, in the file's order: a line of text or a
+    picture put on screen. Reads the whole file."""
+    output = run(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "s",
+            "-count_packets",
+            "-show_entries",
+            "stream=nb_read_packets",
+            "-of",
+            "json",
+            str(path),
+        ]
+    )
+    return [int(s["nb_read_packets"]) for s in json.loads(output).get("streams", ())]
+
+
 def parse_probe(raw: dict[str, Any]) -> Probe:
     """Read ffprobe's JSON, as produced by probe() or loaded from a fixture."""
     if "format" not in raw:
@@ -82,6 +106,7 @@ def parse_probe(raw: dict[str, Any]) -> Probe:
 
 def _stream(raw: dict[str, Any]) -> Stream:
     tags = raw.get("tags", {})
+    disposition = raw.get("disposition", {})
     duration = _seconds(raw.get("duration"))
     if duration is None:
         # Matroska carries per-stream durations only as a tag, written by the
@@ -96,6 +121,8 @@ def _stream(raw: dict[str, Any]) -> Stream:
         channels=int(raw["channels"]) if "channels" in raw else None,
         language=tags.get("language"),
         title=tags.get("title"),
+        default=bool(disposition.get("default")),
+        forced=bool(disposition.get("forced")),
     )
 
 
