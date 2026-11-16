@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0](https://github.com/DArtagan/reelbarrow/compare/v0.6.0...v0.7.0) (2026-11-16)
+
+
+### Features
+
+* **plan:** stop a full subtitle track being forced ([#30](https://github.com/DArtagan/reelbarrow/issues/30)) ([138ad20](https://github.com/DArtagan/reelbarrow/commit/138ad20881ce9f2169149b347cb8ab722d851e7d))
+
+
+### Documentation
+
+* retire embedded-tags ([dd1d597](https://github.com/DArtagan/reelbarrow/commit/dd1d5978a4ac2665d93469431103b9bf123ff661))
+* retire embedded-tags todo spec ([#28](https://github.com/DArtagan/reelbarrow/issues/28)) ([dd1d597](https://github.com/DArtagan/reelbarrow/commit/dd1d5978a4ac2665d93469431103b9bf123ff661))
+
 ## [0.6.0](https://github.com/DArtagan/reelbarrow/compare/v0.5.0...v0.6.0) (2026-11-16)
 
 
