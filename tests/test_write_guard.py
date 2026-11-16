@@ -8,10 +8,11 @@ one (`share_guard`, used by every test that builds a share) catches what
 reading can't see, such as a library writing on a module's behalf.
 
 Neither sees a tool's own writes, which are its process's, so both judge a
-tool by its name. Only the executor runs one that writes, such as mkvpropedit.
-Only it and `analysis/tools.py` start a process at all, and every command
-the analysis gives `tools.py` is written out where it is given, naming one of
-`share_guard.READING_TOOLS`.
+tool by its command. Only the executor runs one that writes, such as
+mkvpropedit. Only it and `analysis/tools.py` start a process at all, and every
+command the analysis gives `tools.py` is written out where it is given,
+naming one of `share_guard.READING_TOOLS`, and for ffmpeg, words
+`share_guard.ffmpeg_writes` finds write only to its stdout.
 """
 
 import ast
@@ -22,7 +23,7 @@ import pytest
 import share_guard
 
 from reelbarrow import manifest
-from reelbarrow.analysis import tools
+from reelbarrow.analysis import tools, video
 from reelbarrow.analysis.probe import probe
 from reelbarrow.executor import Writer
 
@@ -196,21 +197,22 @@ WRAPPERS = frozenset({f"{TOOLS}.run", f"{TOOLS}.pipe"})
 STARTERS = frozenset({"executor.py", "analysis/tools.py"})
 
 
+def _word(node: ast.expr) -> str | None:
+    """A command's word as the source spells it, or None."""
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    return None
+
+
 def _program(node: ast.expr) -> str:
     """The tool a command written out names, or `?`."""
-    if not (
-        isinstance(node, ast.List | ast.Tuple)
-        and node.elts
-        and isinstance(node.elts[0], ast.Constant)
-        and isinstance(node.elts[0].value, str)
-    ):
+    if not isinstance(node, ast.List | ast.Tuple) or not node.elts:
         return "?"
-    program = node.elts[0].value
-    last = node.elts[-1]
-    if program == "ffmpeg" and not (
-        isinstance(last, ast.Constant) and last.value == "-"
-    ):
-        return "ffmpeg, to a file"
+    program, *args = [_word(element) for element in node.elts]
+    if program is None:
+        return "?"
+    if program == "ffmpeg" and (why := share_guard.ffmpeg_writes(args)):
+        return f"ffmpeg, {why}"
     return program
 
 
@@ -320,7 +322,28 @@ def test_the_analysis_runs_tools_through_tools_py_and_the_executor_tags():
         ),
         (
             f"from {TOOLS} import run\nrun(['ffmpeg', '-i', p, 'out.mkv'])",
-            [(f"{TOOLS}.run", "ffmpeg, to a file")],
+            [(f"{TOOLS}.run", "ffmpeg, to an output other than its stdout")],
+        ),
+        # A file written beside the stdout, by an output or an option.
+        (
+            f"from {TOOLS} import run\nrun(['ffmpeg', '-i', p, 'x.mkv', '-f', 'md5', '-'])",
+            [(f"{TOOLS}.run", "ffmpeg, with x.mkv")],
+        ),
+        (
+            f"from {TOOLS} import run\nrun(['ffmpeg', '-report', '-i', p, '-'])",
+            [(f"{TOOLS}.run", "ffmpeg, with -report")],
+        ),
+        (
+            f"from {TOOLS} import run\nrun(['ffmpeg', '-i', p, '-f', 'hls', '-'])",
+            [(f"{TOOLS}.run", "ffmpeg, with -f hls")],
+        ),
+        (
+            f"from {TOOLS} import run\nrun(['ffmpeg', '-i', p, '-f', f, '-'])",
+            [(f"{TOOLS}.run", "ffmpeg, with -f unknown")],
+        ),
+        (
+            f"from {TOOLS} import run\nrun(['ffmpeg', '-i', p, *more, '-'])",
+            [(f"{TOOLS}.run", "ffmpeg, with a word not written out")],
         ),
         (f"from {TOOLS} import run\nrun(command)", [(f"{TOOLS}.run", "?")]),
         # Not a process: a name that only looks like one.
@@ -420,6 +443,18 @@ def test_a_module_made_to_run_mkvpropedit_is_caught(tmp_path, ffmpeg):
     assert violations == ["tools.py: ran mkvpropedit"]
 
 
+def test_a_module_made_to_run_ffmpeg_to_a_file_is_caught(tmp_path, ffmpeg):
+    root = tmp_path / "video"
+    root.mkdir()
+    film = ffmpeg("video/film.mkv", "-f", "lavfi", "-i", "testsrc=d=1")
+    made = share_guard.guard(root)
+    try:
+        tools.run(["ffmpeg", "-v", "error", "-i", str(film), str(root / "x.mkv")])
+    finally:
+        violations = share_guard.release(made)
+    assert violations == ["tools.py: ran ffmpeg, to an output other than its stdout"]
+
+
 def test_a_module_running_a_tool_that_reads_is_not(tmp_path, ffmpeg):
     root = tmp_path / "video"
     root.mkdir()
@@ -427,6 +462,7 @@ def test_a_module_running_a_tool_that_reads_is_not(tmp_path, ffmpeg):
     made = share_guard.guard(root)
     try:
         probe(film)
+        video.md5(film)
     finally:
         assert share_guard.release(made) == []
 
