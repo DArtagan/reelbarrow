@@ -27,8 +27,8 @@ be measured from its files.
   flat `raw/` split into `raw/<LABEL> [<identity>]/` with `disc.json` where the
   disc's identity can be measured, sidecars and ignore markers written, names
   folded to ASCII. No media is replaced or deleted here.
-- **Embedded tags** on each entry's transcodes, through
-  [embedded-tags](embedded-tags.md)'s operation, since the 2024 entries were
+- **Embedded tags** on each entry's transcodes, through the `tag` operation
+  (*Sidecars and embedded metadata*), since the 2024 entries were
   filed before reelbarrow tagged anything (Will, 2026-11-11, moving tagging
   ahead of first-filing so this is the only retrofit). Raw copies stay
   untagged.

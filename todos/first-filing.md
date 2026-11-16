@@ -37,9 +37,9 @@ for the run can file nothing else.
   each library, by its path on the share (`{"movies": "/data/movies"}`, read
   from Plex's Deployment 2026-11-10). `reelbarrow file` refuses a live run
   without all three.
-- **Job 34's plan is still automatic**, and holds the `tag` operation
-  [embedded-tags](embedded-tags.md) added, which was measured on a copy
-  before it was trusted with the library, and the correction to its caption
+- **Job 34's plan is still automatic**, and holds the `tag` operation, which
+  was measured on a copy before it was trusted with the library (E41) and
+  is in the deployed pod's plan for job 34 (E43), and the correction to its caption
   track's flags that [subtitle-flags](subtitle-flags.md) adds.
 - **Job 34's is the only automatic plan.** `reelbarrow plan` with no path, over
   every manifest, gates every other one review or hold. `reelbarrow file`

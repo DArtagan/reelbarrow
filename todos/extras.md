@@ -92,8 +92,8 @@ before anything files an extra.
     whether the share holds such a case, and settle with Will how they're told
     apart. The raw folder's own name, `<label> [dvd-<crc64>]`, already tells
     them apart.
-- **Embedded tags** for an extra, through [embedded-tags](embedded-tags.md)'s
-  operation: its film's `IMDB` and `TMDB`. With a TheDiscDB match, its name as
+- **Embedded tags** for an extra, through the `tag` operation (*Sidecars and
+  embedded metadata*): its film's `IMDB` and `TMDB`. With a TheDiscDB match, its name as
   `TITLE` and its kind as `CONTENT_TYPE`. Without one, a `TITLE` made only of
   what is known (the film, and the disc's number for the title) and no
   `CONTENT_TYPE`.
