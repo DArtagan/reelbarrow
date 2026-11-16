@@ -15,6 +15,7 @@ import pytest
 from reelbarrow import executor
 from reelbarrow.analysis.probe import probe
 from reelbarrow.executor import Refused, Writer, WriterError, merged_tags
+from reelbarrow.plan import TargetTags
 
 TAGS = {
     "TITLE": "Monte Carlo or Bust!",
@@ -22,6 +23,7 @@ TAGS = {
     "IMDB": "tt0064688",
     "TMDB": "movie/38792",
 }
+FILM = [TargetTags(level=50, type="MOVIE", simple=TAGS)]
 CHAPTERS = """;FFMETADATA1
 [CHAPTER]
 TIMEBASE=1/1000
@@ -85,7 +87,7 @@ def test_a_film_is_tagged_with_its_identity_and_nothing_else_changes(root):
     film = root / "import" / "film.mkv"
     before, hashed = probe(film), streams(film)
 
-    detail = Writer(root, dry_run=False).tag("import/film.mkv", TAGS["TITLE"], TAGS)
+    detail = Writer(root, dry_run=False).tag("import/film.mkv", TAGS["TITLE"], FILM)
 
     after = probe(film)
     assert after.tags["title"] == "Monte Carlo or Bust!"
@@ -101,12 +103,38 @@ def test_a_film_is_tagged_with_its_identity_and_nothing_else_changes(root):
     assert "COMMENT" in detail and "2 chapters as before" in detail
 
 
+def test_a_file_is_tagged_at_each_level_it_is_given(root):
+    """As an episode will be: its own title at 50, its show's at 70."""
+    film = root / "import" / "film.mkv"
+    levels = [
+        TargetTags(level=70, type="COLLECTION", simple={"TITLE": "A Show"}),
+        TargetTags(level=50, type="EPISODE", simple={"TITLE": "An Episode"}),
+    ]
+
+    Writer(root, dry_run=False).tag("import/film.mkv", "An Episode", levels)
+
+    after = probe(film)
+    assert after.tags["COLLECTION/TITLE"] == "A Show"
+    assert after.tags["EPISODE/TITLE"] == "An Episode"
+    # mkvextract leaves out a level of 50, the default.
+    written = [
+        (
+            t.findtext("Targets/TargetTypeValue", "50"),
+            t.findtext("Targets/TargetType"),
+            t.findtext("Simple/String"),
+        )
+        for t in tags(film)
+        if t.find("Targets/TargetType") is not None
+    ]
+    assert written == [("70", "COLLECTION", "A Show"), ("50", "EPISODE", "An Episode")]
+
+
 def test_each_tracks_tags_are_left_alone(root):
     film = root / "import" / "film.mkv"
     before = track_tags(film)
     assert before
 
-    Writer(root, dry_run=False).tag("import/film.mkv", TAGS["TITLE"], TAGS)
+    Writer(root, dry_run=False).tag("import/film.mkv", TAGS["TITLE"], FILM)
 
     assert track_tags(film) == before
 
@@ -114,9 +142,9 @@ def test_each_tracks_tags_are_left_alone(root):
 def test_tagging_again_changes_no_tag(root):
     film = root / "import" / "film.mkv"
     writer = Writer(root, dry_run=False)
-    writer.tag("import/film.mkv", TAGS["TITLE"], TAGS)
+    writer.tag("import/film.mkv", TAGS["TITLE"], FILM)
     once = ET.tostring(tags(film))
-    writer.tag("import/film.mkv", TAGS["TITLE"], TAGS)
+    writer.tag("import/film.mkv", TAGS["TITLE"], FILM)
     assert ET.tostring(tags(film)) == once
 
 
@@ -124,7 +152,7 @@ def test_dry_run_refuses_a_tag_and_the_file_is_unchanged(root):
     film = root / "import" / "film.mkv"
     before = (film.read_bytes(), film.stat().st_mtime_ns)
     with pytest.raises(Refused):
-        Writer(root).tag("import/film.mkv", TAGS["TITLE"], TAGS)
+        Writer(root).tag("import/film.mkv", TAGS["TITLE"], FILM)
     assert (film.read_bytes(), film.stat().st_mtime_ns) == before
 
 
@@ -138,7 +166,7 @@ def test_a_file_mkvinfo_finds_fault_with_is_not_edited(root):
     broken = content[:at] + bytes(4) + content[at + 4 :]
     (root / "import" / "broken.mkv").write_bytes(broken)
     with pytest.raises(WriterError, match="mkvinfo finds fault"):
-        Writer(root, dry_run=False).tag("import/broken.mkv", "x", TAGS)
+        Writer(root, dry_run=False).tag("import/broken.mkv", "x", FILM)
     assert (root / "import" / "broken.mkv").read_bytes() == broken
 
 
@@ -147,12 +175,12 @@ def test_a_tag_that_doesnt_read_back_as_set_fails(root, monkeypatch):
     first = probe(root / "import" / "film.mkv")
     monkeypatch.setattr(executor, "probe", lambda file: first)
     with pytest.raises(WriterError, match="was edited, but ffprobe doesn't read"):
-        Writer(root, dry_run=False).tag("import/film.mkv", TAGS["TITLE"], TAGS)
+        Writer(root, dry_run=False).tag("import/film.mkv", TAGS["TITLE"], FILM)
 
 
 def test_a_tag_needs_a_file(root):
     with pytest.raises(WriterError, match="isn't a file"):
-        Writer(root, dry_run=False).tag("import", "x", TAGS)
+        Writer(root, dry_run=False).tag("import", "x", FILM)
 
 
 # The tags written: what was there, merged with what reelbarrow sets.
@@ -172,7 +200,14 @@ def test_merged_tags_keep_globals_and_replace_by_name():
       </Tag>
     </Tags>"""
 
-    kept, document = merged_tags(existing, {"TITLE": "New", "TMDB": "movie/2"})
+    kept, document = merged_tags(
+        existing,
+        [
+            TargetTags(
+                level=50, type="MOVIE", simple={"TITLE": "New", "TMDB": "movie/2"}
+            )
+        ],
+    )
 
     assert kept == ["ENCODER"]
     found = ET.fromstring(document)
@@ -188,8 +223,27 @@ def test_merged_tags_keep_globals_and_replace_by_name():
     } == {"TITLE": "New", "TMDB": "movie/2"}
 
 
+def test_merged_tags_replace_a_name_only_at_its_own_level():
+    existing = b"""<?xml version="1.0"?><Tags>
+      <Tag><Targets><TargetTypeValue>70</TargetTypeValue></Targets>
+        <Simple><Name>TITLE</Name><String>A Show</String></Simple>
+      </Tag>
+    </Tags>"""
+
+    kept, document = merged_tags(
+        existing, [TargetTags(level=50, type="EPISODE", simple={"TITLE": "An Ep"})]
+    )
+
+    assert kept == ["TITLE"]
+    show, episode = ET.fromstring(document)
+    assert show.findtext("Simple/String") == "A Show"
+    assert episode.findtext("Simple/String") == "An Ep"
+
+
 def test_merged_tags_of_a_file_with_none():
-    kept, document = merged_tags(b"", {"TITLE": "Ünïcode, unfolded"})
+    kept, document = merged_tags(
+        b"", [TargetTags(level=50, type="MOVIE", simple={"TITLE": "Ünïcode"})]
+    )
     assert kept == []
     (ours,) = ET.fromstring(document)
-    assert ours.findtext("Simple/String") == "Ünïcode, unfolded"
+    assert ours.findtext("Simple/String") == "Ünïcode"

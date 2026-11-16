@@ -34,7 +34,7 @@ from reelbarrow.executor import (
     filing_schema,
     render_report,
 )
-from reelbarrow.plan import ARTWORK, Gate, Plan, ShareLibrary, plan
+from reelbarrow.plan import ARTWORK, Gate, Plan, ShareLibrary, TargetTags, plan
 from reelbarrow.plex import Plex
 from reelbarrow.sidecars import MAGIC, Sources
 from reelbarrow.tmdb import Recorded
@@ -90,23 +90,29 @@ class PlexServer:
 
 
 FEATURE = f"{COMPLETED}/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969).mkv"
-TAGS = {
-    "TITLE": "Monte Carlo or Bust!",
-    "DATE_RELEASED": "1969-04-28",
-    "IMDB": "tt0064688",
-    "TMDB": "movie/38792",
-}
+TAGS = [
+    TargetTags(
+        level=50,
+        type="MOVIE",
+        simple={
+            "TITLE": "Monte Carlo or Bust!",
+            "DATE_RELEASED": "1969-04-28",
+            "IMDB": "tt0064688",
+            "TMDB": "movie/38792",
+        },
+    )
+]
 
 
 @pytest.fixture(autouse=True)
-def tagged(monkeypatch) -> list[tuple[str, str, dict]]:
+def tagged(monkeypatch) -> list[tuple[str, str, list[TargetTags]]]:
     """The writer's tag, refused in dry run as the writer's own is, and
     otherwise only recorded."""
     calls = []
 
     def tag(self, path, title, tags):
         self._refuse_in_dry_run()
-        calls.append((path, title, dict(tags)))
+        calls.append((path, title, list(tags)))
         return "read back"
 
     monkeypatch.setattr(Writer, "tag", tag)

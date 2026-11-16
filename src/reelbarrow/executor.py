@@ -35,7 +35,7 @@ import os
 import stat
 import subprocess
 import xml.etree.ElementTree as ET
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 from enum import StrEnum
 from importlib.metadata import version
@@ -60,6 +60,7 @@ from reelbarrow.plan import (
     Rename,
     ShareLibrary,
     Tag,
+    TargetTags,
     Write,
     manifest_sha256,
 )
@@ -76,8 +77,8 @@ class WriterError(Exception):
     """The share isn't as the operation needs it, so it isn't attempted."""
 
 
-# Matroska's tag levels: a feature's tags are the film's.
-MOVIE = ("50", "MOVIE")
+# A tag's level when its target gives none (Matroska's specification).
+DEFAULT_LEVEL = 50
 
 
 class Writer:
@@ -155,9 +156,9 @@ class Writer:
             raise WriterError(f"{path} isn't a folder")
         os.rmdir(folder)
 
-    def tag(self, path: str, title: str, tags: Mapping[str, str]) -> str:
-        """Sets a Matroska file's segment title, and its global tags at
-        target type 50, MOVIE, in place; returns what it kept and checked.
+    def tag(self, path: str, title: str, tags: Sequence[TargetTags]) -> str:
+        """Sets a Matroska file's segment title and global tags in place;
+        returns what it kept and checked.
 
         mkvpropedit rewrites only the file's metadata: on job 34's transcode,
         983 bytes at its head and 502 appended, every stream's hash unchanged.
@@ -166,9 +167,10 @@ class Writer:
         after: mkvinfo finds no fault, ffprobe reads back the title and every
         tag, and the duration and chapters are as they were.
 
-        `--tags global:` replaces all of a file's global tags, so those
-        already there are written back with these, but for one of a name
-        these set, which these replace."""
+        mkvpropedit can't add to a file's global tags, only replace them all
+        (`--tags global:`). So the file's own are read first, and the ones
+        it is given are those plus `tags`. Where both have a tag of one name
+        at one level, `tags`' is the one written (`merged_tags`)."""
         self._refuse_in_dry_run()
         file = self._path(path)
         if not stat.S_ISREG(os.lstat(file).st_mode):
@@ -213,10 +215,12 @@ class Writer:
         _sound(file, path, edited)
         after = _probe(file, path)
         wrong = [] if after.tags.get("title") == title else ["the segment title"]
+        # ffprobe names a global tag by its target's type: `MOVIE/TITLE`.
         wrong += [
-            name
-            for name, value in tags.items()
-            if after.tags.get(f"{MOVIE[1]}/{name}") != value
+            f"{target.type}/{name}"
+            for target in tags
+            for name, value in target.simple.items()
+            if after.tags.get(f"{target.type}/{name}") != value
         ]
         if wrong:
             raise WriterError(
@@ -236,14 +240,14 @@ class Writer:
         )
 
 
-def merged_tags(existing: bytes, tags: Mapping[str, str]) -> tuple[list[str], bytes]:
-    """The global tags to write: those in `existing`, mkvextract's XML, but
-    for any of a name `tags` sets, then `tags` at target type 50; and the
-    names kept.
+def merged_tags(existing: bytes, tags: Sequence[TargetTags]) -> tuple[list[str], bytes]:
+    """The global tags to write, as mkvpropedit reads them: those in
+    `existing`, mkvextract's XML, but for any `tags` names at the same level,
+    then `tags`; and the names kept.
 
     A tag aimed at a track, an edition, a chapter or an attachment isn't
     global, and `--tags global:` leaves it alone, so it is left out here."""
-    setting = {name.upper() for name in tags}
+    setting = {(t.level, name.upper()) for t in tags for name in t.simple}
     found = ET.fromstring(existing) if existing.strip() else ET.Element("Tags")
     merged = ET.Element("Tags")
     kept: list[str] = []
@@ -251,22 +255,24 @@ def merged_tags(existing: bytes, tags: Mapping[str, str]) -> tuple[list[str], by
         targets = tag.find("Targets")
         if targets is not None and any(t.tag.endswith("UID") for t in targets):
             continue
+        level = int(tag.findtext("Targets/TargetTypeValue") or DEFAULT_LEVEL)
         for simple in tag.findall("Simple"):
             name = simple.findtext("Name") or ""
-            if name.upper() in setting:
+            if (level, name.upper()) in setting:
                 tag.remove(simple)
             else:
                 kept.append(name)
         if tag.find("Simple") is not None:
             merged.append(tag)
-    ours = ET.SubElement(merged, "Tag")
-    targets = ET.SubElement(ours, "Targets")
-    ET.SubElement(targets, "TargetTypeValue").text = MOVIE[0]
-    ET.SubElement(targets, "TargetType").text = MOVIE[1]
-    for name, value in tags.items():
-        simple = ET.SubElement(ours, "Simple")
-        ET.SubElement(simple, "Name").text = name
-        ET.SubElement(simple, "String").text = value
+    for target in tags:
+        ours = ET.SubElement(merged, "Tag")
+        targets = ET.SubElement(ours, "Targets")
+        ET.SubElement(targets, "TargetTypeValue").text = str(target.level)
+        ET.SubElement(targets, "TargetType").text = target.type
+        for name, value in target.simple.items():
+            simple = ET.SubElement(ours, "Simple")
+            ET.SubElement(simple, "Name").text = name
+            ET.SubElement(simple, "String").text = value
     return kept, ET.tostring(merged, encoding="utf-8", xml_declaration=True)
 
 

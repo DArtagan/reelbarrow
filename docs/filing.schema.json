@@ -915,7 +915,7 @@
     },
     "Tag": {
       "additionalProperties": false,
-      "description": "A Matroska file's own record of what it is, set in place: its segment\ntitle, which most players show as its name, and global tags at target\ntype 50, MOVIE (*Sidecars and embedded metadata*). Global tags already in\nthe file are kept, but for one of the same name, which these replace.",
+      "description": "Every tag reelbarrow gives one Matroska file, set in place by one\nedit: its segment title, which most players show as its name, and its\nglobal tags, by level (*Sidecars and embedded metadata*).\n\nA global tag already in the file is kept unless one of these has the same\nname at the same level, which then replaces it.",
       "properties": {
         "op": {
           "const": "tag",
@@ -936,11 +936,11 @@
           "type": "string"
         },
         "tags": {
-          "additionalProperties": {
-            "type": "string"
+          "items": {
+            "$ref": "#/$defs/TargetTags"
           },
           "title": "Tags",
-          "type": "object"
+          "type": "array"
         }
       },
       "required": [
@@ -950,6 +950,43 @@
         "tags"
       ],
       "title": "Tag",
+      "type": "object"
+    },
+    "TargetTags": {
+      "additionalProperties": false,
+      "description": "One of Matroska's tags: named values, all about one level of what the\nfile holds, which its target names. A film is 50, MOVIE; an episode is 50,\nEPISODE, in a season at 60, SEASON, of a show at 70, COLLECTION.",
+      "properties": {
+        "level": {
+          "enum": [
+            10,
+            20,
+            30,
+            40,
+            50,
+            60,
+            70
+          ],
+          "title": "Level",
+          "type": "integer"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "simple": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Simple",
+          "type": "object"
+        }
+      },
+      "required": [
+        "level",
+        "type",
+        "simple"
+      ],
+      "title": "TargetTags",
       "type": "object"
     },
     "Title": {

@@ -103,6 +103,15 @@ either way.
   which most players show; `TITLE` at level 50 is the tagging system's
   account of what the content is, beside the ids. For a feature they agree;
   for an extra they can differ.
+- **Each tag names its target level in the plan**, as a list of groups,
+  each with its level, its type and its simple tags (Will, reviewing the
+  pull request, offered it against one target for the whole operation or an
+  implied 50, `MOVIE`). The filing record holds the plan, so the record says
+  where each tag went without the code that wrote it. An episode will need
+  several levels in one file: 70, `COLLECTION`, for the show, 60, `SEASON`, and
+  50, `EPISODE`. A tag already in the file is replaced only by one of the
+  same name at the same level, and each level and type appears once in an
+  operation, since ffprobe reads a tag back by its type (`MOVIE/TITLE`).
 
 The example Will agreed (*"Yes, now build it as shown."*), as `reelbarrow
 plan` renders job 34's first operation:
@@ -111,11 +120,14 @@ plan` renders job 34's first operation:
   tag          import/automatic-ripping-machine/completed/movies/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969)/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969).mkv
                the feature's identity, inside the file
                segment title  Monte Carlo or Bust!
-               TITLE          Monte Carlo or Bust!
-               DATE_RELEASED  1969-04-28
-               IMDB           tt0064688
-               TMDB           movie/38792
+               50 MOVIE
+                 TITLE          Monte Carlo or Bust!
+                 DATE_RELEASED  1969-04-28
+                 IMDB           tt0064688
+                 TMDB           movie/38792
 ```
+
+(The `50 MOVIE` line was added in review, with the groups above.)
 
 and the file's tags afterwards, by `mkvextract`: HandBrake's four per-track
 `DURATION`s untouched, its `ENCODER` kept, and a tag at level 50, `MOVIE`,
@@ -165,7 +177,11 @@ holding the four above.
   by its name:
   - only `reelbarrow/executor.py` runs a tool that writes;
   - `analysis/tools.py` runs only tools that read (ffprobe, fpcalc, lsdvd,
-    and ffmpeg, whose command must end in `-`, its stdout);
+    and ffmpeg). ffmpeg can write, so its command is checked too: every
+    word must be one of the options the analysis uses, none of which names
+    a file, with `-f` one of the formats it uses, and its one output `-`,
+    its stdout. Only checking that the command ends in `-` let through
+    `-i x out.mkv -f md5 -`, `-report` and `-f hls`;
   - a test fails when a module is made to run mkvpropedit.
 - **MKVToolNix** goes in the image and in devenv, together; *devenv.nix*
   says a version difference between them is the usual reason a test passes

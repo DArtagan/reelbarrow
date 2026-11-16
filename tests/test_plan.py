@@ -146,7 +146,9 @@ def test_the_feature_is_tagged_with_its_identity_where_arm_left_it(case):
         f"{COMPLETED}/Those-Daring-Young-Men-in-Their-Jaunty-Jalopies (1969).mkv"
     )
     assert tag.title == "Monte Carlo or Bust!"
-    assert tag.tags == {
+    (film,) = tag.tags
+    assert (film.level, film.type) == (50, "MOVIE")
+    assert film.simple == {
         "TITLE": "Monte Carlo or Bust!",
         "DATE_RELEASED": "1969-04-28",
         "IMDB": "tt0064688",
@@ -154,11 +156,30 @@ def test_the_feature_is_tagged_with_its_identity_where_arm_left_it(case):
     }
 
 
+def test_a_tag_operation_names_each_level_and_type_once():
+    def tag(*targets: tuple[int, str]) -> dict:
+        return {
+            "op": "tag",
+            "path": "x.mkv",
+            "reason": "",
+            "title": "x",
+            "tags": [
+                {"level": level, "type": type, "simple": {}} for level, type in targets
+            ],
+        }
+
+    Tag.model_validate(tag((70, "COLLECTION"), (50, "EPISODE")))
+    for twice in ([(50, "MOVIE"), (50, "EPISODE")], [(50, "X"), (70, "X")]):
+        with pytest.raises(ValueError, match="each level and type"):
+            Tag.model_validate(tag(*twice))
+
+
 def test_the_rendered_plan_shows_each_tag(case):
     text = render(planned(case))
     assert f"  tag          {COMPLETED}/" in text
     assert "               segment title  Monte Carlo or Bust!" in text
-    assert "               TMDB           movie/38792" in text
+    assert "               50 MOVIE\n" in text
+    assert "                 TMDB           movie/38792" in text
 
 
 def test_a_feature_that_isnt_matroska_is_reviewed(case):
@@ -400,7 +421,7 @@ def test_names_are_folded_for_the_share(case):
     # Tags are UTF-8, so the film's own title goes in unfolded.
     tag = made.operations[0]
     assert isinstance(tag, Tag)
-    assert tag.title == tag.tags["TITLE"] == "Monte Carlo: or Bust\u2026"
+    assert tag.title == tag.tags[0].simple["TITLE"] == "Monte Carlo: or Bust\u2026"
 
 
 def test_an_analysis_of_another_job_is_refused(case):

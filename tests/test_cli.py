@@ -134,12 +134,18 @@ def test_plan_with_no_path_plans_every_manifest_but_the_running(
         "path": f"{COMPLETED}/A-Film (1969).mkv",
         "reason": "the feature's identity, inside the file",
         "title": "A Film",
-        "tags": {
-            "TITLE": "A Film",
-            "DATE_RELEASED": "1969-04-28",
-            "IMDB": "tt0064688",
-            "TMDB": "movie/38792",
-        },
+        "tags": [
+            {
+                "level": 50,
+                "type": "MOVIE",
+                "simple": {
+                    "TITLE": "A Film",
+                    "DATE_RELEASED": "1969-04-28",
+                    "IMDB": "tt0064688",
+                    "TMDB": "movie/38792",
+                },
+            }
+        ],
     }
     assert folder["path"] == "movies/A Film (1969) {tmdb-38792}"
 

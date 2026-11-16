@@ -18,9 +18,9 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
-from typing import Annotated, Literal, Protocol
+from typing import Annotated, Literal, Protocol, Self
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 from reelbarrow import disc_record, names
 from reelbarrow.analyse import Analysis, File, Folder, Video
@@ -96,17 +96,40 @@ class Sidecar(StrEnum):
     DISC_JSON = "disc_json"
 
 
+class TargetTags(Model):
+    """One of Matroska's tags: named values, all about one level of what the
+    file holds, which its target names. A film is 50, MOVIE; an episode is 50,
+    EPISODE, in a season at 60, SEASON, of a show at 70, COLLECTION."""
+
+    level: Literal[10, 20, 30, 40, 50, 60, 70]
+    type: str
+    simple: dict[str, str]
+
+
 class Tag(Model):
-    """A Matroska file's own record of what it is, set in place: its segment
-    title, which most players show as its name, and global tags at target
-    type 50, MOVIE (*Sidecars and embedded metadata*). Global tags already in
-    the file are kept, but for one of the same name, which these replace."""
+    """Every tag reelbarrow gives one Matroska file, set in place by one
+    edit: its segment title, which most players show as its name, and its
+    global tags, by level (*Sidecars and embedded metadata*).
+
+    A global tag already in the file is kept unless one of these has the same
+    name at the same level, which then replaces it."""
 
     op: Literal["tag"] = "tag"
     path: str
     reason: str
     title: str
-    tags: dict[str, str]
+    tags: list[TargetTags]
+
+    @model_validator(mode="after")
+    def _one_target_each(self) -> Self:
+        # ffprobe names a tag by its target's type, so that is how one is
+        # read back after the edit, and two with one type couldn't be told
+        # apart.
+        levels = [t.level for t in self.tags]
+        types = [t.type for t in self.tags]
+        if len(set(levels)) != len(levels) or len(set(types)) != len(types):
+            raise ValueError("each level and type is tagged once")
+        return self
 
 
 class MakeFolder(Model):
@@ -674,17 +697,20 @@ def _operations(
     return operations, targets, filing_record
 
 
-def feature_tags(movie: Movie) -> dict[str, str]:
-    """A feature's tags, by Matroska's tagging specification: TMDB's title,
-    in UTF-8 where names on the share are folded to ASCII, its release date,
-    and both ids, TMDB's prefixed by its kind as the specification requires."""
-    tags = {"TITLE": movie.title}
+def feature_tags(movie: Movie) -> list[TargetTags]:
+    """A feature's tags, by Matroska's tagging specification, all about the
+    film: its title, its release date, and both ids, TMDB's prefixed by its
+    kind as the specification requires.
+
+    The title is TMDB's, not the folder's name for the film: a tag holds any
+    Unicode, where a name on the share is folded to ASCII."""
+    simple = {"TITLE": movie.title}
     if movie.release_date:
-        tags["DATE_RELEASED"] = movie.release_date
+        simple["DATE_RELEASED"] = movie.release_date
     if movie.imdb_id:
-        tags["IMDB"] = movie.imdb_id
-    tags["TMDB"] = f"movie/{movie.id}"
-    return tags
+        simple["IMDB"] = movie.imdb_id
+    simple["TMDB"] = f"movie/{movie.id}"
+    return [TargetTags(level=50, type="MOVIE", simple=simple)]
 
 
 def record_name(source: str, id: str) -> str:
@@ -717,10 +743,12 @@ def render(plan: Plan) -> str:
                 lines.append(f"  tag          {op.path}")
                 lines.append(f"               {op.reason}")
                 lines.append(f"               {'segment title':<14} {op.title}")
-                lines += [
-                    f"               {name:<14} {value}"
-                    for name, value in op.tags.items()
-                ]
+                for target in op.tags:
+                    lines.append(f"               {target.level} {target.type}")
+                    lines += [
+                        f"                 {name:<14} {value}"
+                        for name, value in target.simple.items()
+                    ]
                 continue
             case MakeFolder():
                 lines.append(f"  make folder  {op.path}")
