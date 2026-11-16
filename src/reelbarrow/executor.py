@@ -16,7 +16,7 @@ Carrying out a plan is step 7 of *The service*, in the design:
    record's path, absent, so a unit already filed is never filed again.
 2. Every sidecar is rendered, so a provider that can't be reached stops the
    filing before anything has moved.
-3. The operations, in the plan's order: the feature's tags, folders,
+3. The operations, in the plan's order: the feature's edit, folders,
    renames, sidecars, then leftovers. If one fails, the rest aren't
    attempted, and nothing is undone automatically: the report says what was
    done and what wasn't, so a person can resolve it.
@@ -52,6 +52,7 @@ from reelbarrow.manifest import Manifest, ShareRef
 from reelbarrow.plan import (
     Basis,
     DeleteFolder,
+    Edit,
     Gate,
     MakeFolder,
     Operation,
@@ -59,7 +60,7 @@ from reelbarrow.plan import (
     Plan,
     Rename,
     ShareLibrary,
-    Tag,
+    SubtitleFlags,
     TargetTags,
     Write,
     manifest_sha256,
@@ -83,8 +84,8 @@ DEFAULT_LEVEL = 50
 
 class Writer:
     """Every change under the video root: make a folder, rename, write a new
-    file, tag a Matroska file, remove an emptied folder. Nothing is ever
-    overwritten, copied or removed with what it holds, and a tag changes a
+    file, edit a Matroska file, remove an emptied folder. Nothing is ever
+    overwritten, copied or removed with what it holds, and an edit changes a
     file's metadata, never its streams."""
 
     def __init__(self, video_root: Path, *, dry_run: bool = True) -> None:
@@ -156,16 +157,24 @@ class Writer:
             raise WriterError(f"{path} isn't a folder")
         os.rmdir(folder)
 
-    def tag(self, path: str, title: str, tags: Sequence[TargetTags]) -> str:
-        """Sets a Matroska file's segment title and global tags in place;
-        returns what it kept and checked.
+    def edit(
+        self,
+        path: str,
+        title: str,
+        tags: Sequence[TargetTags],
+        subtitles: Sequence[SubtitleFlags] = (),
+    ) -> str:
+        """Sets a Matroska file's segment title, global tags and subtitle
+        tracks' forced flags in place, in one run of mkvpropedit; returns what
+        it kept and checked.
 
         mkvpropedit rewrites only the file's metadata: on job 34's transcode,
         983 bytes at its head and 502 appended, every stream's hash unchanged.
         Killed part way, it can leave that metadata damaged, which a second
         run can't always mend, so the file is checked before it is edited and
-        after: mkvinfo finds no fault, ffprobe reads back the title and every
-        tag, and the duration and chapters are as they were.
+        after: mkvinfo finds no fault; ffprobe reads back the title, every
+        tag and each subtitle track's flag as set, and every other track's
+        flags as they were; and the duration and chapters are as they were.
 
         mkvpropedit can't add to a file's global tags, only replace them all
         (`--tags global:`). So the file's own are read first, and the ones
@@ -177,6 +186,9 @@ class Writer:
             raise WriterError(f"{path} isn't a file")
         _sound(file, path, "")
         before = _probe(file, path)
+        found = len(before.of_type("subtitle"))
+        if any(track.track > found for track in subtitles):
+            raise WriterError(f"{path} has {found} subtitle tracks")
         kept, document = merged_tags(
             _tool(["mkvextract", str(file), "tags", "-"]), tags
         )
@@ -198,6 +210,16 @@ class Writer:
                     "info",
                     "--set",
                     f"title={title}",
+                    *(
+                        argument
+                        for track in subtitles
+                        for argument in (
+                            "--edit",
+                            f"track:s{track.track}",
+                            "--set",
+                            f"flag-forced={int(track.forced)}",
+                        )
+                    ),
                 ],
                 pass_fds=(fd,),
                 capture_output=True,
@@ -222,6 +244,7 @@ class Writer:
             for name, value in target.simple.items()
             if after.tags.get(f"{target.type}/{name}") != value
         ]
+        wrong += _flags_unlike(before, after, subtitles)
         if wrong:
             raise WriterError(
                 f"{path} {edited}ffprobe doesn't read back {', '.join(wrong)}"
@@ -238,6 +261,28 @@ class Writer:
             + f"read back, {before.duration} s and {len(before.chapters)} "
             + "chapters as before"
         )
+
+
+def _flags_unlike(
+    before: Probe, after: Probe, subtitles: Sequence[SubtitleFlags]
+) -> list[str]:
+    """Each track whose flags ffprobe doesn't read back as `subtitles` set
+    them, or as they were."""
+    setting = {track.track: track.forced for track in subtitles}
+    if [s.index for s in before.streams] != [s.index for s in after.streams]:
+        return ["its tracks"]
+    wrong = []
+    number = 0
+    for was, now in zip(before.streams, after.streams, strict=True):
+        forced = was.forced
+        name = f"track {was.index}'s flags"
+        if was.codec_type == "subtitle":
+            number += 1
+            forced = setting.get(number, was.forced)
+            name = f"subtitle s{number}'s flags"
+        if (now.default, now.forced) != (was.default, forced):
+            wrong.append(name)
+    return wrong
 
 
 def merged_tags(existing: bytes, tags: Sequence[TargetTags]) -> tuple[list[str], bytes]:
@@ -598,8 +643,10 @@ class Executor:
         detail = rendered.detail if rendered is not None else ""
         try:
             match op:
-                case Tag():
-                    return Outcome.DONE, self.writer.tag(op.path, op.title, op.tags)
+                case Edit():
+                    return Outcome.DONE, self.writer.edit(
+                        op.path, op.title, op.tags, op.subtitles
+                    )
                 case MakeFolder():
                     self.writer.make_folder(op.path)
                 case Rename():

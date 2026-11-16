@@ -21,7 +21,7 @@ Specs are referred to by name, not number, so finishing one renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 5 | [subtitle-flags](subtitle-flags.md) | A full subtitle track neither forced nor default, in the plan and in ARM's preset | — |
+| 5 | [subtitle-flags](subtitle-flags.md) | A full subtitle track not forced, in the plan, and none made forced by ARM | — |
 | 6 | [first-filing](first-filing.md) | *Monte Carlo or Bust!* filed and tagged for real by one deliberate run, its preconditions proven, then dry run back on | subtitle-flags |
 | 7 | [extras](extras.md) | Extras named from TheDiscDB, or `<disc label>_title_<n>`, in the kind folders Plex reads, proven in the players | — |
 | 8 | [manifest-loop](manifest-loop.md) | Every manifest planned, simplest case first, in any order: the whole fixtures table | extras |

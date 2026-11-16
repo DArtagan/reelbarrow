@@ -72,6 +72,7 @@ def test_every_file_is_listed_and_every_video_measured(share):
     film = files["Film (1969).mkv"]
     assert film.video.duration == pytest.approx(10, abs=0.1)
     assert film.video.chapters == [0.0, 4.0]
+    assert film.video.subtitles == []
     assert film.size == (share / COMPLETED / "Film (1969).mkv").stat().st_size
     assert files["notes.txt"].video is None and files["notes.txt"].error is None
     # A video that can't be measured says so, rather than stopping the job.
@@ -88,6 +89,45 @@ def test_the_raw_copy_found_is_measured_and_says_how_it_was_found(share):
     (copy,) = raw.files
     assert copy.mtime == START + timedelta(hours=1)
     assert copy.video.chapters == [0.0, 4.0]
+    # A raw copy is never edited, so its subtitles aren't counted.
+    assert copy.video.subtitles is None
+
+
+def test_a_completed_videos_subtitles_are_counted_with_their_flags(tmp_path, ffmpeg):
+    (tmp_path / "full.srt").write_text(
+        "".join(f"{n + 1}\n00:00:0{n},000 --> 00:00:0{n},500\nl\n\n" for n in range(9))
+    )
+    (tmp_path / "forced.srt").write_text("1\n00:00:01,000 --> 00:00:02,000\nf\n\n")
+    root = tmp_path / "video"
+    (root / COMPLETED).mkdir(parents=True)
+    ffmpeg(
+        f"video/{COMPLETED}/Film (1969).mkv",
+        *("-f", "lavfi", "-i", "testsrc=d=10:s=64x48:r=10"),
+        *("-i", str(tmp_path / "full.srt"), "-i", str(tmp_path / "forced.srt")),
+        *("-map", "0", "-map", "1", "-map", "2", "-c:v", "ffv1", "-c:s", "srt"),
+        *("-metadata:s:s:0", "language=eng", "-metadata:s:s:1", "language=eng"),
+        *("-disposition:s:0", "default+forced", "-disposition:s:1", "forced"),
+    )
+
+    document = analyse(job(), root, RawIndex(root, f"{ARM}/raw"))
+
+    (film,) = document.completed.files
+    assert [s.model_dump() for s in film.video.subtitles] == [
+        {
+            "codec": "subrip",
+            "language": "eng",
+            "default": True,
+            "forced": True,
+            "events": 9,
+        },
+        {
+            "codec": "subrip",
+            "language": "eng",
+            "default": False,
+            "forced": True,
+            "events": 1,
+        },
+    ]
 
 
 def test_the_document_reads_back_as_written(share):

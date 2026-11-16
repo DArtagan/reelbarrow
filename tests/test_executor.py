@@ -6,8 +6,8 @@ only, its sidecars, `raw/` holding the disc's folder with `disc.json` and the
 filing's record, and nothing left behind of the job in `completed/` or `raw/`.
 
 The case's files are sparse placeholders, with nothing for mkvpropedit to
-edit, so the writer's tag is a stand-in here (`tagged`); `test_tag` and
-`test_cli` tag real MKVs.
+edit, so the writer's edit is a stand-in here (`edited`); `test_edit` and
+`test_cli` edit real MKVs.
 """
 
 import json
@@ -34,7 +34,15 @@ from reelbarrow.executor import (
     filing_schema,
     render_report,
 )
-from reelbarrow.plan import ARTWORK, Gate, Plan, ShareLibrary, TargetTags, plan
+from reelbarrow.plan import (
+    ARTWORK,
+    Gate,
+    Plan,
+    ShareLibrary,
+    SubtitleFlags,
+    TargetTags,
+    plan,
+)
 from reelbarrow.plex import Plex
 from reelbarrow.sidecars import MAGIC, Sources
 from reelbarrow.tmdb import Recorded
@@ -105,17 +113,19 @@ TAGS = [
 
 
 @pytest.fixture(autouse=True)
-def tagged(monkeypatch) -> list[tuple[str, str, list[TargetTags]]]:
-    """The writer's tag, refused in dry run as the writer's own is, and
+def edited(
+    monkeypatch,
+) -> list[tuple[str, str, list[TargetTags], list[SubtitleFlags]]]:
+    """The writer's edit, refused in dry run as the writer's own is, and
     otherwise only recorded."""
     calls = []
 
-    def tag(self, path, title, tags):
+    def edit(self, path, title, tags, subtitles=()):
         self._refuse_in_dry_run()
-        calls.append((path, title, list(tags)))
+        calls.append((path, title, list(tags), list(subtitles)))
         return "read back"
 
-    monkeypatch.setattr(Writer, "tag", tag)
+    monkeypatch.setattr(Writer, "edit", edit)
     return calls
 
 
@@ -205,7 +215,7 @@ def planned(root: Path, case: cases.Case) -> Plan:
     return made
 
 
-def test_job_34_files_into_its_rows_layout(root, case, plex_server, tagged):
+def test_job_34_files_into_its_rows_layout(root, case, plex_server, edited):
     """The executor spec's first done-when, with dry run off."""
     film_inode = (root / COMPLETED / f"{COMPLETED.split('/')[-1]}.mkv").stat().st_ino
     made = planned(root, case)
@@ -215,9 +225,11 @@ def test_job_34_files_into_its_rows_layout(root, case, plex_server, tagged):
     )
 
     assert report.result is Result.FILED, render_report(report)
-    # Tagged where ARM left it, before anything moved.
-    assert tagged == [(FEATURE, "Monte Carlo or Bust!", TAGS)]
-    assert report.steps[1].step == "tag"
+    # Edited where ARM left it, before anything moved.
+    (edit,) = edited
+    assert edit[:3] == (FEATURE, "Monte Carlo or Bust!", TAGS)
+    assert [(s.track, s.forced) for s in edit[3]] == [(1, False)]
+    assert report.steps[1].step == "edit"
     assert report.steps[1].outcome is Outcome.DONE
     artwork = {
         PurePosixPath(step.subject).name
@@ -383,7 +395,7 @@ def test_dry_run_refuses_every_change_and_the_share_is_unchanged(
             {Outcome.REFUSED, Outcome.SKIPPED} if name == "write" else {Outcome.REFUSED}
         )
         assert set(seen) <= allowed, name
-    assert steps["tag"] == [Outcome.REFUSED]
+    assert steps["edit"] == [Outcome.REFUSED]
     assert len(steps["record"]) == 1 and len(steps["plex_scan"]) == 1
     assert plex_server.scanned == []
 
@@ -487,7 +499,7 @@ def test_a_filing_that_stops_before_its_folders_are_made_says_so(
     report = executor(root, case, dry_run=False).carry_out(made, case.manifest)
 
     assert report.result is Result.INCOMPLETE
-    # The film was tagged, nothing was filed, and the report says both.
+    # The film was edited, nothing was filed, and the report says both.
     outcomes = [step.outcome for step in report.steps[1:-1]]
     assert outcomes[:2] == [Outcome.DONE, Outcome.FAILED]
     assert set(outcomes[2:]) == {Outcome.NOT_RUN}
@@ -497,16 +509,16 @@ def test_a_filing_that_stops_before_its_folders_are_made_says_so(
     assert not (root / FOLDER).exists()
 
 
-def test_a_tag_that_fails_stops_the_filing_with_nothing_moved(
+def test_an_edit_that_fails_stops_the_filing_with_nothing_moved(
     root, case, monkeypatch, plex_server
 ):
     made = planned(root, case)
     before = tree(root)
 
-    def tag(self, path, title, tags):
+    def edit(self, path, title, tags, subtitles=()):
         raise WriterError(f"{path} was edited, but mkvinfo finds fault with it")
 
-    monkeypatch.setattr(Writer, "tag", tag)
+    monkeypatch.setattr(Writer, "edit", edit)
     report = executor(root, case, dry_run=False, plex_server=plex_server).carry_out(
         made, case.manifest
     )
@@ -514,7 +526,7 @@ def test_a_tag_that_fails_stops_the_filing_with_nothing_moved(
     assert report.result is Result.INCOMPLETE
     basis, first, *rest, record = report.steps
     assert basis.outcome is Outcome.DONE
-    assert (first.step, first.outcome) == ("tag", Outcome.FAILED)
+    assert (first.step, first.outcome) == ("edit", Outcome.FAILED)
     assert "mkvinfo finds fault" in first.detail
     assert {step.outcome for step in rest} == {Outcome.NOT_RUN}
     # The library is untouched, so there is no record there: the report is

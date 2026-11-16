@@ -1,13 +1,15 @@
-"""The writer's tag, on real MKVs made by ffmpeg: a film's identity set in its
-own metadata, what was there kept, and its streams untouched.
+"""The writer's edit, on real MKVs made by ffmpeg: a film's identity set in
+its own metadata, its subtitles' flags corrected, what was there kept, and
+its streams untouched.
 
 The executor's tests file onto `cases.Case.build`'s sparse placeholders,
 which hold nothing for mkvpropedit to edit; these, and `test_cli`'s, are
-where a tag is made for real.
+where an edit is made for real.
 """
 
 import subprocess
 import xml.etree.ElementTree as ET
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -15,7 +17,7 @@ import pytest
 from reelbarrow import executor
 from reelbarrow.analysis.probe import probe
 from reelbarrow.executor import Refused, Writer, WriterError, merged_tags
-from reelbarrow.plan import TargetTags
+from reelbarrow.plan import SubtitleFlags, TargetTags
 
 TAGS = {
     "TITLE": "Monte Carlo or Bust!",
@@ -34,26 +36,43 @@ TIMEBASE=1/1000
 START=2000
 END=4000
 """
+# A line every 0.4 s, and one line: a full track and a forced-only one.
+FULL = "".join(
+    f"{n + 1}\n00:00:0{n * 4 // 10},{n * 4 % 10}00 --> 00:00:0{n * 4 // 10},"
+    f"{n * 4 % 10}90\nline {n}\n\n"
+    for n in range(10)
+)
+FORCED_ONLY = "1\n00:00:02,000 --> 00:00:03,000\nforeign\n\n"
 
 
 @pytest.fixture
 def root(tmp_path, ffmpeg, guarded) -> Path:
     """A share holding one film as HandBrake leaves one: chapters, a global
-    tag of its own and one per track, and no title."""
+    tag of its own and one per track, no title, and two subtitle tracks, a
+    full one default and forced and a forced-only one."""
     root = tmp_path / "video"
     (root / "import").mkdir(parents=True)
     (tmp_path / "chapters.txt").write_text(CHAPTERS)
+    (tmp_path / "full.srt").write_text(FULL)
+    (tmp_path / "forced.srt").write_text(FORCED_ONLY)
     ffmpeg(
         "video/import/film.mkv",
         *("-f", "lavfi", "-i", "testsrc=d=4:s=32x24:r=5"),
         *("-f", "lavfi", "-i", "sine=d=4"),
-        *("-i", str(tmp_path / "chapters.txt"), "-map_chapters", "2"),
-        *("-map", "0", "-map", "1", "-c:v", "ffv1", "-c:a", "flac"),
+        *("-i", str(tmp_path / "chapters.txt")),
+        *("-i", str(tmp_path / "full.srt"), "-i", str(tmp_path / "forced.srt")),
+        *("-map_chapters", "2", "-map", "0", "-map", "1", "-map", "3", "-map", "4"),
+        *("-c:v", "ffv1", "-c:a", "flac", "-c:s", "srt"),
+        *("-disposition:s:0", "default+forced", "-disposition:s:1", "forced"),
         # Global tags already there: one kept, one reelbarrow's replaces.
         *("-metadata", "COMMENT=ripped by ARM", "-metadata", "IMDB=tt0000001"),
     )
     guarded(root)
     return root
+
+
+def flags(file: Path) -> list[tuple[str, bool, bool]]:
+    return [(s.codec_type, s.default, s.forced) for s in probe(file).streams]
 
 
 def streams(file: Path) -> bytes:
@@ -86,8 +105,9 @@ def track_tags(file: Path) -> list[tuple[str, list[tuple[str, str]]]]:
 def test_a_film_is_tagged_with_its_identity_and_nothing_else_changes(root):
     film = root / "import" / "film.mkv"
     before, hashed = probe(film), streams(film)
+    flags_before = flags(film)
 
-    detail = Writer(root, dry_run=False).tag("import/film.mkv", TAGS["TITLE"], FILM)
+    detail = Writer(root, dry_run=False).edit("import/film.mkv", TAGS["TITLE"], FILM)
 
     after = probe(film)
     assert after.tags["title"] == "Monte Carlo or Bust!"
@@ -101,6 +121,44 @@ def test_a_film_is_tagged_with_its_identity_and_nothing_else_changes(root):
     assert [c.start for c in after.chapters] == [0.0, 2.0]
     assert detail.startswith("kept ")
     assert "COMMENT" in detail and "2 chapters as before" in detail
+    # No track is named, so every track's flags are as they were.
+    assert flags(film) == flags_before
+
+
+def test_a_full_subtitle_track_is_forced_no_longer_and_nothing_else_changes(root):
+    """The subtitle-flags spec's: a full track forced and a forced-only one,
+    and only the full one's flag changes; its default flag stays."""
+    film = root / "import" / "film.mkv"
+    hashed, before = streams(film), flags(film)
+    assert before[2:] == [("subtitle", True, True), ("subtitle", False, True)]
+
+    Writer(root, dry_run=False).edit(
+        "import/film.mkv",
+        TAGS["TITLE"],
+        FILM,
+        [SubtitleFlags(track=1, forced=False, reason="a full track, forced")],
+    )
+
+    assert flags(film) == [
+        *before[:2],
+        ("subtitle", True, False),
+        ("subtitle", False, True),
+    ]
+    assert probe(film).tags["MOVIE/TMDB"] == "movie/38792"
+    assert streams(film) == hashed
+
+
+def test_a_subtitle_track_the_file_lacks_is_refused_before_any_edit(root):
+    film = root / "import" / "film.mkv"
+    before = film.read_bytes()
+    with pytest.raises(WriterError, match="has 2 subtitle tracks"):
+        Writer(root, dry_run=False).edit(
+            "import/film.mkv",
+            TAGS["TITLE"],
+            FILM,
+            [SubtitleFlags(track=3, forced=False, reason="")],
+        )
+    assert film.read_bytes() == before
 
 
 def test_a_file_is_tagged_at_each_level_it_is_given(root):
@@ -111,7 +169,7 @@ def test_a_file_is_tagged_at_each_level_it_is_given(root):
         TargetTags(level=50, type="EPISODE", simple={"TITLE": "An Episode"}),
     ]
 
-    Writer(root, dry_run=False).tag("import/film.mkv", "An Episode", levels)
+    Writer(root, dry_run=False).edit("import/film.mkv", "An Episode", levels)
 
     after = probe(film)
     assert after.tags["COLLECTION/TITLE"] == "A Show"
@@ -134,25 +192,26 @@ def test_each_tracks_tags_are_left_alone(root):
     before = track_tags(film)
     assert before
 
-    Writer(root, dry_run=False).tag("import/film.mkv", TAGS["TITLE"], FILM)
+    Writer(root, dry_run=False).edit("import/film.mkv", TAGS["TITLE"], FILM)
 
     assert track_tags(film) == before
 
 
-def test_tagging_again_changes_no_tag(root):
+def test_editing_again_changes_no_tag_or_flag(root):
     film = root / "import" / "film.mkv"
     writer = Writer(root, dry_run=False)
-    writer.tag("import/film.mkv", TAGS["TITLE"], FILM)
-    once = ET.tostring(tags(film))
-    writer.tag("import/film.mkv", TAGS["TITLE"], FILM)
-    assert ET.tostring(tags(film)) == once
+    full = [SubtitleFlags(track=1, forced=False, reason="")]
+    writer.edit("import/film.mkv", TAGS["TITLE"], FILM, full)
+    once = ET.tostring(tags(film)), flags(film)
+    writer.edit("import/film.mkv", TAGS["TITLE"], FILM, full)
+    assert (ET.tostring(tags(film)), flags(film)) == once
 
 
-def test_dry_run_refuses_a_tag_and_the_file_is_unchanged(root):
+def test_dry_run_refuses_an_edit_and_the_file_is_unchanged(root):
     film = root / "import" / "film.mkv"
     before = (film.read_bytes(), film.stat().st_mtime_ns)
     with pytest.raises(Refused):
-        Writer(root).tag("import/film.mkv", TAGS["TITLE"], FILM)
+        Writer(root).edit("import/film.mkv", TAGS["TITLE"], FILM)
     assert (film.read_bytes(), film.stat().st_mtime_ns) == before
 
 
@@ -166,7 +225,7 @@ def test_a_file_mkvinfo_finds_fault_with_is_not_edited(root):
     broken = content[:at] + bytes(4) + content[at + 4 :]
     (root / "import" / "broken.mkv").write_bytes(broken)
     with pytest.raises(WriterError, match="mkvinfo finds fault"):
-        Writer(root, dry_run=False).tag("import/broken.mkv", "x", FILM)
+        Writer(root, dry_run=False).edit("import/broken.mkv", "x", FILM)
     assert (root / "import" / "broken.mkv").read_bytes() == broken
 
 
@@ -175,12 +234,23 @@ def test_a_tag_that_doesnt_read_back_as_set_fails(root, monkeypatch):
     first = probe(root / "import" / "film.mkv")
     monkeypatch.setattr(executor, "probe", lambda file: first)
     with pytest.raises(WriterError, match="was edited, but ffprobe doesn't read"):
-        Writer(root, dry_run=False).tag("import/film.mkv", TAGS["TITLE"], FILM)
+        Writer(root, dry_run=False).edit("import/film.mkv", TAGS["TITLE"], FILM)
 
 
-def test_a_tag_needs_a_file(root):
+def test_a_flag_that_doesnt_read_back_as_set_fails(root, monkeypatch):
+    """ffprobe reading the tags as set, but the subtitle still forced."""
+    first = probe(root / "import" / "film.mkv")
+    monkeypatch.setattr(
+        executor, "probe", lambda file: replace(probe(file), streams=first.streams)
+    )
+    full = [SubtitleFlags(track=1, forced=False, reason="")]
+    with pytest.raises(WriterError, match="doesn't read back subtitle s1's flags"):
+        Writer(root, dry_run=False).edit("import/film.mkv", TAGS["TITLE"], FILM, full)
+
+
+def test_an_edit_needs_a_file(root):
     with pytest.raises(WriterError, match="isn't a file"):
-        Writer(root, dry_run=False).tag("import", "x", FILM)
+        Writer(root, dry_run=False).edit("import", "x", FILM)
 
 
 # The tags written: what was there, merged with what reelbarrow sets.

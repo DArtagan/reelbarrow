@@ -49,6 +49,12 @@ PAIRING_TOLERANCE = 0.25
 # MKV as from a Blu-ray playlist (E35): job 34's MKV has one at 1.03 s before
 # its end, and its transcode, of equal length, doesn't.
 HANDBRAKE_LAST_CHAPTER = 1.5
+# Subtitle events a minute (*Subtitle flags*): a full track at least this
+# many, a forced-only one at most the other. The full tracks of four DVD
+# transcodes ran 7.5 to 16.7 and Shrek the Third's forced-only track 0.01
+# (E44). A forced track between the two goes to review.
+FULL_SUBTITLES = 5.0
+FORCED_ONLY_SUBTITLES = 1.0
 
 # Who identified the disc, for this disc is film X: ARM's own lookup, or a
 # person in its UI. An identity ARM copied from another job by label is not
@@ -106,19 +112,35 @@ class TargetTags(Model):
     simple: dict[str, str]
 
 
-class Tag(Model):
-    """Every tag reelbarrow gives one Matroska file, set in place by one
-    edit: its segment title, which most players show as its name, and its
-    global tags, by level (*Sidecars and embedded metadata*).
+class SubtitleFlags(Model):
+    """A subtitle track's flags as they are to be. Only `forced` is set:
+    a track's default flag is left as it is (*Subtitle flags*)."""
+
+    track: int = Field(
+        ge=1,
+        description="Its place among the file's subtitle tracks, from 1: "
+        "mkvpropedit's `track:s<n>`.",
+    )
+    forced: bool
+    reason: str
+
+
+class Edit(Model):
+    """Everything reelbarrow sets inside one Matroska file, in place, by one
+    edit of its metadata (*Sidecars and embedded metadata*): its segment
+    title, which most players show as its name; its global tags, by level;
+    and its subtitle tracks' flags.
 
     A global tag already in the file is kept unless one of these has the same
-    name at the same level, which then replaces it."""
+    name at the same level, which then replaces it. A track not named in
+    `subtitles` is left as it is."""
 
-    op: Literal["tag"] = "tag"
+    op: Literal["edit"] = "edit"
     path: str
     reason: str
     title: str
     tags: list[TargetTags]
+    subtitles: list[SubtitleFlags] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _one_target_each(self) -> Self:
@@ -129,6 +151,9 @@ class Tag(Model):
         types = [t.type for t in self.tags]
         if len(set(levels)) != len(levels) or len(set(types)) != len(types):
             raise ValueError("each level and type is tagged once")
+        tracks = [s.track for s in self.subtitles]
+        if len(set(tracks)) != len(tracks):
+            raise ValueError("each subtitle track is set once")
         return self
 
 
@@ -166,7 +191,7 @@ class DeleteFolder(Model):
 
 
 Operation = Annotated[
-    Tag | MakeFolder | Rename | Write | DeleteFolder, Field(discriminator="op")
+    Edit | MakeFolder | Rename | Write | DeleteFolder, Field(discriminator="op")
 ]
 
 
@@ -357,6 +382,7 @@ def plan(
             if suffix.lower() == ".mkv"
             else f"{feature.name} is {suffix or 'of no type'}, which isn't tagged",
         )
+    subtitles = _subtitles(feature, check) if feature is not None else []
 
     disc = job.disc
     check(
@@ -388,7 +414,7 @@ def plan(
         else:
             check("name", True, f"{film!r}, from TMDB's {movie.title!r}")
             operations, targets, filing_record = _operations(
-                job, movie, film, movies, completed, feature, raw_source
+                job, movie, film, movies, completed, feature, raw_source, subtitles
             )
             states = [library.stat(path) for path in targets]
             there = [state.path for state in states if state.present]
@@ -490,6 +516,54 @@ def _feature(videos: list[File], movie: Movie, check: _Checks) -> File | None:
     return feature
 
 
+def _subtitles(feature: File, check: _Checks) -> list[SubtitleFlags]:
+    """The feature's forced subtitle tracks that are full ones, to be forced
+    no longer (*Subtitle flags*). A full track's events run through the film,
+    where a forced-only track holds the few lines a viewer needs whatever
+    they chose. Only a forced track is judged, and one whose events fall
+    between the two rates sends the plan to review."""
+    video = feature.video
+    if video is None or video.subtitles is None:
+        check("subtitles", False, f"{feature.name}'s subtitles weren't counted")
+        return []
+    minutes = video.duration / 60
+    flags: list[SubtitleFlags] = []
+    judged: list[str] = []
+    unsure = False
+    for number, track in enumerate(video.subtitles, 1):
+        if not track.forced:
+            continue
+        rate = track.events / minutes if minutes else 0.0
+        measured = f"{track.events:,} events, {rate:.1f} a minute"
+        what = f"s{number} {track.language or 'und'} {track.codec or '?'}, {measured}"
+        if rate >= FULL_SUBTITLES:
+            flags.append(
+                SubtitleFlags(
+                    track=number,
+                    forced=False,
+                    reason=f"a full track, forced: {measured}",
+                )
+            )
+            judged.append(f"{what}: a full track, forced")
+        elif rate <= FORCED_ONLY_SUBTITLES:
+            judged.append(f"{what}: forced-only, left as it is")
+        else:
+            unsure = True
+            judged.append(
+                f"{what}: neither {FULL_SUBTITLES:g} a minute or more, as a full"
+                f" track has, nor {FORCED_ONLY_SUBTITLES:g} or fewer"
+            )
+    count = len(video.subtitles)
+    check(
+        "subtitles",
+        not unsure,
+        "; ".join(judged)
+        if judged
+        else f"{count} subtitle track{'' if count == 1 else 's'}, none forced",
+    )
+    return flags
+
+
 def _raw(
     job: Manifest, analysis: Analysis, feature: File | None, check: _Checks
 ) -> list[File]:
@@ -561,12 +635,13 @@ def _operations(
     completed: Folder | None,
     feature: File,
     raw_source: list[File],
+    subtitles: list[SubtitleFlags],
 ) -> tuple[list[Operation], list[str], str | None]:
     """The operations, in the order the executor carries them out: the
-    feature's tags, then folders, then renames, then sidecars, then leftovers;
+    feature's edit, then folders, then renames, then sidecars, then leftovers;
     their target paths; and where the filing's record goes.
 
-    The feature is tagged where ARM left it, before anything moves: an edit
+    The feature is edited where ARM left it, before anything moves: an edit
     that fails or is interrupted can leave the file's own metadata damaged,
     never its streams, and there it stops the filing with the library
     untouched and the damage out of Plex's sight. Every folder is made before
@@ -577,12 +652,15 @@ def _operations(
     target = f"{folder}/{film}{PurePosixPath(feature.path).suffix}"
     runtime = f"TMDB's {movie.runtime} min"
     filing_record = None
-    tags: list[Operation] = [
-        Tag(
+    edits: list[Operation] = [
+        Edit(
             path=feature.path,
-            reason="the feature's identity, inside the file",
+            reason="the feature's identity"
+            + (" and its subtitles' flags" if subtitles else "")
+            + ", inside the file",
             title=movie.title,
             tags=feature_tags(movie),
+            subtitles=subtitles,
         )
     ]
     folders: list[Operation] = [
@@ -680,7 +758,7 @@ def _operations(
                 path=str(source_folder), reason="the job's raw folder, emptied"
             )
         ]
-    operations = tags + folders + renames + sidecars + leftovers
+    operations = edits + folders + renames + sidecars + leftovers
     targets = [
         path
         for op in operations
@@ -739,8 +817,8 @@ def render(plan: Plan) -> str:
         )
     for op in plan.operations:
         match op:
-            case Tag():
-                lines.append(f"  tag          {op.path}")
+            case Edit():
+                lines.append(f"  edit         {op.path}")
                 lines.append(f"               {op.reason}")
                 lines.append(f"               {'segment title':<14} {op.title}")
                 for target in op.tags:
@@ -749,6 +827,12 @@ def render(plan: Plan) -> str:
                         f"                 {name:<14} {value}"
                         for name, value in target.simple.items()
                     ]
+                for track in op.subtitles:
+                    forced = "forced" if track.forced else "not forced"
+                    lines.append(
+                        f"               {f'subtitle s{track.track}':<14} {forced}"
+                    )
+                    lines.append(f"                 {track.reason}")
                 continue
             case MakeFolder():
                 lines.append(f"  make folder  {op.path}")
