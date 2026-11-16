@@ -79,7 +79,9 @@ the spec is deleted in the same pull request, with a line added to
 [`docs/project_log.md`](docs/project_log.md). A retired slug is never reused.
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/);
-release-please builds versions and the changelog from them. Releasing and
+release-please builds versions and the changelog from them. A pull request's
+description is not wrapped by hand: each paragraph and list item is one line,
+and GitHub wraps it. Releasing and
 deploying are in [`docs/releasing.md`](docs/releasing.md). A merge to `main`
 deploys nothing until the release pull request is merged.
 

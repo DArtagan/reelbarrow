@@ -18,9 +18,9 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
-from typing import Annotated, Literal, Protocol
+from typing import Annotated, Literal, Protocol, Self
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 from reelbarrow import disc_record, names
 from reelbarrow.analyse import Analysis, File, Folder, Video
@@ -96,6 +96,42 @@ class Sidecar(StrEnum):
     DISC_JSON = "disc_json"
 
 
+class TargetTags(Model):
+    """One of Matroska's tags: named values, all about one level of what the
+    file holds, which its target names. A film is 50, MOVIE; an episode is 50,
+    EPISODE, in a season at 60, SEASON, of a show at 70, COLLECTION."""
+
+    level: Literal[10, 20, 30, 40, 50, 60, 70]
+    type: str
+    simple: dict[str, str]
+
+
+class Tag(Model):
+    """Every tag reelbarrow gives one Matroska file, set in place by one
+    edit: its segment title, which most players show as its name, and its
+    global tags, by level (*Sidecars and embedded metadata*).
+
+    A global tag already in the file is kept unless one of these has the same
+    name at the same level, which then replaces it."""
+
+    op: Literal["tag"] = "tag"
+    path: str
+    reason: str
+    title: str
+    tags: list[TargetTags]
+
+    @model_validator(mode="after")
+    def _one_target_each(self) -> Self:
+        # ffprobe names a tag by its target's type, so that is how one is
+        # read back after the edit, and two with one type couldn't be told
+        # apart.
+        levels = [t.level for t in self.tags]
+        types = [t.type for t in self.tags]
+        if len(set(levels)) != len(levels) or len(set(types)) != len(types):
+            raise ValueError("each level and type is tagged once")
+        return self
+
+
 class MakeFolder(Model):
     op: Literal["make_folder"] = "make_folder"
     path: str
@@ -130,7 +166,7 @@ class DeleteFolder(Model):
 
 
 Operation = Annotated[
-    MakeFolder | Rename | Write | DeleteFolder, Field(discriminator="op")
+    Tag | MakeFolder | Rename | Write | DeleteFolder, Field(discriminator="op")
 ]
 
 
@@ -312,6 +348,15 @@ def plan(
     feature = None
     if movie is not None and movie.runtime:
         feature = _feature(videos, movie, check)
+    if feature is not None:
+        suffix = PurePosixPath(feature.path).suffix
+        check(
+            "matroska",
+            suffix.lower() == ".mkv",
+            f"{feature.name} is Matroska, so it can carry its identity"
+            if suffix.lower() == ".mkv"
+            else f"{feature.name} is {suffix or 'of no type'}, which isn't tagged",
+        )
 
     disc = job.disc
     check(
@@ -517,17 +562,29 @@ def _operations(
     feature: File,
     raw_source: list[File],
 ) -> tuple[list[Operation], list[str], str | None]:
-    """The operations, in the order the executor carries them out: folders,
-    then renames, then sidecars, then leftovers; their target paths; and where
-    the filing's record goes.
+    """The operations, in the order the executor carries them out: the
+    feature's tags, then folders, then renames, then sidecars, then leftovers;
+    their target paths; and where the filing's record goes.
 
-    Every folder is made before anything moves, so once anything has, the
-    disc's folder is there for the record of what was done."""
+    The feature is tagged where ARM left it, before anything moves: an edit
+    that fails or is interrupted can leave the file's own metadata damaged,
+    never its streams, and there it stops the filing with the library
+    untouched and the damage out of Plex's sight. Every folder is made before
+    anything moves, so once anything has, the disc's folder is there for the
+    record of what was done."""
     assert job.disc is not None
     folder = f"{movies}/{film} {{tmdb-{movie.id}}}"
     target = f"{folder}/{film}{PurePosixPath(feature.path).suffix}"
     runtime = f"TMDB's {movie.runtime} min"
     filing_record = None
+    tags: list[Operation] = [
+        Tag(
+            path=feature.path,
+            reason="the feature's identity, inside the file",
+            title=movie.title,
+            tags=feature_tags(movie),
+        )
+    ]
     folders: list[Operation] = [
         MakeFolder(path=folder, reason=f"{movie.title}'s folder, TMDB {movie.id}"),
     ]
@@ -623,7 +680,7 @@ def _operations(
                 path=str(source_folder), reason="the job's raw folder, emptied"
             )
         ]
-    operations = folders + renames + sidecars + leftovers
+    operations = tags + folders + renames + sidecars + leftovers
     targets = [
         path
         for op in operations
@@ -638,6 +695,22 @@ def _operations(
     if filing_record is not None:
         targets.append(filing_record)
     return operations, targets, filing_record
+
+
+def feature_tags(movie: Movie) -> list[TargetTags]:
+    """A feature's tags, by Matroska's tagging specification, all about the
+    film: its title, its release date, and both ids, TMDB's prefixed by its
+    kind as the specification requires.
+
+    The title is TMDB's, not the folder's name for the film: a tag holds any
+    Unicode, where a name on the share is folded to ASCII."""
+    simple = {"TITLE": movie.title}
+    if movie.release_date:
+        simple["DATE_RELEASED"] = movie.release_date
+    if movie.imdb_id:
+        simple["IMDB"] = movie.imdb_id
+    simple["TMDB"] = f"movie/{movie.id}"
+    return [TargetTags(level=50, type="MOVIE", simple=simple)]
 
 
 def record_name(source: str, id: str) -> str:
@@ -666,6 +739,17 @@ def render(plan: Plan) -> str:
         )
     for op in plan.operations:
         match op:
+            case Tag():
+                lines.append(f"  tag          {op.path}")
+                lines.append(f"               {op.reason}")
+                lines.append(f"               {'segment title':<14} {op.title}")
+                for target in op.tags:
+                    lines.append(f"               {target.level} {target.type}")
+                    lines += [
+                        f"                 {name:<14} {value}"
+                        for name, value in target.simple.items()
+                    ]
+                continue
             case MakeFolder():
                 lines.append(f"  make folder  {op.path}")
             case Rename():

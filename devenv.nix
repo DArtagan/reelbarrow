@@ -5,9 +5,9 @@
 }:
 
 {
-  # The media tools the analysis shells out to. The Dockerfile installs the
-  # same ones from Debian; a test that passes here and fails in the image is
-  # usually a version difference between the two.
+  # The media tools the analysis and the executor shell out to. The
+  # Dockerfile installs the same ones from Debian; a test that passes here and
+  # fails in the image is usually a version difference between the two.
   packages = with pkgs; [
     chromaprint
     ffmpeg
@@ -15,6 +15,7 @@
     git
     jq
     lsdvd
+    mkvtoolnix-cli
     skopeo
   ];
 
