@@ -21,10 +21,9 @@ Specs are referred to by name, not number, so finishing one renumbers nothing.
 
 | # | spec | what | needs |
 |---|---|---|---|
-| 4 | [embedded-tags](embedded-tags.md) | Each filed video carries its identity as Matroska tags, so the file stands alone | — |
-| 5 | [subtitle-flags](subtitle-flags.md) | A full subtitle track neither forced nor default, in the plan and in ARM's preset | embedded-tags |
-| 6 | [first-filing](first-filing.md) | *Monte Carlo or Bust!* filed and tagged for real by one deliberate run, its preconditions proven, then dry run back on | embedded-tags, subtitle-flags |
-| 7 | [extras](extras.md) | Extras named from TheDiscDB, or `<disc label>_title_<n>`, in the kind folders Plex reads, proven in the players | embedded-tags |
+| 5 | [subtitle-flags](subtitle-flags.md) | A full subtitle track neither forced nor default, in the plan and in ARM's preset | — |
+| 6 | [first-filing](first-filing.md) | *Monte Carlo or Bust!* filed and tagged for real by one deliberate run, its preconditions proven, then dry run back on | subtitle-flags |
+| 7 | [extras](extras.md) | Extras named from TheDiscDB, or `<disc label>_title_<n>`, in the kind folders Plex reads, proven in the players | — |
 | 8 | [manifest-loop](manifest-loop.md) | Every manifest planned, simplest case first, in any order: the whole fixtures table | extras |
 | 9 | [plan-inbox](plan-inbox.md) | The service: a plan and its basis per manifest in the inbox, replanned when the basis changes, listed in the web UI | manifest-loop |
 | 10 | [automatic-filing](automatic-filing.md) | Dry run off: the service files what the gate passes, the table's other two films | plan-inbox, first-filing |
@@ -38,10 +37,8 @@ Specs are referred to by name, not number, so finishing one renumbers nothing.
 | 18 | [superseded-sources](superseded-sources.md) | Sources with no manifest that the library already holds better, deleted | hard-movie-cases |
 
 editions needs nothing else and can run whenever there is a free session.
-embedded-tags comes before first-filing (Will, 2026-11-11), so every film
-reelbarrow files is tagged as it is filed. subtitle-flags comes before
-first-filing too (Will, 2026-11-11: *"Order it so we'll implement that spec
-before the first filing of job 34."*). extras comes before manifest-loop,
+subtitle-flags comes before first-filing (Will, 2026-11-11: *"Order it so
+we'll implement that spec before the first filing of job 34."*). extras comes before manifest-loop,
 which plans the first films with extras (Will, 2026-11-11).
 
 ## After these

@@ -5,9 +5,9 @@
 > Correct the subtitle flags ARM's transcodes carry, so a film doesn't play
 > with subtitles always on, and stop ARM making them wrong. Read
 > `todos/subtitle-flags.md`, then *Sidecars and embedded metadata* in
-> `docs/design.md`, the `tag` operation and `Writer.tag` that
-> [embedded-tags](embedded-tags.md) added, and *Rules that protect the
-> library* in `AGENTS.md`. Job 34 is filed by
+> `docs/design.md`, the `tag` operation and `Writer.tag` (step 7 of *The
+> service*, in the design), and *Rules that protect the library* in
+> `AGENTS.md`. Job 34 is filed by
 > [first-filing](first-filing.md) after this, so its flags are right as it
 > is filed.
 

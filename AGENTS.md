@@ -49,11 +49,12 @@ a new file first.
 
 - **Dry run is the default, and it must be impossible to bypass by accident.**
   `REELBARROW_DRY_RUN` is true unless set to `false`. Every change to the share,
-  whether rename, write or delete, goes through a single executor that checks
-  it (`reelbarrow.executor.Writer`). No other code opens anything under the
-  video root for writing, and `tests/test_write_guard.py` holds that line: a
-  module that writes fails it, and a test that builds a share takes the
-  `guarded` fixture.
+  whether rename, write, tag or delete, goes through a single executor that
+  checks it (`reelbarrow.executor.Writer`). No other code opens anything under
+  the video root for writing or runs a tool that writes, and
+  `tests/test_write_guard.py` holds that line: a module that writes, or starts
+  a tool other than the analysis's readers, fails it, and a test that builds a
+  share takes the `guarded` fixture.
 - **A misfile is a bug, not a tuning problem.** Per the design's *Confidence*
   section, the fix is a new rule plus a regression fixture, never a confirmation
   step.

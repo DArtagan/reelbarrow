@@ -941,13 +941,34 @@ The pipeline, per ARM job (and later per backlog folder):
 6. **Gate.** Execute automatically only if every item in the plan meets the bar
    in *Confidence*; otherwise put the whole plan up for review. A plan is never
    half-executed.
-7. **File.** Folders, then renames on the same filesystem, sidecars, then
-   deletion of leftovers, then the filing's record, in that order. Then a
+7. **File.** The feature's tags, then folders, then renames on the same
+   filesystem, sidecars, then deletion of leftovers, then the filing's
+   record, in that order. Then a
    Plex partial scan of the touched folder
    (`/library/sections/{id}/refresh?path=…`). Plex's own change detection
    cannot be relied on over a CIFS mount. Every sidecar is rendered before
    the first operation, so a provider that can't be reached stops the filing
    before anything moves.
+
+   **The feature is tagged first, where ARM left it** in `import/`, before
+   anything moves (Will, 2026-11-11, against tagging last in the library and
+   against keeping a copy of the bytes an edit can change). mkvpropedit
+   rewrites only a file's metadata, but killed part way it can leave that
+   metadata damaged past a second run's mending (E41). Tagged first, a
+   failure stops the filing with the library untouched, the damaged file
+   out of Plex's sight and its raw copy still there to transcode again. A
+   filing that stops before its record's folder is made writes no record,
+   and its report is the account. The file is checked before the edit and
+   after: mkvinfo finds no fault, which catches damage ffprobe passes over
+   in silence; ffprobe reads back the segment title and every tag; the
+   duration and the chapters' starts are as they were. The tags reach
+   mkvpropedit in memory, a `memfd` it opens by `/proc/self/fd/<n>`: it
+   can't read them from a pipe, and a temporary file is a write the guard
+   would have to allow. An interruption on CIFS itself isn't measured,
+   since the pod mounts the share read-only; mkvpropedit makes the same
+   calls either way. A feature that isn't Matroska can't carry its tags, so
+   its plan goes to review rather than filing untagged. What each file is
+   given is under *Sidecars and embedded metadata*.
 
    **The filing's record** is written into the disc's folder beside
    `disc.json`, `filing-<source>-<id>.json`, once the operations have
@@ -1492,6 +1513,31 @@ For goal 4 and Will's portability requirement:
 | inside each MKV: title and ID tags, track language/title/default/forced flags, chapter names; for an extra, its film's ids and, where TheDiscDB names it, its kind as `CONTENT_TYPE` | travels with the file through any rename. Raw copies aren't tagged: they are the disc's own bytes (Will, 2026-11-11) |
 | ignore markers in every `raw/`: `.plexignore` (exists), `.ignore`, `.nomedia` | keeps raw BDMV/VIDEO_TS out of every player — `.ignore` for Jellyfin and `.nomedia` for Kodi are believed, not verified |
 
+The tags inside a file follow Matroska's tagging specification
+(<https://www.matroska.org/technical/tagging.html>):
+
+- **A feature** gets `TITLE` (TMDB's title, unfolded, since a tag holds any
+  Unicode where a name on the share is folded to ASCII), `DATE_RELEASED`,
+  `IMDB`, and `TMDB` as `movie/<id>`, the kind prefix the specification
+  requires, all at target level 50, `MOVIE`. It also gets its segment title,
+  which most players show as its name. For a feature the two titles agree;
+  for an extra they can differ.
+- **Each tag's target level is in the plan** (`plan.Tag`, a list of groups,
+  each with its level, type and tags), so a filing record says where each
+  tag went without the code that wrote it, and an episode's file can carry
+  its show's tags at 70, `COLLECTION`, its season's at 60, `SEASON`, and its
+  own at 50, `EPISODE` (Will, 2026-11-16). Each level and type appears once
+  in an operation, since ffprobe reads a tag back by its type
+  (`MOVIE/TITLE`).
+- **Tags already in the file are kept.** mkvpropedit replaces all of a
+  file's global tags at once, so the file's own are read first and written
+  back with reelbarrow's. One of the same name at the same level is
+  replaced by reelbarrow's. Tags aimed at a track, such as HandBrake's
+  per-track `DURATION`, aren't touched.
+- **No other tags.** `ORIGINAL_MEDIA_TYPE`, `DATE_DIGITIZED`, a custom tag
+  linking the file to its disc, and the descriptive tags the NFO already
+  holds were offered and declined (Will, 2026-11-11: *"No thanks."*).
+
 ---
 
 ## Future work
@@ -1567,6 +1613,7 @@ All read-only against the cluster and the share. Artefacts in
 | E40 | 11-11 | `reelbarrow file` on job 34's manifest in the deployed pod (0.5.0), in dry run, with job 34's folders and the film's library folder listed with sizes and modification times before and after; Plex's sections and the 2024 entries' `extras/` read through Plex's API with reelbarrow's token | every operation refused but the four artworks neither provider has, after the basis (the manifest and 20 paths) matched; rendering fetched TMDB's poster (830,862 bytes) and backdrop (427,378 bytes) and fanart.tv answered; the listings identical. Plex's section 1 alone holds `/data/movies`; it shows none of the 44 MKVs in 14 film folders' `extras/` |
 | E41 | 11-11 | mkvpropedit 102.0 setting job 34's tags and segment title on a copy of its transcode, checksummed against the pod's, outside the library; killed before each of its 19 writes in turn; a second run, and mkvmerge, on each state left; the built image's `Writer.tag` (mkvpropedit 92.0) on another copy | every stream's hash unchanged; 983 bytes changed at the head and 502 appended, in 0.06 s, in place with no temporary file or fsync; interrupted, the streams always survive but the metadata can be left without a duration, failing mkvinfo, or with HandBrake's track tags lost, and a second run refuses 7 of the 19 states; mkvmerge rebuilds them with every stream's hash changed; the image's run gives the same tags |
 | E42 | 11-11 | ffprobe's stream flags over every MKV in ARM's `completed/` in the pod; subtitle event counts for job 34, Pale Rider, Field of Dreams and Shrek the Third; ARM's HandBrake preset | on every DVD transcode the full English subtitle track is default and forced (job 34's 1,790 closed captions; Pale Rider's 876; Field of Dreams' 1,703; Shrek's 1,092, beside a forced track of 1 event); Blu-ray transcodes' are neither; the preset has foreign-audio search on |
+| E43 | 11-16 | `reelbarrow plan` on job 34's manifest in the deployed pod (0.6.0), in dry run | `automatic`, all 16 checks passing, `matroska` among them; 18 operations, the first the tag of the transcode in `import/`: segment title *Monte Carlo or Bust!*, and at 50, `MOVIE`, `TITLE` the same, `DATE_RELEASED` 1969-04-28, `IMDB` tt0064688, `TMDB` movie/38792 |
 
 ---
 
